@@ -3,9 +3,10 @@ import { reduceEachTrailingCommentRange } from "typescript";
 import type { Port } from "./types/networking/port";
 import multer from "multer"
 import { FileName } from "./types/filename";
+import type { ApiPath } from "./types/apiApth";
 
 
-class TypeSafeClassBase<T> {
+class TypeSafeClassBase<T>{
   private v: T;
   constructor(v: T) {
     this.v = v;
@@ -58,7 +59,7 @@ export class WebRouter<Context> {
 
   private async customResponseToExpressResponse<Body>(
     res: express.Response,
-    result: Promise<RequestResponse<Body>>
+    result: Promise<RequestResponse<Body> | RequestResponse<{error: string}>>
   ): Promise<void> {
     const resolvedResult = await result;
     res.status(resolvedResult.status.getV()).json(resolvedResult.data);
@@ -121,6 +122,10 @@ export class WebRouter<Context> {
     });
 
     return this
+  }
+
+  addSubRouter(path: ApiPath, router: express.Router) {
+    this.expressRouter.use(path.value,router)
   }
 
   getExpressRouter(): Router {

@@ -1,5 +1,6 @@
 import { WebRouter, type RequestHandler } from '../app';
 import { ResponseStatus } from '../app';
+import { ApiPath } from '../types/apiApth';
 import  { Port } from '../types/networking/port';
 import { responses, responsesStatuses } from '../utils/responses';
 
@@ -53,7 +54,7 @@ userWebRouter.post<{ name: string }, { organization: string }, { name: string, o
   }
 })
 
-webRouter.withMiddlewares()
+webRouter.addSubRouter(new ApiPath("/users"),userWebRouter.getExpressRouter())
 
-const port =  new Port(3000) 
+const port =  new Port(3004) 
 webRouter.start(port);
