@@ -1,5 +1,7 @@
-import { ResponseStatus, WebRouter } from "../app";
+import { builtIns, ResponseStatus, WebRouter } from "../app";
 import express from "express";
+import { Port } from "../types/networking/port";
+import { FileName } from "../types/filename";
 interface DB {
     getUser(userId: string): string | null
  }
@@ -17,13 +19,12 @@ const app = new WebRouter({db: new ExampleDb})
 
 app.get<{}, {userId: number},{file: File}>("/user", (req ,res, next, ctx) => { 
     if(true) {
-        return {status: new ResponseStatus(200), data: {file: "f"}};
+        return {status: new ResponseStatus(200), data: {file: ctx.db.getUser("")}};
     } else {
         return {status: new ResponseStatus(404), data: "User not found"};
     }
 })
 
-const app2 = express()
 
 
 // type ValidatorObject = Record<
@@ -35,11 +36,6 @@ const app2 = express()
 
 // function buildRoute(validator,)
 
+app.withMiddlewares(builtIns.middlewares.fileUploading.defaultFileUpload(new FileName("file")))
 
-
-
-app2.use(app.getRouter())
-
-app2.listen(3000, () => {
-    console.log('Server is running on port 3000');
-});
+app.start(new Port(3003))

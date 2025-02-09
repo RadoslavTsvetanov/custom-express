@@ -1,5 +1,9 @@
 import express, { Router } from "express";
 import { reduceEachTrailingCommentRange } from "typescript";
+import type { Port } from "./types/networking/port";
+import multer from "multer"
+import { FileName } from "./types/filename";
+
 
 class TypeSafeClassBase<T> {
   private v: T;
@@ -24,6 +28,21 @@ type RequestHandler<Context, Body, Params, ResponseData> = (
   next: express.NextFunction,
   ctx: Context
 ) => Promise<RequestResponse<ResponseData>>;
+
+const upload = multer({ storage: multer.memoryStorage()})
+
+const fileUploading = {
+  defaultFileUpload: (NameForAccessingTheFile: FileName) => {return upload.single(NameForAccessingTheFile.value)}, 
+  multipleFilesUpload: (NameForAccessingTheFiles: FileName, maxFilesCountAllowed: number) => { return upload.array(NameForAccessingTheFiles.value,maxFilesCountAllowed ) }
+}
+
+export const builtIns = {
+  middlewares: {
+    fileUploading,
+  }
+}
+
+
 
 export class WebRouter<Context> {
   private context: Context;
@@ -92,13 +111,24 @@ export class WebRouter<Context> {
     this.expressRouter.put(route, this.wrapHandler(handler));
   }
 
-  addMiddleware(...middlewares: express.RequestHandler[]): void {
+  // note that the order matters since middlewares are executed in the order they added 
+  withMiddlewares(...middlewares: express.RequestHandler[]): this {
     middlewares.forEach((middleware) => {
       this.expressRouter.use(middleware);
     });
+
+    return this
   }
 
-  getRouter(): Router {
+  getExpressRouter(): Router {
     return this.expressRouter;
+  }
+
+  start(port: Port) {
+    const app = express()
+    app.use(this.expressRouter)
+    app.listen(port.value, () => {
+      console.log(`Server is running on port ${port.value}`);
+    });
   }
 }

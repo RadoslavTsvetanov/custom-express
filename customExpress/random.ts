@@ -1,11 +1,11 @@
-class A { 
-    constructor(params) {
-        this.params = params
-    }
+import  express  from 'express';
+const app = express();
+const router = express.Router();
 
-    [Symbol.toPrimitive]{ 
-        return "f"
-    }
-}
+router.get('/use', (req, res) => { 
+    res.status(200).json({});
+})
 
-console.log(new A(4))
+app.use(router)
+
+app.listen(3001)
