@@ -17,17 +17,20 @@ class TypeSafeClassBase<T> {
 
 export class ResponseStatus extends TypeSafeClassBase<number> {}
 
-type RequestResponse<Body> = {
+
+
+
+export type RequestResponse<Body> = {
   status: ResponseStatus;
   data: Body;
 };
 
-type RequestHandler<Context, Body, Params, ResponseData> = (
+export type RequestHandler<Context, Body, Params, ResponseData> = (
   req: express.Request<Params, ResponseData, Body>,
   res: express.Response<ResponseData>,
   next: express.NextFunction,
   ctx: Context
-) => Promise<RequestResponse<ResponseData>>;
+) => Promise<RequestResponse<ResponseData> | RequestResponse<{error: string}>>;
 
 const upload = multer({ storage: multer.memoryStorage()})
 

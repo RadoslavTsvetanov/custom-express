@@ -2,6 +2,7 @@ import { builtIns, ResponseStatus, WebRouter } from "../app";
 import express from "express";
 import { Port } from "../types/networking/port";
 import { FileName } from "../types/filename";
+
 interface DB {
     getUser(userId: string): string | null
  }
@@ -16,14 +17,6 @@ const app = new WebRouter({db: new ExampleDb})
 
 
 
-
-app.get<{}, {userId: number},{file: File}>("/user", (req ,res, next, ctx) => { 
-    if(true) {
-        return {status: new ResponseStatus(200), data: {file: ctx.db.getUser("")}};
-    } else {
-        return {status: new ResponseStatus(404), data: "User not found"};
-    }
-})
 
 
 
