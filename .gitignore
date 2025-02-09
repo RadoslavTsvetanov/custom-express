@@ -1,0 +1,27 @@
+# Node/Bun dependencies
+node_modules/
+bun.lockb
+
+# Build artifacts
+dist/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Bun cache
+.cache/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor-specific files
+.vscode/
+.idea/
+.DS_Store
+
