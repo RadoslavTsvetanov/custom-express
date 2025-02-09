@@ -35,3 +35,24 @@ export const responsesStatuses = {
     versionNotSupported: new ResponseStatus(505),          // HTTP Version Not Supported
     networkAuthenticationRequired: new ResponseStatus(511) // Network Authentication Required
 }
+
+export const responses = {
+    succesfullyCreatedEntity: () => {
+        return {
+            status: responsesStatuses.created,
+            data: {}
+        }
+    },
+    succesfullyCreatedEntityReturningTheEntity: <T>(data: T) => {
+        return {
+            status: responsesStatuses.created,
+            data,
+        }
+    },
+    found: <T>(data: T ) => {
+        return {
+            status: responsesStatuses.success,
+            data
+        }
+    }
+}

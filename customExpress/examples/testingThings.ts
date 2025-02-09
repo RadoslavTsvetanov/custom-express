@@ -1,7 +1,7 @@
 import { WebRouter, type RequestHandler } from '../app';
 import { ResponseStatus } from '../app';
 import  { Port } from '../types/networking/port';
-import { responsesStatuses } from '../utils/responses';
+import { responses, responsesStatuses } from '../utils/responses';
 
 interface MyContext {
   userService: {
@@ -16,10 +16,7 @@ interface UserResponse {
 const getUsersHandler: RequestHandler<MyContext, undefined, {}, UserResponse> = async (req, res, next, ctx) => {
   try {
     const users = await ctx.userService.getUsers();
-    return {
-      status: responsesStatuses.success,
-      data: { users },
-    };
+    return responses.found({ users }) 
   } catch (error) {
     return {
       status: new ResponseStatus(500),
@@ -28,6 +25,7 @@ const getUsersHandler: RequestHandler<MyContext, undefined, {}, UserResponse> = 
   }
 };
 
+
 // Initialize the router with context
 const myContext: MyContext = {
   userService: {
@@ -35,11 +33,27 @@ const myContext: MyContext = {
   },
 };
 
-const webRouter = new WebRouter(myContext);
+const webRouter = new WebRouter({});
 
+
+const userWebRouter = new WebRouter(myContext);
 // Attach the GET route with the handler
-webRouter.get('/users', getUsersHandler);
+userWebRouter.get('/', getUsersHandler);
 
-// Example of how you would start the server
+
+userWebRouter.post<{ name: string }, { organization: string }, { name: string, organization: string }>("/", async(req, res, next, ctx) => {
+  try {
+    return responses.succesfullyCreatedEntityReturningTheEntity({ organization: req.params.organization, name: req.body.name })
+    
+  } catch (err) { 
+    return {
+      status: new ResponseStatus(500),
+      data: { error: 'Internal Server Error' },
+    };
+  }
+})
+
+webRouter.withMiddlewares()
+
 const port =  new Port(3000) 
 webRouter.start(port);
