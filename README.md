@@ -20,7 +20,7 @@ Example (pseudo ts)
 ```
 
 
-Things that need to be done: custom type validation: see zod for refernce and also how to do it with classes
+Things that need to be done: custom type validation: see zod and zod-express for refernce and also how to do it with classes
 \
 ## built in file handler
 since by default express does not have a file processing capabilities we have set up one (pur choise is [multer](https://www.npmjs.com/package/multer))
