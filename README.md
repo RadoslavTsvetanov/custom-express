@@ -18,7 +18,9 @@ Example (pseudo ts)
 
 
 ```
+## better type safety
 
+Although that is bot a fault of express we have added better type safety around some common things you need when making apis
 
 Things that need to be done: custom type validation: see zod and zod-express for refernce and also how to do it with classes
 \
