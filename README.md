@@ -114,6 +114,10 @@ Here are some example
 
 ## Optional parameters 
 
+Note: by default every paramter is required so you need to explicitely make it optional (yeah we decided it like that, yeah we think thts the way, no you dont want otherwise, think of how much of your route handlers will fail if sone parameter you are accessing directly without checking if its really there will fail)
+
+
+
 zod provides three way to make a parameter optional:
 
 // credits to https://gist.github.com/ciiqr/ee19e9ff3bb603f8c42b00f5ad8c551e for this
