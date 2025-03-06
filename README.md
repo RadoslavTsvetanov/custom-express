@@ -85,3 +85,16 @@ const app2 = new WebSExpress()
 
 app.use(app2.getRouter())
 ```
+
+# Use cases
+
+## Standalone project
+
+ you can use it as you defacto library and only use it
+
+## Hybrid
+
+you can use it for some path and use express for others since they can easilt morph into one another and like that get the benefits only at the routes you want since  it does come with some negatives and you wouldnt like them to affect your whole code base
+
+you can alsao lpug it into existing express project and never use express again but still not needing to migrate your codebase
+
