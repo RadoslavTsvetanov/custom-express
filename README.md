@@ -98,3 +98,48 @@ you can use it for some path and use express for others since they can easilt mo
 
 you can alsao lpug it into existing express project and never use express again but still not needing to migrate your codebase
 
+
+
+
+
+# Docs
+
+## Defining your request models 
+
+we use zod for validating requests and generating openapi definitions so you should familiriaze with it (not that its difficult the devs have really made it amazing to work with for new devs ) 
+
+Here are some example 
+
+
+
+## Optional parameters 
+
+zod provides three way to make a parameter optional:
+
+// credits to https://gist.github.com/ciiqr/ee19e9ff3bb603f8c42b00f5ad8c551e for this
+
+// z.object({
+//     // valid if string or:
+//     optional: z.string().optional(), // field not provided, or explicitly `undefined`
+//     nullable: z.string().nullable(), // field explicitly `null`
+//     nullish: z.string().nullish(), // field not provided, explicitly `null`, or explicitly `undefined`
+// });
+
+// type
+// {
+    // optional?: string | undefined;
+    // nullable: string | null;
+    // nullish?: string | null | undefined;
+// }
+
+however for requests defintions (body, parameters etc...) we recommend not using null since not every language has it and i dont think you can recieve a parameter with value of null. For example if you say a parameter could or could not be there you will do something like this 
+```ts
+
+req.body.hhhh // if not there will resolve to undefined and nullable will throw an error since its undefined not null
+
+```
+
+```ts
+
+```
+
