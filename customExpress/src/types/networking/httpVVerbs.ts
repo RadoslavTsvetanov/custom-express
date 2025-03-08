@@ -1,8 +1,13 @@
-export enum HttpVerb {
-  GET = "GET",
-  POST = "POST",
-  PUT = "PUT",
-  DELETE = "DELETE",
-  PATCH = "PATCH",
-  OPTIONS = "OPTIONS",
-}
+export type HttpVerb = 
+   "GET"
+  | "POST"
+  | "PUT"
+  | "DELETE"
+  |  "PATCH"
+ | "OPTIONS"
+
+
+
+
+
+ const a: Record<HttpVerb, string> = {"DELETE": ""}

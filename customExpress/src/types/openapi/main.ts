@@ -1,92 +1,146 @@
-import { Optionable } from "errors-as-types/lib/rust-like-pattern/option"
-import type { HttpVerb } from "../networking/httpVVerbs"
-import type { OpenAPISpec } from "../openapi"
-import type { ApiPath } from "../apiApth"
 
-export interface openApiEndpointMetadata {
-  operationId: Optionable<string>
-  summary: Optionable<string> 
+import { Optionable } from "errors-as-types/lib/rust-like-pattern/option";
+import type {HttpVerb} from "../networking/httpVVerbs.ts";
+import type {ApiPath} from "../apiApth.ts";
+
+export namespace ParameterEnums {
+  export type In = "query" | "header" | "path" | "cookie";
+
+  export enum Style {
+    form = "form",
+    simple = "simple",
+    label = "label",
+    spaceDelimited = "spaceDelimited",
+    pipeDelimited = "pipeDelimited",
+    deepObject = "deepObject",
+  }
 }
 
-type Response = {
+export namespace MyOpenApiDefinitions {
+  export enum MIMEType  {
+    textPlain =  "text/plain",
+    applicationJson = "application/json",
+  }
 
+  export type Path = string;
+
+  export type RouteDefinition = {
+    [key in HttpVerb]: {
+      responses: Response[];
+    };
+  };
+
+  export enum ParameterType {
+    string = "string",
+    number = "number",
+    integer = "integer",
+    boolean = "boolean",
+    object = "object",
+    array = "array",
+  }
+  export type Entity = {
+    type: MyOpenApiDefinitions.ParameterType;
+    properties: Record<string, Entity>;
+  };
+
+  export type Response = {
+   [ statusCode: string]: {
+     description: string;
+     content?: {
+       [type in MIMEType]: {
+         schema: Entity
+       }
+     }
+   }
+  };
+
+  export type Parameter = {
+    name: string;
+    in: ParameterEnums.In;
+    description?: string;
+    required: boolean;
+    style: ParameterEnums.Style;
+    schema: {
+      type: MyOpenApiDefinitions.ParameterType;
+      items?: { type: MyOpenApiDefinitions.ParameterType };
+    };
+  };
+
+  export interface Body {
+    description?: string;
+    required: boolean;
+    content: Record<string, { schema: { $ref: string } }>;
+  }
+
+  export interface EndpointMetadata {
+    verb: HttpVerb;
+    description: Optionable<string>;
+    parameters: Parameter[];
+    body: Body;
+    responses: Response[];
+  }
+
+  export type SpecRoutePathEndpointEntry = Partial<Record<HttpVerb, {
+    summary?: string;
+    description?: string;
+    tags?: string[];
+    parameters?: Parameter[];
+    requestBody?: Body;
+    responses: Record<string, Response>;
+  }>>;
+
+  export type SpecRoutePaths = Record<Path, SpecRoutePathEndpointEntry>;
+
+  export type Spec = {
+    openapi: "3.0.0" | "3.1.0";
+    info: {
+      title: string;
+      version: string;
+      description?: string;
+    };
+    servers?: { url: string; description?: string }[];
+    paths: SpecRoutePaths;
+    components?: { schemas?: Record<string, any> };
+  };
 }
-
-
-
-export interface EndpointMetadata {
-  verb: HttpVerb 
-  description: Optionable<string>
-  responses: Response[]
-} 
 
 export interface RouterMetadata {
-  getSummary(): Optionable<string>
-  getHeaders(): string[]
-  addEndpoint(data: EndpointMetadata): void
-  toOpenApiSpec(): OpenAPISpec
+  getSummary(): Optionable<string>;
+  getHeaders(): string[];
+  addEndpoint(data: MyOpenApiDefinitions.EndpointMetadata): void;
+  toOpenApiSpec(): MyOpenApiDefinitions.Spec;
 }
 
-
-// class SubrouteDefinition<T extends string> {
-//   // Store subroutes dynamically with their names as keys
-//   private subRoutes: Record<T, SubrouteDefinition<T>> = {} as Record<T, SubrouteDefinition<T>>;
-
-//   constructor(private name: ApiPath) {}
-
-//   // Method to get a subroute by its name, ensuring IntelliSense works
-//   getSubRoute<K extends T>(subroute: K): SubrouteDefinition<T> {
-//     return this.subRoutes[subroute];
-//   }
-
-//   // Method to add a subroute to the definition
-//   addSubroute(subroute: SubrouteDefinition<T>, name: T) {
-//     this.subRoutes[name] = subroute;
-//   }
-
-//   // You can also have other methods as needed (e.g., get all subroutes)
-//   getAllSubRoutes(): T[] {
-//     return Object.keys(this.subRoutes) as T[];
-//   }
-// }
-
-
-// const app = new SubrouteDefinition(new ApiPath("l"))
-// app.addSubroute(new SubrouteDefinition(new ApiPath("i")), "i")
-
-
-
 export class SubrouteDefinition implements RouterMetadata {
-  private path: ApiPath
   private subRoutes: Record<string, SubrouteDefinition> = {};
   private summary: Optionable<string> = new Optionable<string>("");
   private headers: string[] = [];
-  private endpoints: EndpointMetadata[] = []
-  constructor(path: ApiPath) {
-    this.path = path;
+  private endpoints: MyOpenApiDefinitions.EndpointMetadata[] = [];
+
+  constructor(private path: ApiPath) {
+
   }
 
-  toOpenApiSpec(): OpenAPISpec {
-    const obj: OpenAPISpec = {
+  toOpenApiSpec(): MyOpenApiDefinitions.Spec {
+    const pathsEntry: MyOpenApiDefinitions.SpecRoutePaths = {
+
+
+
+    };
+
+    return {
       openapi: "3.0.0",
-      info: {
-        title: "API Documentation",
-        version: "1.0.0",
-      },
+      info: { title: "API Documentation", version: "1.0.0" },
       servers: [{ url: "http://localhost:3000" }],
-      paths: this.endpoints,
+      paths: pathsEntry,
       components: {},
-    }
-
-
-    
-
-    return obj
+    };
   }
 
-  addEndpoint(data: EndpointMetadata): void {
-     this.endpoints.push(data) 
+  addEndpoint(data: MyOpenApiDefinitions.EndpointMetadata): void {
+    this.endpoints.push(data);
   }
+
   getHeaders(): string[] {
     return this.headers;
   }
@@ -95,7 +149,7 @@ export class SubrouteDefinition implements RouterMetadata {
     return this.summary;
   }
 
-  getSubRoute<K extends string>(subroute: K){
+  getSubRoute<K extends string>(subroute: K): SubrouteDefinition {
     return this.subRoutes[subroute];
   }
 
@@ -103,4 +157,3 @@ export class SubrouteDefinition implements RouterMetadata {
     this.subRoutes[name] = subroute;
   }
 }
-

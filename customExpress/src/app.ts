@@ -1,14 +1,13 @@
 import express, { Router } from "express";
-import { z, ZodSchema } from "zod";
+import {z, ZodObject, ZodSchema, type ZodFirstPartySchemaTypes} from "zod";
 import { ApiPath } from "./types/apiApth";
 import { TypeSafeClassBase } from "./utils/contextsafetype";
 import * as f from "safe-envs-mk-3"
 import { Optionable } from "errors-as-types/lib/rust-like-pattern/option";
-import type { OpenAPISpec } from "./types/openapi";
-import { schemaToObject } from "./utils/parseZodSchema";
 import { Port} from "./types/networking/port"
 import { HttpVerb } from "./types/networking/httpVVerbs";
-import { openApiEndpointMetadata, RouterMetadata, SubrouteDefinition } from "./types/openapi/main";
+import {  type RouterMetadata, SubrouteDefinition } from "./types/openapi/main";
+import type {StatusCode} from "./types/networking/statusCode.ts";
 
 export class ResponseStatus extends TypeSafeClassBase<number> { }
 
@@ -17,7 +16,8 @@ export class ResponseStatus extends TypeSafeClassBase<number> { }
 type RequestDefinitionObject<RequestBody, RequestParams, ResponseBody> = {
   body: ZodSchema<RequestBody>;
   params: ZodSchema<RequestParams>;
-  response: ZodSchema<ResponseBody>;
+  // responses: {statusCode: StatusCode, schema: ZodSchema<ResponseBody>}[];
+  responses: ZodSchema<ResponseBody>
 };
 
 
@@ -41,29 +41,35 @@ export type RequestHandler<
 >;
 function panic(msg: string = ""): void {
   throw new Error(msg)
-} 
+}
 
+type RouteMetadata= {
+  description: Optionable<string>
+}
 
 export class WebRouter<ContextType> {
   protected context: ContextType;
   protected expressRouter: Router;
-  protected routerMetadata: RouterMetadata  = {} as RouterMetadata // ! could cause bugs 
-  private usedRoutes: Record<"get" | "post" | "delete" | "put", string[]> = {
-    get: [],
-    post: [],
-    delete: [],
-    put: []
+  protected routerMetadata: RouterMetadata
+  private  readonly usedRoutes: Record<HttpVerb, string[]> = {
+    GET: [],
+    POST: [],
+    DELETE: [],
+    PUT: [],
+    PATCH: [],
+    OPTIONS: [],
   };
 
 
 
 
-  constructor(context: ContextType, routerMetadata?: RouterMetadata) {
+  constructor(context: ContextType) {
     this.expressRouter = express.Router();
     this.context = context;
     this.expressRouter.get("/spec", (req, res) => {
       res.json(this.routerMetadata.toOpenApiSpec())
     })
+    this.routerMetadata
   }
 
   private async customResponseToExpressResponse<ResponseData>(
@@ -105,16 +111,19 @@ export class WebRouter<ContextType> {
 
         // Call the handler with validated data
         const result = handler(req, res, next, this.context);
+        const resultValidation = (() => {
+          validator.responses
+
+        })()
         await this.customResponseToExpressResponse(res, result);
       } catch (error) {
         next(error);
       }
     };
   }
-
   get<RequestParams, ResponseBody>(
     route: string,
-    validator: RequestDefinitionObject<
+   validator: RequestDefinitionObject<
       {},
       RequestParams,
       ResponseBody
@@ -125,23 +134,32 @@ export class WebRouter<ContextType> {
       RequestParams,
       ResponseBody
       >,
-    openapiMetaData?: openApiEndpointMetadata
+    openapiEndpointMetaData?: RouteMetadata
   ): void {
-    this.routerMetadata.addEndpoint({
-      verb: HttpVerb.GET,
-      description: (openapiMetaData?.summary || new Optionable<string>(null)),
-      responses: [schemaToObject(validator.response)] 
-    })
-    this.usedRoutes.get.forEach(existingRoute => {
+    // this.routerMetadata.addEndpoint({
+    //   verb: "GET",
+    //   parameters:   validator.body.shape
+    //   description: (openapiMetaData?.summary || new Optionable<string>(null)),
+    //   body:,
+    //   responses: validator.responses
+    // })
+
+
+
+
+
+    this.usedRoutes.GET.forEach(existingRoute => {
       if (route === existingRoute) {
         panic("route " + route + " for HTTP VERB get is already defined" ) // TODO: add checks like these for the rest of the http verbs 
       }
     })
-    this.usedRoutes.get.push(route)
+
+    this.usedRoutes.GET.push(route)
+
     this.expressRouter.get(route, this.wrapHandler({
       body: z.object({}),
       params: validator.params,
-      response: validator.response,
+      responses: validator.responses,
     }, handler));
   }
 
