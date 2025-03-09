@@ -39,23 +39,31 @@ test("zodSchemaIntoOpenapiResponseContentDefinition testing if it is working cor
     })
 
     const expected = {
-        h: {
-            e: {
-                type: "string",
-                description: "a string{\"kind\":\"min\",\"value\":4}",
-                min: 4,
-                required: false
-            },
-            g: {
-                type: "string",
-                description: "a string{\"kind\":\"min\",\"value\":4}",
-                min: 4,
-                required: true
+        properties: {
+            h: {
+                type: "object",
+                    properties: {
+                    e: {
+                        type: "string",
+                        description: "a string{\"kind\":\"min\",\"value\":4}",
+                        checks: {
+
+                            min: 4,
+                        },
+                        required: false
+                    },
+                    g:  {
+                        type: "string",
+                        description: "a string{\"kind\":\"min\",\"value\":4}",
+                        checks: {min: 4},
+                        required: true
+                    }
+                }
             }
         }
     }
 
-    logWithoutMethods()
+    // logWithoutMethods()
     logWithoutMethods(exampleObject.shape)
     logWithoutMethods(exampleObject.shape.h.shape)
 

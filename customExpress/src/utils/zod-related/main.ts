@@ -5,7 +5,7 @@ import {Optionable} from "errors-as-types/lib/rust-like-pattern/option";
 import type {ICustomError} from "errors-as-types/lib/rust-like-pattern/result";
 
 
-export function parseZodUnion(schema:ZodUnion<any>): Array<any> {
+export function parseZodUnion(schema:ZodUnion<unknown>): Array<unknown> {
         // return schema.options.flatMap(parseZodUnion);
 
 

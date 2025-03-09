@@ -4,16 +4,42 @@ import type {Port} from "../types/networking/port.ts";
 import {ContextSafeType} from "../types/baseContextSafeTypet.ts";
 import type { MyZodDefinitions } from "../types/zod/zod.ts";
 import { z } from "zod";
+import type { WithDescription } from '../types/generaltypes.ts';
+import type { MyOpenApiDefinitions } from '../types/openapi/main.ts';
 
 
 
 namespace customWebsocket {
 
 
+    export namespace openWebsockets {
+
+        export type Definition = {
+            channels: openWebsockets.Channel[]
+        }
+
+
+        export type Channel = {
+            [key: "subscribe" | "publish"]: {
+                messages: {
+                    contentType: MyOpenApiDefinitions.MIMEType
+                    payload: MyOpenApiDefinitions.Entity
+                }
+            } & WithDescription
+        } & WithDescription
+    }
+
+
     export namespace CustomUwsTypeDefs {
       export type HandlerResponse<T extends ZodObjectUnion> = {
         data: T;
       };
+        
+        
+        
+        
+        
+        
       export type routeConfig = {
         open: <Response extends ZodObjectUnion>(
           ws: WebSocket<any>
@@ -92,6 +118,13 @@ namespace customWebsocket {
         getRouter() {
           return this.uws;
         }
+          
+          
+          getDefinition() {
+            //   return {
+            //     channels: this.subRoutes.map((subRouter) => subRouter.getDefinition()),
+            //   };
+          }
       }
     }
 

@@ -18,7 +18,7 @@ test("parseZodParameterObject with 2 objects", () => { // this test is to check 
     // console.log(prettifyJson(JSON.stringify(expected)))
     const result = parseZodUnion(firstObj.or(secondObj))
     // console.log(prettifyJson(JSON.stringify(result)))
-    expect(expected).toMatchObject(result)
+    expect(JSON.parse(JSON.stringify(expected))).toMatchObject(JSON.parse(JSON.stringify(result)))
 })
 
 

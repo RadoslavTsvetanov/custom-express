@@ -1,13 +1,16 @@
 import express, { Router } from "express";
-import {z, ZodObject, ZodSchema, type ZodFirstPartySchemaTypes} from "zod";
+import {z, ZodObject, ZodSchema, type ZodFirstPartySchemaTypes, type ZodRawShape} from "zod";
 import { ApiPath } from "./types/apiApth";
 import { TypeSafeClassBase } from "./utils/contextsafetype";
 import * as f from "safe-envs-mk-3"
 import { Optionable } from "errors-as-types/lib/rust-like-pattern/option";
 import { Port} from "./types/networking/port"
-import { HttpVerb } from "./types/networking/httpVVerbs";
-import {  type RouterMetadata, SubrouteDefinition } from "./types/openapi/main";
+import { type HttpVerb } from "./types/networking/httpVVerbs";
+import {  MyOpenApiDefinitions, type RouterMetadata, SubrouteDefinition } from "./types/openapi/main";
 import type {StatusCode} from "./types/networking/statusCode.ts";
+import { logWithoutMethods } from "./utils/logging.ts";
+import { zodSchemaIntoOpenapiResponseContentDefinition } from "./utils/zod-related/parseZodSchema.ts";
+import { parseZodUnion } from "./utils/zod-related/main.ts";
 
 export class ResponseStatus extends TypeSafeClassBase<number> { }
 
@@ -47,6 +50,10 @@ type RouteMetadata= {
   description: Optionable<string>
 }
 
+
+// why are we using zod 
+
+
 export class WebRouter<ContextType> {
   protected context: ContextType;
   protected expressRouter: Router;
@@ -63,13 +70,13 @@ export class WebRouter<ContextType> {
 
 
 
-  constructor(context: ContextType) {
+  constructor(context: ContextType, routerMetadata: RouterMetadata) {
     this.expressRouter = express.Router();
     this.context = context;
+    this.routerMetadata = routerMetadata
     this.expressRouter.get("/spec", (req, res) => {
       res.json(this.routerMetadata.toOpenApiSpec())
     })
-    this.routerMetadata
   }
 
   private async customResponseToExpressResponse<ResponseData>(
@@ -82,7 +89,7 @@ export class WebRouter<ContextType> {
     res.status(resolvedResult.status.getValue()).json(resolvedResult.data);
   }
 
-  private wrapHandler<RequestBody, RequestParams, ResponseBody>(
+  private wrapHandler<RequestBody, RequestParams, ResponseBody >(
     validator: RequestDefinitionObject<
       RequestBody,
       RequestParams,
@@ -122,7 +129,7 @@ export class WebRouter<ContextType> {
     };
   }
   get<RequestParams, ResponseBody>(
-    route: string,
+    route: ApiPath,
    validator: RequestDefinitionObject<
       {},
       RequestParams,
@@ -135,36 +142,42 @@ export class WebRouter<ContextType> {
       ResponseBody
       >,
     openapiEndpointMetaData?: RouteMetadata
-  ): void {
-    // this.routerMetadata.addEndpoint({
-    //   verb: "GET",
-    //   parameters:   validator.body.shape
-    //   description: (openapiMetaData?.summary || new Optionable<string>(null)),
-    //   body:,
-    //   responses: validator.responses
-    // })
+  ): this {
+    logWithoutMethods(validator)
+
+
+    this.routerMetadata.addEndpoint({
+      verb: "GET",
+      parameters:    [(zodSchemaIntoOpenapiResponseContentDefinition(validator.params as ZodObject<any>))],
+      description: ( openapiEndpointMetaData?.description ?? new Optionable("")),
+      responses: [],
+      route 
+    })
 
 
 
 
 
     this.usedRoutes.GET.forEach(existingRoute => {
-      if (route === existingRoute) {
+      if (route.value === existingRoute) {
         panic("route " + route + " for HTTP VERB get is already defined" ) // TODO: add checks like these for the rest of the http verbs 
       }
     })
 
-    this.usedRoutes.GET.push(route)
+    this.usedRoutes.GET.push(route.value)
 
-    this.expressRouter.get(route, this.wrapHandler({
+    this.expressRouter.get(route.value, this.wrapHandler({
       body: z.object({}),
       params: validator.params,
       responses: validator.responses,
     }, handler));
+
+
+return this
   }
 
-  post<RequestBody, RequestParams, ResponseBody>(
-    route: string,
+  post<RequestBody , RequestParams, ResponseBody>(
+    route: ApiPath,
     validator: RequestDefinitionObject<
       RequestBody,
       RequestParams,
@@ -176,8 +189,38 @@ export class WebRouter<ContextType> {
       RequestParams,
       ResponseBody
     >
-  ): void {
-    this.expressRouter.post(route, this.wrapHandler(validator, handler));
+  ): this{
+    this.usedRoutes.POST.forEach(existingRoute => {
+      if (route.value === existingRoute) {
+        panic("route " + route + " for HTTP VERB post is already defined")
+      }
+    })
+
+    this.usedRoutes.POST.push(route.value)
+
+    this.routerMetadata.addEndpoint({
+      verb: "POST",
+      parameters: [],
+      description: new Optionable(""),
+      responses:
+        parseZodUnion(validator.responses).map(response => {
+          return {
+            content: {
+              [MyOpenApiDefinitions.MIMEType.applicationJson]: {
+                schema: zodSchemaIntoOpenapiResponseContentDefinition(response as ZodObject<any>)
+              }
+            }
+          }
+          })
+     ,   
+      
+        
+     
+      route
+    })
+    this.expressRouter.post(route.value, this.wrapHandler(validator, handler));
+
+    return this
   }
 
   delete<RequestBody, RequestParams, ResponseBody>(
@@ -244,7 +287,7 @@ export class WebRouter<ContextType> {
 export class App<ContextType> extends WebRouter<ContextType>{
   private metadata: SubrouteDefinition
   constructor(context: ContextType) {
-    super(context)
+    super(context, new SubrouteDefinition(new ApiPath("")))
     this.metadata = new SubrouteDefinition(new ApiPath("/"))
   }
 

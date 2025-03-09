@@ -1,4 +1,4 @@
-import {z, ZodNumber, ZodObject, ZodString, type ZodRawShape, type ZodTypeAny} from "zod";
+import {z, ZodAny, ZodNumber, ZodObject, ZodString, ZodUnknown, type ZodRawShape, type ZodTypeAny} from "zod";
 
 export namespace MyZodDefinitions { 
   export interface _def {
@@ -7,7 +7,7 @@ export namespace MyZodDefinitions {
     description?: string;
   }
 
-    export type ObjectUnion = readonly [ZodObject<any>, ...ZodObject<any>[]]
+    export type ObjectUnion<> = readonly [ZodObject<any>, ...ZodObject<any>[]]
 
 
 

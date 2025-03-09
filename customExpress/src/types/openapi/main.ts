@@ -2,6 +2,8 @@
 import { Optionable } from "errors-as-types/lib/rust-like-pattern/option";
 import type {HttpVerb} from "../networking/httpVVerbs.ts";
 import type {ApiPath} from "../apiApth.ts";
+import type { ApiAccess } from "aws-sdk/clients/finspacedata";
+import type { WithDescription } from "../generaltypes.ts";
 
 export namespace ParameterEnums {
   export type In = "query" | "header" | "path" | "cookie";
@@ -37,21 +39,23 @@ export namespace MyOpenApiDefinitions {
     boolean = "boolean",
     object = "object",
     array = "array",
+    unknown = "unknown",
   }
-  export type Entity = {
+  export type Entity = { // note on the entity we support more things than the tradiotianl openapi object but its extension so it wont break existing openapi integrations 
     type: MyOpenApiDefinitions.ParameterType;
     properties: Record<string, Entity>;
-  };
+    required: boolean
+    checks: Record<string, string>
+  } & WithDescription;
 
   export type Response = {
    [ statusCode: string]: {
-     description: string;
      content?: {
        [type in MIMEType]: {
          schema: Entity
        }
      }
-   }
+   } & WithDescription
   };
 
   export type Parameter = {
@@ -60,10 +64,7 @@ export namespace MyOpenApiDefinitions {
     description?: string;
     required: boolean;
     style: ParameterEnums.Style;
-    schema: {
-      type: MyOpenApiDefinitions.ParameterType;
-      items?: { type: MyOpenApiDefinitions.ParameterType };
-    };
+    schema: Entity
   };
 
   export interface Body {
@@ -73,10 +74,11 @@ export namespace MyOpenApiDefinitions {
   }
 
   export interface EndpointMetadata {
+    route: ApiPath 
     verb: HttpVerb;
     description: Optionable<string>;
     parameters: Parameter[];
-    body: Body;
+    body?: Body;
     responses: Response[];
   }
 
@@ -104,7 +106,7 @@ export namespace MyOpenApiDefinitions {
   };
 }
 
-export interface RouterMetadata {
+export interface RouterMetadata { //
   getSummary(): Optionable<string>;
   getHeaders(): string[];
   addEndpoint(data: MyOpenApiDefinitions.EndpointMetadata): void;
@@ -122,11 +124,20 @@ export class SubrouteDefinition implements RouterMetadata {
   }
 
   toOpenApiSpec(): MyOpenApiDefinitions.Spec {
-    const pathsEntry: MyOpenApiDefinitions.SpecRoutePaths = {
-
-
-
-    };
+    const pathsEntry: MyOpenApiDefinitions.SpecRoutePaths = {};
+    this.endpoints.map((endpoint) => {
+      const pathEntry: MyOpenApiDefinitions.SpecRoutePathEndpointEntry = {
+        [endpoint.verb]:{
+        description: endpoint.description,
+        tags: ["API"],
+        parameters: endpoint.parameters,
+        requestBody: endpoint.body,
+        responses: endpoint.responses,
+        }
+        
+      };
+      pathsEntry[endpoint.route.value] = pathEntry;
+    })
 
     return {
       openapi: "3.0.0",
@@ -137,7 +148,7 @@ export class SubrouteDefinition implements RouterMetadata {
     };
   }
 
-  addEndpoint(data: MyOpenApiDefinitions.EndpointMetadata): void {
+  addEndpoint(data: MyOpenApiDefinitions.EndpointMetadata & {route: ApiPath}): void {
     this.endpoints.push(data);
   }
 

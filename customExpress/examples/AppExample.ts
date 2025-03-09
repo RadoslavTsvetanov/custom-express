@@ -16,7 +16,7 @@ userRouter.get(
   {
     body: z.object({}),
     params: z.object({}),
-    response: z.object({}),
+    responses: z.object({}),
     },
     
   async (req, res, next, ctx) => {
@@ -30,8 +30,7 @@ userRouter.get(
       };
     },
     {
-        summary: new Optionable("Get user list"),
-        operationId: new Optionable<string>(null)
+        description: new Optionable("Get user list"),
   }
 );
 
