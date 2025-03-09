@@ -50,6 +50,10 @@ function populateOpenapiFieldsFromZodChecks(obj: MyZodDefinitions.ZodLike): Enti
     return objToReturn
 }
 
+
+
+
+
 export function zodSchemaIntoOpenapiResponseContentDefinition(responseDefinition: ZodObject<any>, schema: MyOpenApiDefinitions.Entity = {type: MyOpenApiDefinitions.ParameterType.object,properties: {}, checks: {}, description: "", required: true}): MyOpenApiDefinitions.Entity {
     Object.keys(responseDefinition.shape).forEach(key => {
         const shapeElement = responseDefinition.shape[key]

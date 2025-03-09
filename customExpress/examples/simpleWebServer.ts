@@ -81,6 +81,9 @@ app.get(
     body: z.object({ // note here we can pass anything but it wont be available in the req.body since GET REQUESTS shouldnt have body (seriously i am talking from experience this has caused so many bugs its unimaginable ), here is the snippet to see how it made
       name: z.string(),
     }),
+    query: z.object({
+      gg: z.string().min(30)
+    }),
   },
   async (r) => {
     r.body; // there is nothong on the body
@@ -110,9 +113,16 @@ app.get(
         }),
       ]
     ),
-    params: z.object({}),
+    params: z.object({
+      hui: z.string(),
+      userId: z.string(),
+    }) , 
+    query: z.object({
+      gg: z.string().min(30)
+    }),
   },
   async (r) => {
+    r.query.gg
     return {
       status: new ResponseStatus(201),
       data: {

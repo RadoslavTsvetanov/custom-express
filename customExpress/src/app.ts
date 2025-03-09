@@ -6,19 +6,21 @@ import * as f from "safe-envs-mk-3"
 import { Optionable } from "errors-as-types/lib/rust-like-pattern/option";
 import { Port} from "./types/networking/port"
 import { type HttpVerb } from "./types/networking/httpVVerbs";
-import {  MyOpenApiDefinitions, type RouterMetadata, SubrouteDefinition } from "./types/openapi/main";
+import {  MyOpenApiDefinitions, ParameterEnums, type RouterMetadata, SubrouteDefinition } from "./types/openapi/main";
 import type {StatusCode} from "./types/networking/statusCode.ts";
 import { logWithoutMethods } from "./utils/logging.ts";
 import { zodSchemaIntoOpenapiResponseContentDefinition } from "./utils/zod-related/parseZodSchema.ts";
 import { parseZodUnion } from "./utils/zod-related/main.ts";
+import { error } from "console";
 
 export class ResponseStatus extends TypeSafeClassBase<number> { }
 
 
 
-type RequestDefinitionObject<RequestBody, RequestParams, ResponseBody> = {
+type RequestDefinitionObject<RequestBody, RequestParams, ResponseBody, Query> = {
   body: ZodSchema<RequestBody>;
   params: ZodSchema<RequestParams>;
+  query: ZodSchema<Query>
   // responses: {statusCode: StatusCode, schema: ZodSchema<ResponseBody>}[];
   responses: ZodSchema<ResponseBody>
 };
@@ -33,9 +35,10 @@ export type RequestHandler<
   ContextType,
   RequestBody,
   RequestParams,
-  ResponseBody
+  ResponseBody,
+  Query
 > = (
-  req: express.Request<RequestParams, ResponseBody, RequestBody>,
+  req: express.Request<RequestParams, ResponseBody, RequestBody,Query >,
   res: express.Response<ResponseBody>,
   next: express.NextFunction,
   ctx: ContextType
@@ -81,25 +84,27 @@ export class WebRouter<ContextType> {
 
   private async customResponseToExpressResponse<ResponseData>(
     res: express.Response,
-    result: Promise<
+    result: 
       RequestResponse<ResponseData> | RequestResponse<{ error: string }>
-    >
+    
   ): Promise<void> {
-    const resolvedResult = await result;
+    const resolvedResult = result;
     res.status(resolvedResult.status.getValue()).json(resolvedResult.data);
   }
 
-  private wrapHandler<RequestBody, RequestParams, ResponseBody >(
+  private wrapHandler<RequestBody, RequestParams, ResponseBody, Query >(
     validator: RequestDefinitionObject<
       RequestBody,
       RequestParams,
-      ResponseBody
+      ResponseBody,
+      Query
     >,
     handler: RequestHandler<
       ContextType,
       RequestBody,
       RequestParams,
-      ResponseBody
+      ResponseBody,
+      Query
     >
   ) {
     return async (
@@ -110,16 +115,31 @@ export class WebRouter<ContextType> {
       try {
         const bodyValidation = validator.body.safeParse(req.body);
         const paramsValidation = validator.params.safeParse(req.params);
-
-        if (!bodyValidation.success || !paramsValidation.success) {
-        res.status(406).json({ error: ("" + bodyValidation.error?.toString() + paramsValidation.error?.toString().trim() )})
+        const queryParamsValidation = validator.query.safeParse(req.query)
+        if (!bodyValidation.success || !paramsValidation.success || !queryParamsValidation!) {
+        res.status(406).json({ error: ("" + bodyValidation.error?.toString() + paramsValidation.error?.toString().trim() + queryParamsValidation.error?.toString().trim())})
         return
         }
-
+        // req.query = queryParamsValidation.data
         // Call the handler with validated data
-        const result = handler(req, res, next, this.context);
-        const resultValidation = (() => {
-          validator.responses
+        const result = await  handler(req, res, next, this.context);
+        (() => { // todo: validate it against the validator.responses
+          let isSuccesful = false
+          parseZodUnion(validator.responses).map((response) => {
+            if (response.safeParse(result).success) {
+             isSuccesful = true
+           }
+          })
+
+          if (!isSuccesful) {
+            return this.customResponseToExpressResponse(res, {
+                status: new ResponseStatus(403),
+              data: {
+                error: "response wihch was made is not from the expected"
+              }
+            })
+          }
+
 
         })()
         await this.customResponseToExpressResponse(res, result);
@@ -128,18 +148,20 @@ export class WebRouter<ContextType> {
       }
     };
   }
-  get<RequestParams, ResponseBody>(
+  get<RequestParams, ResponseBody, Query>(
     route: ApiPath,
    validator: RequestDefinitionObject<
       {},
       RequestParams,
-      ResponseBody
+     ResponseBody,
+      Query
     >,
     handler: RequestHandler<
       ContextType,
       {},
       RequestParams,
-      ResponseBody
+      ResponseBody,
+      Query
       >,
     openapiEndpointMetaData?: RouteMetadata
   ): this {
@@ -170,24 +192,27 @@ export class WebRouter<ContextType> {
       body: z.object({}),
       params: validator.params,
       responses: validator.responses,
+      query: validator.query
     }, handler));
 
 
 return this
   }
 
-  post<RequestBody , RequestParams, ResponseBody>(
+  post<RequestBody , RequestParams, ResponseBody, Query>(
     route: ApiPath,
     validator: RequestDefinitionObject<
       RequestBody,
       RequestParams,
-      ResponseBody
+      ResponseBody,
+      Query
     >,
     handler: RequestHandler<
       ContextType,
       RequestBody,
       RequestParams,
-      ResponseBody
+      ResponseBody,
+      Query
     >
   ): this{
     this.usedRoutes.POST.forEach(existingRoute => {
@@ -200,7 +225,36 @@ return this
 
     this.routerMetadata.addEndpoint({
       verb: "POST",
-      parameters: [],
+      parameters: (() => {
+        const pathParamsEntity = zodSchemaIntoOpenapiResponseContentDefinition(validator.params)
+
+          console.log(pathParamsEntity)
+        const parameters = Object.keys(pathParamsEntity.properties).map(key => {
+          console.log(pathParamsEntity.properties[key], key)
+          return {
+            name: key,
+            in: "path" as ParameterEnums.In,
+            schema: pathParamsEntity.properties[key],
+            required: pathParamsEntity.properties[key].required,
+            style: ParameterEnums.Style.simple
+          }
+        })
+
+        const paramsInQuery = zodSchemaIntoOpenapiResponseContentDefinition(validator.query)
+          
+          
+          Object.keys(paramsInQuery.properties).forEach(key => {
+          parameters.push({
+            name: key,
+            in: "query",
+            schema: paramsInQuery.properties[key],
+            required: paramsInQuery.properties[key].required,
+            style: ParameterEnums.Style.simple
+          })
+        })
+
+      return parameters 
+      })(),
       description: new Optionable(""),
       responses:
         parseZodUnion(validator.responses).map(response => {
