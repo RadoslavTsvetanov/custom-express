@@ -4,6 +4,9 @@ import type {HttpVerb} from "../networking/httpVVerbs.ts";
 import type {ApiPath} from "../apiApth.ts";
 import type { ApiAccess } from "aws-sdk/clients/finspacedata";
 import type { WithDescription } from "../generaltypes.ts";
+import { z, ZodObject, ZodUnknown, type ZodRawShape } from "zod";
+import type { MyZodDefinitions } from "../zod/zod.ts";
+import type { Url } from "../networking/url.ts";
 
 export namespace ParameterEnums {
   export type In = "query" | "header" | "path" | "cookie";
@@ -107,10 +110,12 @@ export namespace MyOpenApiDefinitions {
 }
 
 export interface RouterMetadata { //
+  getBaseUrl(): Url;
   getSummary(): Optionable<string>;
   getHeaders(): string[];
   addEndpoint(data: MyOpenApiDefinitions.EndpointMetadata): void;
   toOpenApiSpec(): MyOpenApiDefinitions.Spec;
+  createSubRouterMetadataDefinition(path: ApiPath): RouterMetadata
 }
 
 export class SubrouteDefinition implements RouterMetadata {
@@ -118,9 +123,18 @@ export class SubrouteDefinition implements RouterMetadata {
   private summary: Optionable<string> = new Optionable<string>("");
   private headers: string[] = [];
   private endpoints: MyOpenApiDefinitions.EndpointMetadata[] = [];
+  private baseUrl: Url
+  constructor(private baseURl: Url) {
+    this.baseUrl = baseURl
+  }
 
-  constructor(private path: ApiPath) {
+  createSubRouterMetadataDefinition(path: ApiPath): RouterMetadata {
+      this.subRoutes[path.value] = new SubrouteDefinition(this.baseURl.addPath(path))
+      return this.subRoutes[path.value]
+  }
 
+  getBaseUrl(): Url {
+      return this.baseUrl
   }
 
   toOpenApiSpec(): MyOpenApiDefinitions.Spec {
@@ -168,3 +182,42 @@ export class SubrouteDefinition implements RouterMetadata {
     this.subRoutes[name] = subroute;
   }
 }
+
+
+
+
+
+type fff<T extends MyZodDefinitions.ObjectUnion> = z.ZodUnion<T>
+
+
+const g = z.union([
+  z.object({
+    g : z.string()
+  }),
+  z.object({
+    u: z.string()
+  }) 
+])
+
+
+const f = z.object({
+  g: z.string(),
+  u: z.string(),
+  a: z.string()
+})
+
+
+
+function customObjectType<T extends ZodObject<Y>, Y extends ZodRawShape>(key: string,g: ZodObject<any>, existingObject: T) {
+  return z.object({
+    ...existingObject.shape,
+    [key]: g
+  })
+}
+
+
+function tgtg<T extends MyZodDefinitions.ObjectUnion>(z: fff<T>){
+  return z
+}
+
+

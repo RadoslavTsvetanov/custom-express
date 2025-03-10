@@ -12,6 +12,8 @@ import { logWithoutMethods } from "./utils/logging.ts";
 import { zodSchemaIntoOpenapiResponseContentDefinition } from "./utils/zod-related/parseZodSchema.ts";
 import { parseZodUnion } from "./utils/zod-related/main.ts";
 import { error } from "console";
+import { GetSet } from "./utils/getSetClass.ts";
+import { Url } from "./types/networking/url.ts";
 
 export class ResponseStatus extends TypeSafeClassBase<number> { }
 
@@ -196,7 +198,7 @@ export class WebRouter<ContextType> {
     }, handler));
 
 
-return this
+    return this
   }
 
   post<RequestBody , RequestParams, ResponseBody, Query>(
@@ -265,7 +267,7 @@ return this
               }
             }
           }
-          })
+        })
      ,   
       
         
@@ -327,6 +329,14 @@ return this
     return this.expressRouter;
   }
 
+  createChildRouter<NewRouterContext>(additionalContext: NewRouterContext, subPath: ApiPath) {
+
+    const newRouter =  new WebRouter({...this.context, ...additionalContext}, this.routerMetadata.createSubRouterMetadataDefinition(subPath))
+    this.expressRouter.use(subPath.value, newRouter.getExpressRouter())
+    return newRouter
+
+  }
+
   start(port: Port): void {
     const app = express();
     app.use(express.json()); // Ensure JSON parsing middleware is used
@@ -335,27 +345,4 @@ return this
       console.log(`Server is running on port ${port.value}`);
     });
   }
-}
-
-
-export class App<ContextType> extends WebRouter<ContextType>{
-  private metadata: SubrouteDefinition
-  constructor(context: ContextType) {
-    super(context, new SubrouteDefinition(new ApiPath("")))
-    this.metadata = new SubrouteDefinition(new ApiPath("/"))
-  }
-
-
-  createChildRouter<NewRouterContextType>(subpath: ApiPath, context: NewRouterContextType): WebRouter<NewRouterContextType & ContextType> {
-
-
-
-
-    const newRouter = new WebRouter({...this.context, ...context}, this.metadata.getSubRoute(subpath.value))
-
-
-    this.expressRouter.use(subpath.value, newRouter.getExpressRouter())
-    return newRouter
-  }
-
 }
