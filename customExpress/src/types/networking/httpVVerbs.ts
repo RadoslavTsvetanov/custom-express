@@ -1,13 +1,8 @@
 export type HttpVerb = 
-   "GET"
-  | "POST"
-  | "PUT"
-  | "DELETE"
-  |  "PATCH"
- | "OPTIONS"
+   "get"
+  | "post"
+  | "put"
+  | "delete"
+  |  "patch"
+ | "options"
 
-
-
-
-
- const a: Record<HttpVerb, string> = {"DELETE": ""}

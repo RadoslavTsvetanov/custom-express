@@ -137,9 +137,6 @@ export class SubrouteDefinition implements RouterMetadata {
   createSubRouterMetadataDefinition(path: ApiPath): RouterMetadata {
     const newSubroute = new SubrouteDefinition(this.baseURl.addPath(path))
       this.subRoutes[path.value] = newSubroute
-    console.log("adding subroute",path.value,newSubroute)
-    console.log("subroutes after adding",this.subRoutes)
-      console.log(this.subRoutes)
       return newSubroute 
   }
 
@@ -149,18 +146,20 @@ export class SubrouteDefinition implements RouterMetadata {
 
 
   private mapEndpointToSpecRouteDefinitionEntry(endpoint: MyOpenApiDefinitions.EndpointMetadata) {
-    
+
       const pathEntry: MyOpenApiDefinitions.SpecRoutePathEndpointEntry = {
         [endpoint.verb]:{
-        description: endpoint.description,
+        description: endpoint.description.unpack_with_default(""),
+        summary: endpoint.description.unpack_with_default(""),
         tags: ["API"],
         parameters: endpoint.parameters,
         requestBody: endpoint.body,
         responses: endpoint.responses,
         }
-
       };
+
       return pathEntry
+
   }
 
   private  parseSubPathStrcuture(s: SubrouteDefinition, pathsEntries: MyOpenApiDefinitions.SpecRoutePaths) {
@@ -182,9 +181,7 @@ export class SubrouteDefinition implements RouterMetadata {
     this.endpoints.map((endpoint) => {
       pathsEntry[(endpoint.route.value)] = this.mapEndpointToSpecRouteDefinitionEntry(endpoint);
     })
-    console.log(JSON.parse(JSON.stringify(this.subRoutes)))
     Object.keys(this.subRoutes).map(key => {
-      console.log("key4",this.subRoutes[key])
       this.subRoutes[key].endpoints.map(endpoint => {
         pathsEntry[this.subRoutes[key].baseURl.value.getV().replace(this.baseURl.value.getV(),"") + endpoint.route.value] = this.mapEndpointToSpecRouteDefinitionEntry(endpoint)
       })

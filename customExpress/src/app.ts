@@ -66,12 +66,12 @@ export class WebRouter<ContextType> {
   protected port: Optionable<Port> = new Optionable<Port>(null);
   protected routerMetadata: RouterMetadata
   private  readonly usedRoutes: Record<HttpVerb, string[]> = {
-    GET: [],
-    POST: [],
-    DELETE: [],
-    PUT: [],
-    PATCH: [],
-    OPTIONS: [],
+    get: [],
+    post: [],
+    delete: [],
+    put: [],
+    patch: [],
+    options: [],
   };
 
 
@@ -176,7 +176,7 @@ export class WebRouter<ContextType> {
 
 
     this.routerMetadata.addEndpoint({
-      verb: "GET",
+      verb: "get",
       parameters:    [(zodSchemaIntoOpenapiResponseContentDefinition(validator.params as ZodObject<any>))],
       description: ( openapiEndpointMetaData?.description ?? new Optionable("")),
       responses: [],
@@ -187,13 +187,13 @@ export class WebRouter<ContextType> {
 
 
 
-    this.usedRoutes.GET.forEach(existingRoute => {
+    this.usedRoutes.get.forEach(existingRoute => {
       if (route.value === existingRoute) {
         panic("route " + route + " for HTTP VERB get is already defined" ) // TODO: add checks like these for the rest of the http verbs 
       }
     })
 
-    this.usedRoutes.GET.push(route.value)
+    this.usedRoutes.get.push(route.value)
 
     this.expressRouter.get(route.value, this.wrapHandler({
       body: z.object({}),
@@ -205,6 +205,8 @@ export class WebRouter<ContextType> {
 
     return this
   }
+
+  
 
   post<RequestBody , RequestParams, ResponseBody, Query>(
     route: ApiPath,
@@ -222,21 +224,20 @@ export class WebRouter<ContextType> {
       Query
     >
   ): this{
-    this.usedRoutes.POST.forEach(existingRoute => {
+    this.usedRoutes.post.forEach(existingRoute => {
       if (route.value === existingRoute) {
         panic("route " + route + " for HTTP VERB post is already defined")
       }
     })
 
-    this.usedRoutes.POST.push(route.value)
+    this.usedRoutes.post.push(route.value)
 
     this.routerMetadata.addEndpoint({
-      verb: "POST",
+      verb: "post",
       parameters: (() => {
         const pathParamsEntity = zodSchemaIntoOpenapiResponseContentDefinition(validator.params)
 
         const parameters = Object.keys(pathParamsEntity.properties).map(key => {
-          console.log(pathParamsEntity.properties[key], key)
           return {
             name: key,
             in: "path" as ParameterEnums.In,
