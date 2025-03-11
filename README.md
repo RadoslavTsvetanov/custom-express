@@ -703,5 +703,86 @@ Argument of type '() => number' is not assignable to parameter of type 'InlineHa
 (3000)
 ```
 
+# What are we currently working on ?
+
+## TypeSockets
+
+we are trying to make end to end typesafe cleint server socket communicstion tooling 
+
+
+Here is roughly what we are trying to achieve: 
+
+
+```ts
+
+
+
+server.channe("/someroute",{
+	onMessage: (msgType: MsgTypes) => {
+		
+	}
+	messagesThatCanBePublished: {
+		quit: { // like this you define the name of the message
+			field: number
+		}
+	
+	}
+})
+
+
+export const server.generateCleint()
+
+
+```
+
+like this you define your ws socket handler as you can see you can define a channel, a channel is like a http route but for websockets and you define the schema of your requests so that you can get typesafety on your client too
+
+
+
+```
+import {client} from "../"
+
+
+client.someRoute.onMessage({
+	quit: (msg: {fieldId}) => {
+			.... // your handler
+		}
+
+
+})
+
+
+
+like this we can define typesafe communication between a cleint and a webso0cket server and this opens the doors to many thiings
+
+
+for example you can create
+
+
+// react component 
+function Hi(){
+	const [name, setName] = usestate<someRoute.quitType>()
+	useEffect(() => {
+
+		cleint.someRoute.onMessage({
+
+			quit: (g) => {
+					setName("gg") // X
+					setNAme(g) will work
+			}
+		})
+		
+	},[])
+
+
+	return <div></div>
+}
+
+
+
+```
+
+
+
 
 
