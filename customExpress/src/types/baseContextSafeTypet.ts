@@ -5,7 +5,7 @@ export abstract class ContextSafeType<V>{
             this.v = v;
         }
         else {
-            throw new Error(`Invalid value for ${this.constructor.name}: ${v}`);
+            throw new Error(`Invalid value for ${JSON.stringify(this.constructor.name)}: ${JSON.stringify(v)}`);
         }
     }
 

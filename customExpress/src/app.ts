@@ -14,6 +14,7 @@ import { parseZodUnion } from "./utils/zod-related/main.ts";
 import { error } from "console";
 import { GetSet } from "./utils/getSetClass.ts";
 import { Url } from "./types/networking/url.ts";
+import { console } from "inspector";
 
 export class ResponseStatus extends TypeSafeClassBase<number> { }
 
@@ -62,6 +63,7 @@ type RouteMetadata= {
 export class WebRouter<ContextType> {
   protected context: ContextType;
   protected expressRouter: Router;
+  protected port: Optionable<Port> = new Optionable<Port>(null);
   protected routerMetadata: RouterMetadata
   private  readonly usedRoutes: Record<HttpVerb, string[]> = {
     GET: [],
@@ -75,7 +77,10 @@ export class WebRouter<ContextType> {
 
 
 
-  constructor(context: ContextType, routerMetadata: RouterMetadata) {
+  constructor(context: ContextType, routerMetadata: RouterMetadata, port?: Port) {
+    new Optionable(port).ifCanBeUnpacked(() => {
+      this.port = new Optionable<Port>(port)
+    })
     this.expressRouter = express.Router();
     this.context = context;
     this.routerMetadata = routerMetadata
@@ -230,7 +235,6 @@ export class WebRouter<ContextType> {
       parameters: (() => {
         const pathParamsEntity = zodSchemaIntoOpenapiResponseContentDefinition(validator.params)
 
-          console.log(pathParamsEntity)
         const parameters = Object.keys(pathParamsEntity.properties).map(key => {
           console.log(pathParamsEntity.properties[key], key)
           return {
@@ -279,35 +283,39 @@ export class WebRouter<ContextType> {
     return this
   }
 
-  delete<RequestBody, RequestParams, ResponseBody>(
+  delete<RequestBody, RequestParams, ResponseBody, Query>(
     route: string,
     validator: RequestDefinitionObject<
       RequestBody,
       RequestParams,
-      ResponseBody
+      ResponseBody,
+      Query
     >,
     handler: RequestHandler<
       ContextType,
       RequestBody,
       RequestParams,
-      ResponseBody
+      ResponseBody,
+      Query
     >
   ): void {
     this.expressRouter.delete(route, this.wrapHandler(validator, handler));
   }
 
-  put<RequestBody, RequestParams, ResponseBody>(
+  put<RequestBody, RequestParams, ResponseBody, Query>(
     route: string,
     validator: RequestDefinitionObject<
       RequestBody,
       RequestParams,
-      ResponseBody
+      ResponseBody,
+      Query
     >,
     handler: RequestHandler<
       ContextType,
       RequestBody,
       RequestParams,
-      ResponseBody
+      ResponseBody,
+      Query
     >
   ): void {
     this.expressRouter.put(route, this.wrapHandler(validator, handler));
@@ -331,7 +339,7 @@ export class WebRouter<ContextType> {
 
   createChildRouter<NewRouterContext>(additionalContext: NewRouterContext, subPath: ApiPath) {
 
-    const newRouter =  new WebRouter({...this.context, ...additionalContext}, this.routerMetadata.createSubRouterMetadataDefinition(subPath))
+    const newRouter = new WebRouter({ ...this.context, ...additionalContext }, this.routerMetadata.createSubRouterMetadataDefinition(subPath))
     this.expressRouter.use(subPath.value, newRouter.getExpressRouter())
     return newRouter
 
@@ -341,8 +349,21 @@ export class WebRouter<ContextType> {
     const app = express();
     app.use(express.json()); // Ensure JSON parsing middleware is used
     app.use(this.expressRouter);
-    app.listen(port.value, () => {
-      console.log(`Server is running on port ${port.value}`);
-    });
+    let alreadyDefined = false
+
+      alreadyDefined = true
+    this.port.ifCanBeUnpacked(v => {
+      console.log("port is already set above")
+      app.listen(v.value, () => {
+        console.log(`Server is running on port ${v.value}`);
+      });
+    })
+
+    if (alreadyDefined) {
+      app.listen(port.value, () => {
+        console.log(`Server is running on port ${port.value}`);
+      })
+    }
   }
+
 }

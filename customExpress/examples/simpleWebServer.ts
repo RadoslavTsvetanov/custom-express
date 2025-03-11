@@ -6,6 +6,8 @@ import {builtIns} from "../src/builtins/main.ts";
 import {Port} from "../src/types/networking/port.ts";
 import { SubrouteDefinition } from "../src/types/openapi/main.ts";
 import { ApiPath } from "../src/types/apiApth.ts";
+import { Url } from "../src/types/networking/url.ts";
+import { GetSet } from "../src/utils/getSetClass.ts";
 
 interface DB {
   getUser(userId: string): string | null;
@@ -17,53 +19,16 @@ class ExampleDb implements DB {
   }
 }
 
-const app = new WebRouter({ db: new ExampleDb() }, new SubrouteDefinition(new ApiPath("/")));
-
-// type ValidatorObject = Record<
-//     string,
-//     {   type: string
-//         (v: any) => {}
-//     }
-// >
-
-// function buildRoute(validator,)
+const app = new WebRouter({ db: new ExampleDb() }, new SubrouteDefinition(new Url(new GetSet("http://localhost:4000"))));
 
 app.withMiddlewares(
   builtIns.middlewares.fileUploading.defaultFileUpload(new FileName("file"))
 );
 
-/* ts
 
+const userRouter = app.createChildRouter({usersRepo: {}}, new ApiPath("/users"))
 
-get<RequestParams, ResponseBody>(
-route: string,
-validator: RequestDefinitionObject<
-{},
-RequestParams,
-ResponseBody
->,
-handler: RequestHandler<
-ContextType,
-{},
-RequestParams,
-ResponseBody
->
-): void {
-this.expressRouter.get(route, this.wrapHandler({
-body: z.object({}),
-params: validator.params,
-response: validator.response,
-}, handler));
-}
-
-
-*/
-
-// type objectSchema = z.object({
-//     statusCode: z.number
-// })
-
-app.get(
+userRouter.get(
   new ApiPath("/user/:userId"),
   {
     params: z.object({
@@ -116,7 +81,7 @@ app.get(
     params: z.object({
       hui: z.string(),
       userId: z.string(),
-    }) , 
+    }), 
     query: z.object({
       gg: z.string().min(30)
     }),

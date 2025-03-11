@@ -7,6 +7,7 @@ import type { WithDescription } from "../generaltypes.ts";
 import { z, ZodObject, ZodUnknown, type ZodRawShape } from "zod";
 import type { MyZodDefinitions } from "../zod/zod.ts";
 import type { Url } from "../networking/url.ts";
+import type { customSuffixType } from "aws-sdk/clients/iam";
 
 export namespace ParameterEnums {
   export type In = "query" | "header" | "path" | "cookie";
@@ -116,6 +117,7 @@ export interface RouterMetadata { //
   addEndpoint(data: MyOpenApiDefinitions.EndpointMetadata): void;
   toOpenApiSpec(): MyOpenApiDefinitions.Spec;
   createSubRouterMetadataDefinition(path: ApiPath): RouterMetadata
+  getSubroutes(): Record<string, SubrouteDefinition>
 }
 
 export class SubrouteDefinition implements RouterMetadata {
@@ -128,18 +130,26 @@ export class SubrouteDefinition implements RouterMetadata {
     this.baseUrl = baseURl
   }
 
+  getSubroutes(): Record<string, SubrouteDefinition> {
+      return this.subRoutes
+  }
+
   createSubRouterMetadataDefinition(path: ApiPath): RouterMetadata {
-      this.subRoutes[path.value] = new SubrouteDefinition(this.baseURl.addPath(path))
-      return this.subRoutes[path.value]
+    const newSubroute = new SubrouteDefinition(this.baseURl.addPath(path))
+      this.subRoutes[path.value] = newSubroute
+    console.log("adding subroute",path.value,newSubroute)
+    console.log("subroutes after adding",this.subRoutes)
+      console.log(this.subRoutes)
+      return newSubroute 
   }
 
   getBaseUrl(): Url {
       return this.baseUrl
   }
 
-  toOpenApiSpec(): MyOpenApiDefinitions.Spec {
-    const pathsEntry: MyOpenApiDefinitions.SpecRoutePaths = {};
-    this.endpoints.map((endpoint) => {
+
+  private mapEndpointToSpecRouteDefinitionEntry(endpoint: MyOpenApiDefinitions.EndpointMetadata) {
+    
       const pathEntry: MyOpenApiDefinitions.SpecRoutePathEndpointEntry = {
         [endpoint.verb]:{
         description: endpoint.description,
@@ -148,15 +158,45 @@ export class SubrouteDefinition implements RouterMetadata {
         requestBody: endpoint.body,
         responses: endpoint.responses,
         }
-        
+
       };
-      pathsEntry[endpoint.route.value] = pathEntry;
+      return pathEntry
+  }
+
+  private  parseSubPathStrcuture(s: SubrouteDefinition, pathsEntries: MyOpenApiDefinitions.SpecRoutePaths) {
+    const subRoutes = s.getSubroutes()
+    Object.keys(subRoutes).map(key => {
+      
+      subRoutes[key].endpoints.map(endpoint => {
+        pathsEntries[(this.baseURl.value.getV()).replace(this.baseURl.value.getV(),"") + endpoint.route.value] = this.mapEndpointToSpecRouteDefinitionEntry(endpoint)
+      })
+
+      this.parseSubPathStrcuture(subRoutes[key], pathsEntries)
+
+
     })
+  }
+
+  toOpenApiSpec(): MyOpenApiDefinitions.Spec {
+    const pathsEntry: MyOpenApiDefinitions.SpecRoutePaths = {};
+    this.endpoints.map((endpoint) => {
+      pathsEntry[(endpoint.route.value)] = this.mapEndpointToSpecRouteDefinitionEntry(endpoint);
+    })
+    console.log(JSON.parse(JSON.stringify(this.subRoutes)))
+    Object.keys(this.subRoutes).map(key => {
+      console.log("key4",this.subRoutes[key])
+      this.subRoutes[key].endpoints.map(endpoint => {
+        pathsEntry[this.subRoutes[key].baseURl.value.getV().replace(this.baseURl.value.getV(),"") + endpoint.route.value] = this.mapEndpointToSpecRouteDefinitionEntry(endpoint)
+      })
+      this.parseSubPathStrcuture(this.subRoutes[key],pathsEntry)
+    })
+
+
 
     return {
       openapi: "3.0.0",
       info: { title: "API Documentation", version: "1.0.0" },
-      servers: [{ url: "http://localhost:3000" }],
+      servers: [{ url: this.baseURl.value.getV() }],
       paths: pathsEntry,
       components: {},
     };
@@ -208,13 +248,18 @@ const f = z.object({
 
 
 
-function customObjectType<T extends ZodObject<Y>, Y extends ZodRawShape>(key: string,g: ZodObject<any>, existingObject: T) {
+function customObjectType<T extends ZodObject<Y>, Y extends ZodRawShape>(key: string, g: ZodObject<any>, existingObject: T) {
   return z.object({
     ...existingObject.shape,
     [key]: g
   })
 }
 
+const r = customObjectType<{[key: string]: ZodObject}>("", z.object({}), z.object({}))
+
+export type ZodObject3 = typeof r 
+
+const h: ZodObject3<{[key: string]: ZodObject} > = z.object({})
 
 function tgtg<T extends MyZodDefinitions.ObjectUnion>(z: fff<T>){
   return z
