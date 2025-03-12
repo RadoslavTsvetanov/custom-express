@@ -3,28 +3,38 @@ import {z} from "zod";
 import {zodSchemaIntoOpenapiResponseContentDefinition} from "../../../src/utils/zod-related/parseZodSchema.ts";
 import {parseZodUnion} from "../../../src/utils/zod-related/main.ts";
 import {logWithoutMethods} from "../../../src/utils/logging.ts";
+import {MyZodDefinitions} from "../../../src/types/zod/zod.ts";
 
 
 
 test("zodSchemaIntoOpenapiResponseContentDefinition basic", () => {
     const expected ={
         h: {
-            e: {
-                type: "string",
-                description: "a string{\"kind\":\"min\",\"value\":4}",
-                min: 4,
-                required: true
+            description: "pipi pupu",
+            checks: {},
+            properties:{
+                e: {
+                    type: "string",
+                    description: "a string{\"kind\":\"min\",\"value\":4}",
+                    checks: {
+
+                        min: 4,
+                    },
+                    required: true
+                },
             },
+            required: true,
+            type: MyZodDefinitions.Shapes.Object
         },
     }
 
-    const examplObject = z.object({
+    const result = z.object({
         h: z.object({
             e: z.string().min(4).describe("a string")
-        })
+        }).describe("pipi pupu")
     })
 
-   expect(expected).toMatchObject(zodSchemaIntoOpenapiResponseContentDefinition(examplObject))
+   expect(zodSchemaIntoOpenapiResponseContentDefinition(result)).toMatchObject(expected)
 
 }) // this checks if the general logic is there since there are some edge cases but here we are checking if your general logic is right
 
@@ -64,11 +74,9 @@ test("zodSchemaIntoOpenapiResponseContentDefinition testing if it is working cor
     }
 
     // logWithoutMethods()
-    logWithoutMethods(exampleObject.shape)
-    logWithoutMethods(exampleObject.shape.h.shape)
+    // logWithoutMethods(exampleObject.shape)
+    // logWithoutMethods(exampleObject.shape.h.shape)
 
     const result = zodSchemaIntoOpenapiResponseContentDefinition(exampleObject)
-    console.log("3")
-
     expect(result).toMatchObject(expected)
 })

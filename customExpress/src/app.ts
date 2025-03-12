@@ -14,10 +14,10 @@ import { parseZodUnion } from "./utils/zod-related/main.ts";
 import { error } from "console";
 import { GetSet } from "./utils/getSetClass.ts";
 import { Url } from "./types/networking/url.ts";
-import { console } from "inspector";
+import { console, url } from "inspector";
+import swaggerui from "swagger-ui-express"
 
 export class ResponseStatus extends TypeSafeClassBase<number> { }
-
 
 
 type RequestDefinitionObject<RequestBody, RequestParams, ResponseBody, Query> = {
@@ -87,6 +87,7 @@ export class WebRouter<ContextType> {
     this.expressRouter.get("/spec", (req, res) => {
       res.json(this.routerMetadata.toOpenApiSpec())
     })
+
   }
 
   private async customResponseToExpressResponse<ResponseData>(
@@ -155,6 +156,8 @@ export class WebRouter<ContextType> {
       }
     };
   }
+
+
   get<RequestParams, ResponseBody, Query>(
     route: ApiPath,
    validator: RequestDefinitionObject<
@@ -172,7 +175,6 @@ export class WebRouter<ContextType> {
       >,
     openapiEndpointMetaData?: RouteMetadata
   ): this {
-    logWithoutMethods(validator)
 
 
     this.routerMetadata.addEndpoint({
@@ -206,7 +208,80 @@ export class WebRouter<ContextType> {
     return this
   }
 
-  
+
+ registerRoute<
+  Method extends HttpVerb,
+  RequestParams,
+  ResponseBody,
+  Query,
+  RequestBody = Method extends "get" ? {} : any
+>(
+    method: Method,
+    route: ApiPath,
+    validator: RequestDefinitionObject<RequestBody, RequestParams, ResponseBody, Query>,
+    handler: RequestHandler<ContextType, RequestBody, RequestParams, ResponseBody, Query>,
+    openapiEndpointMetaData?: RouteMetadata
+  ): this {
+    // Check if the route is already registered
+    this.usedRoutes[method].forEach(existingRoute => {
+      if (route.value === existingRoute) {
+        panic(`Route ${route.value} for HTTP VERB ${method.toUpperCase()} is already defined`);
+      }
+    });
+
+    this.usedRoutes[method].push(route.value);
+
+    // Define OpenAPI parameters
+    const parameters = (() => {
+      const pathParamsEntity = zodSchemaIntoOpenapiResponseContentDefinition(validator.params);
+      const queryParamsEntity = zodSchemaIntoOpenapiResponseContentDefinition(validator.query);
+      
+      const paramsList = Object.entries(pathParamsEntity.properties).map(([key, value]) => ({
+        name: key,
+        in: "path" as ParameterEnums.In,
+        schema: value,
+        required: value.required,
+        style: ParameterEnums.Style.simple
+      }));
+
+      Object.entries(queryParamsEntity.properties).forEach(([key, value]) => {
+        paramsList.push({
+          name: key,
+          in: "query",
+          schema: value,
+          required: value.required,
+          style: ParameterEnums.Style.simple
+        });
+      });
+
+      return paramsList;
+    })();
+
+    // Register OpenAPI metadata
+    this.routerMetadata.addEndpoint({
+      verb: method,
+      parameters,
+      description: new Optionable(openapiEndpointMetaData?.description ?? ""),
+      responses: method === "post" ?
+        parseZodUnion(validator.responses).map(response => ({
+          content: {
+            [MyOpenApiDefinitions.MIMEType.applicationJson]: {
+              schema: zodSchemaIntoOpenapiResponseContentDefinition(response as ZodObject<any>)
+            }
+          }
+        })) : [],
+      route
+    });
+
+    // Register the route in Express
+    this.expressRouter[method](route.value, this.wrapHandler(validator, handler));
+
+    return this;
+  }
+
+
+
+
 
   post<RequestBody , RequestParams, ResponseBody, Query>(
     route: ApiPath,
@@ -230,19 +305,29 @@ export class WebRouter<ContextType> {
       }
     })
 
+// a bit more clarifications on params, so params is not an array since params have anmes and so they resemble more of an object structre than an array so every entry inside the object is a param
+
+
+
     this.usedRoutes.post.push(route.value)
 
     this.routerMetadata.addEndpoint({
       verb: "post",
       parameters: (() => {
         const pathParamsEntity = zodSchemaIntoOpenapiResponseContentDefinition(validator.params)
+        console.log(
+          "zod schema into params",
+          "zod",
+          validator.params,
+          pathParamsEntity
+        )
 
-        const parameters = Object.keys(pathParamsEntity.properties).map(key => {
+        const parameters = Object.entries(pathParamsEntity.properties).map(([key, value]) => {
           return {
             name: key,
             in: "path" as ParameterEnums.In,
-            schema: pathParamsEntity.properties[key],
-            required: pathParamsEntity.properties[key].required,
+            schema: value, 
+            required: value.required,
             style: ParameterEnums.Style.simple
           }
         })
@@ -265,13 +350,22 @@ export class WebRouter<ContextType> {
       description: new Optionable(""),
       responses:
         parseZodUnion(validator.responses).map(response => {
+
+          const parsedObj = zodSchemaIntoOpenapiResponseContentDefinition(response as ZodObject<any>)
+
+
+          console.log(76767676767676)
+          console.log(parsedObj)
+          console.log(76767676767676)
           return {
+            [parsedObj.properties.statusCode]: {
             content: {
               [MyOpenApiDefinitions.MIMEType.applicationJson]: {
-                schema: zodSchemaIntoOpenapiResponseContentDefinition(response as ZodObject<any>)
+                schema: parsedObj
               }
             }
           }
+        }
         })
      ,   
       
@@ -353,6 +447,12 @@ export class WebRouter<ContextType> {
     let alreadyDefined = false
 
       alreadyDefined = true
+    
+    this.expressRouter.use("/api-docs", swaggerui.serve, swaggerui.setup(null, {
+      swaggerOptions: {
+        url: "http://localhost:" + (this.port.unpack_with_default(port).value) + "/spec"
+      }
+    }));
     this.port.ifCanBeUnpacked(v => {
       console.log("port is already set above")
       app.listen(v.value, () => {

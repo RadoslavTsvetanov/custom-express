@@ -6,6 +6,7 @@ import {Optionable} from "errors-as-types/lib/rust-like-pattern/option";
 import { MyZodDefinitions } from "../../types/zod/zod.ts";
 import { MyOpenApiDefinitions } from "../../types/openapi/main.ts";
 import type { ParameterType } from 'aws-sdk/clients/cloudformation';
+import {parseZodUnion} from "./main.ts";
 
 type Entity = MyOpenApiDefinitions.Entity
 
@@ -55,28 +56,62 @@ function populateOpenapiFieldsFromZodChecks(obj: MyZodDefinitions.ZodLike): Enti
 
 
 export function zodSchemaIntoOpenapiResponseContentDefinition(responseDefinition: ZodObject<any>, schema: MyOpenApiDefinitions.Entity = {type: MyOpenApiDefinitions.ParameterType.object,properties: {}, checks: {}, description: "", required: true}): MyOpenApiDefinitions.Entity {
+    console.log("lolololo")
+    console.log(responseDefinition._def)
+    console.log(88888)
+
+    if(responseDefinition._def.typeName === MyZodDefinitions.Shapes.Literal){
+       schema.checks["or must be" + responseDefinition._def.value] = true
+        return
+    }
+
     Object.keys(responseDefinition.shape).forEach(key => {
         const shapeElement = responseDefinition.shape[key]
 
+        if(shapeElement._def.typeName === MyZodDefinitions.Shapes.Literal){
+            schema.properties[key] = shapeElement._def.value;
+            console.log("jiji")
+            logWithoutMethods(shapeElement)
+
+        }
+
         if(shapeElement._def.typeName === MyZodDefinitions.Shapes.Optional){
+
             schema.properties[key] = populateOpenapiFieldsFromZodChecks(shapeElement
                 ._def.innerType)
             schema.properties[key].required = false
+
         }
 
         if(shapeElement._def.checks) {
+
             schema.properties[key] = populateOpenapiFieldsFromZodChecks(shapeElement)
+
         }
+
         if(shapeElement._def.typeName === MyZodDefinitions.Shapes.Object){
+
             schema.properties[key] = {
                 type: MyOpenApiDefinitions.ParameterType.object,
                 checks : {},
                 description: "",
-                required: false,
+                required: true,
                 properties :{}
             }
+
             zodSchemaIntoOpenapiResponseContentDefinition(shapeElement, schema.properties[key])
-        }else{
+
+        }
+
+
+        if(shapeElement._def.typeName === MyZodDefinitions.Shapes.Union){
+            console.log("/ggg")
+                logWithoutMethods(shapeElement)
+                logWithoutMethods(shapeElement._def)
+            console.log("fr")
+            parseZodUnion(shapeElement._def).map(subElementFromTheUnion => {
+                zodSchemaIntoOpenapiResponseContentDefinition(subElementFromTheUnion, schema.properties[key])
+            })
         }
     })
     return schema
@@ -88,6 +123,6 @@ const examplObject = z.object({
     })
 })
 
-logWithoutMethods(examplObject.shape)
+// logWithoutMethods(examplObject.shape)
 
 console.log(zodSchemaIntoOpenapiResponseContentDefinition(examplObject))

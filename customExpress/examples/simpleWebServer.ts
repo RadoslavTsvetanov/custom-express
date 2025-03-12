@@ -13,13 +13,15 @@ interface DB {
   getUser(userId: string): string | null;
 }
 
+const port = 3003
+
 class ExampleDb implements DB {
   getUser(userId: string): string | null {
     return "hi";
   }
 }
 
-const app = new WebRouter({ db: new ExampleDb() }, new SubrouteDefinition(new Url(new GetSet("http://localhost:4000"))));
+const app = new WebRouter({ db: new ExampleDb() }, new SubrouteDefinition(new Url(new GetSet("http://localhost:"+port)))); //TODO make the second argumnt to instead be amde internally 
 
 app.withMiddlewares(
   builtIns.middlewares.fileUploading.defaultFileUpload(new FileName("file"))
@@ -28,39 +30,7 @@ app.withMiddlewares(
 
 const userRouter = app.createChildRouter({usersRepo: {}}, new ApiPath("/users"))
 
-userRouter.get(
-  new ApiPath("/user/:userId"),
-  {
-    params: z.object({
-        hui: z.literal(3)
-    }),
-    responses: z.object({
-        statusCode: z.literal(1),
-         user: z.string(),
-    })
-      
-    //   .or(z.object({
-    //     userId: z.string().nonempty(),
-    // })),
-    ,
-    body: z.object({ // note here we can pass anything but it wont be available in the req.body since GET REQUESTS shouldnt have body (seriously i am talking from experience this has caused so many bugs its unimaginable ), here is the snippet to see how it made
-      name: z.string(),
-    }),
-    query: z.object({
-      gg: z.string().min(30)
-    }),
-  },
-  async (r) => {
-    r.body; // there is nothong on the body
-      return {
-      status: new ResponseStatus(200),
-      data: {
-          statusCode: 1 as 1, // we need to typecast 1 to 1 since by default every number is of type number not its own type representation 
-          user: r.params.hui.toString()
-        }
-      };
-    }
-).post(
+userRouter.post(
   new ApiPath("/user"),
   {
     body: z.object({
@@ -98,4 +68,10 @@ userRouter.get(
   }
 )
 
-app.start(new Port(3003));
+
+
+
+
+
+
+app.start(new Port(port));
