@@ -1,134 +1,155 @@
-import { ZodObjectUnion } from './../types/zod/zod';
-import uws, {WebSocket} from "uWebSockets.js"
-import type {Port} from "../types/networking/port.ts";
-import {ContextSafeType} from "../types/baseContextSafeTypet.ts";
-import type { MyZodDefinitions } from "../types/zod/zod.ts";
-import { z } from "zod";
-import type { WithDescription } from '../types/generaltypes.ts';
-import type { MyOpenApiDefinitions } from '../types/openapi/main.ts';
+import { WebSocketServer, WebSocket } from "ws";
+import { z, ZodSchema, infer as ZodInfer } from "zod";
+import type { Port } from "../types/networking/port.ts";
+import type { ApiPath } from "../types/apiApth.ts";
+
+// Extracts TypeScript types from Zod schemas
+type InferMessages<T extends Record<string, ZodSchema>> = {
+  [K in keyof T]: { type: K; data: ZodInfer<T[K]> };
+};
 
 
-
-namespace customWebsocket {
-
-
-    export namespace openWebsockets {
-
-        export type Definition = {
-            channels: openWebsockets.Channel[]
-        }
-
-
-        export type Channel = {
-            [key: "subscribe" | "publish"]: {
-                messages: {
-                    contentType: MyOpenApiDefinitions.MIMEType
-                    payload: MyOpenApiDefinitions.Entity
-                }
-            } & WithDescription
-        } & WithDescription
-    }
-
-
-    export namespace CustomUwsTypeDefs {
-      export type HandlerResponse<T extends ZodObjectUnion> = {
-        data: T;
-      };
-        
-        
-        
-        
-        
-        
-      export type routeConfig = {
-        open: <Response extends ZodObjectUnion>(
-          ws: WebSocket<any>
-        ) => HandlerResponse<Response>;
-        close: <MessageTypeOnClose, Response extends ZodObjectUnion>(
-          ws: WebSocket<MessageTypeOnClose>,
-          code: number,
-          message: ArrayBuffer
-        ) => Response;
-        message: <MessageTypeOnMsg, Response extends ZodObjectUnion>(
-          ws: WebSocket<MessageTypeOnMsg>,
-          message: ArrayBuffer
-        ) => Response;
-      };
-
-      export class ApiPath<
-        T /*to not repeat the type but instead assign to a "variable" that i can reuse*/ = string
-      > extends ContextSafeType<T> {
-        customValidator(v: T): boolean {
-          return false;
-        }
-      }
-
-      class CustomWebSocketRouter<T extends string> {
-        private port: Port;
-        private uws = uws.App();
-        private  RouteDefinitions = 
-        private subRoutes: Record<string, CustomWebSocketRouter<"">>;
-        constructor(port: Port) {
-          this.port = port;
-        }
-
-        private transformMsg<T>(v: ArrayBuffer): T {
-          const decoder = new TextDecoder("utf-8");
-          const jsonString = decoder.decode(v);
-
-          return JSON.parse(jsonString);
-        }
-
-        getPath(k: keyof T) {}
-
-        addRoute<
-          Y extends MyZodDefinitions.ObjectUnion, // dont touch this and the one below since they are here just beacause MessageTypeOnClose    MessageTypeOnMsg need a generic too and these will be autoinfered, also ask if instead of these two genrics i could just use an unknown
-          R extends MyZodDefinitions.ObjectUnion,
-          MessageTypeOnClose extends MyZodDefinitions.ZodObjectUnion<R>,
-          MessageTypeOnMsg extends MyZodDefinitions.ZodObjectUnion<Y>
-        >(
-          path: ApiPath,
-          customWebsocketHandlersConfig: CustomUwsTypeDefs.routeConfig,
-          validator: {
-            messageTypeOnRecievedMessage: MessageTypeOnMsg;
-            messageTypeOnExit: MessageTypeOnClose;
-          }
-        ) {
-          this.uws.ws(path.value, {
-            open: (ws: WebSocket<any>) => {
-              customWebsocketHandlersConfig.open(ws);
-            },
-            close: (ws: WebSocket<any>, code: number, message: ArrayBuffer) => {
-              const validationResult = validator.messageTypeOnExit.safeParse(
-                this.transformMsg<MessageTypeOnMsg>(message)
-              );
-
-              if (validationResult.success) {
-                customWebsocketHandlersConfig.close(ws, code, message);
-              } else {
-              }
-            },
-            message: (ws: WebSocket<any>, message: ArrayBuffer) => {
-              const res = customWebsocketHandlersConfig.message(ws, message);
-              ws.send(res); // TODO do the other 2 handlers like that too
-            },
-          });
-        }
-
-        getRouter() {
-          return this.uws;
-        }
-          
-          
-          getDefinition() {
-            //   return {
-            //     channels: this.subRoutes.map((subRouter) => subRouter.getDefinition()),
-            //   };
-          }
-      }
-    }
+type ObjectWithReplacedKey<
+  OldObject,
+  KeyToReplace extends keyof OldObject,
+  NewType
+> = {
+  [K in keyof OldObject]: K extends KeyToReplace ? NewType : OldObject[K];
+};
 
 
 
 
+type H = {
+  h: string
 }
+
+type y = ObjectWithReplacedKey<"h",number, H>
+
+
+
+export namespace customWebsocket {
+  export type CustomWebsocketObject ={} 
+  export class CustomWebSocketRouter {
+    private port: Port;
+    private wss: WebSocketServer;
+    private subRoutes: Record<string, CustomWebSocketRouter> = {};
+
+    constructor(port: Port) {
+      this.port = port;
+      this.wss = new WebSocketServer({ port: port.value });
+    }
+
+    private sendUnprocessableMessageType(
+      ws: WebSocket,
+      invocationInfo: { channel: string; msg: object; handler: string }
+    ) {
+      ws.send(
+        JSON.stringify({
+          error: "Cannot find handler to process message",
+          invocationData: invocationInfo,
+        })
+      );
+    }
+
+    private transformMsg<T extends object>(v: string): T | null {
+      try {
+        return JSON.parse(v) as T;
+      } catch {
+        return null;
+      }
+    }
+
+    addRoute<
+      TSendSchemaKeys extends object,
+      TRecieveSchemaKeys extends object,
+      TSendSchema extends Record<keyof TSendSchema, ZodSchema>,
+      TReceiveSchema extends Record<keyof TRecieveSchemaKeys, ZodSchema>
+    >(
+      path: ApiPath,
+      handlers: {
+        onMsgReceived: {
+          [K in keyof InferMessages<TReceiveSchema>]: (
+            ws: WebSocket,
+            msg: InferMessages<TReceiveSchema>[K]
+          ) => void;
+        };
+        onConnection: (ws: WebSocket) => void;
+        onExit: (ws: WebSocket, code: number, reason: string) => void;
+      },
+      validator: {
+        messagesItCanSend: TSendSchema;
+        messagesItCanReceive: TReceiveSchema;
+      }
+    ) {
+      this.wss.on("connection", (ws) => {
+        handlers.onConnection(ws);
+
+        ws.on("message", async (message) => {
+          const parsedMessage = this.transformMsg<{
+            type: string;
+            data: unknown;
+          }>(message.toString());
+
+          if (!parsedMessage || !parsedMessage.type) {
+            this.sendUnprocessableMessageType(ws, {
+              channel: path.value,
+              handler: "onMessageReceived",
+              msg: parsedMessage || {},
+            });
+            return;
+          }
+
+          const schema = validator.messagesItCanReceive[parsedMessage.type];
+          if (!schema) {
+            this.sendUnprocessableMessageType(ws, {
+              channel: path.value,
+              handler: "onMessageReceived",
+              msg: parsedMessage,
+            });
+            return;
+          }
+
+          const validationResult = schema.safeParse(parsedMessage.data);
+          if (!validationResult.success) {
+            ws.send(
+              JSON.stringify({
+                error: "Invalid message format",
+                details: validationResult.error.format(),
+              })
+            );
+            return;
+          }
+
+          const handler = handlers.onMsgReceived[
+            parsedMessage.type as keyof InferMessages<TReceiveSchema>
+          ];
+          if (handler) {
+            try {
+              await handler(ws, {
+                type: parsedMessage.type,
+                data: validationResult.data,
+              });
+            } catch (error) {
+              ws.send(
+                JSON.stringify({
+                  error: "Handler execution failed",
+                  details: (error as Error).message,
+                })
+              );
+            }
+          }
+        });
+
+        ws.on("close", (code, reason) => {
+          handlers.onExit(ws, code, reason.toString());
+        });
+      });
+    }
+
+    getServer() {
+      return this.wss;
+    }
+  }
+}
+

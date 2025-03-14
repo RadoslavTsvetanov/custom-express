@@ -25,6 +25,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "multer": "^1.4.5-lts.1",
+    "openapi-client-axios": "^7.5.5",
     "safe-envs-mk-3": "^1.0.1",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^11.0.5",

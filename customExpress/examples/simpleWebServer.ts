@@ -69,7 +69,7 @@ userRouter.post(
 )
 
 
-
+export const cleint = await app.generateClient() 
 
 
 

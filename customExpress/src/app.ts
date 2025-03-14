@@ -1,4 +1,6 @@
 import express, { Router } from "express";
+const OpenAPIClientAxios = require("openapi-client-axios").default;
+
 import {z, ZodObject, ZodSchema, type ZodFirstPartySchemaTypes, type ZodRawShape} from "zod";
 import { ApiPath } from "./types/apiApth";
 import { TypeSafeClassBase } from "./utils/contextsafetype";
@@ -438,6 +440,12 @@ export class WebRouter<ContextType> {
     this.expressRouter.use(subPath.value, newRouter.getExpressRouter())
     return newRouter
 
+  }
+
+  async generateClient() {
+const api = new OpenAPIClientAxios({ definition: this.routerMetadata.toOpenApiSpec });
+const client = await api.init(); // Initializes the client
+return client;
   }
 
   start(port: Port): void {
