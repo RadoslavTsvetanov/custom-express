@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { z, ZodSchema, infer as ZodInfer } from "zod";
+import { z, ZodSchema, infer as ZodInfer, ZodObject, type ZodRawShape } from "zod";
 import type { Port } from "../types/networking/port.ts";
 import type { ApiPath } from "../types/apiApth.ts";
 import { panic } from "../utils/panic.ts";
@@ -179,9 +179,9 @@ export namespace customWebsocket {
 
         Prefix<removeNonStringEntriesFromKeyOf<keyof (E[keyof E]["messagesItCanReceive"])>, "send">, //TODO make this work so that we dont have squiggles
         // Prefix<keyof (E[keyof E]["messagesItCanReceive"]), "send">,
-        (d: ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>) => Promise<void>>>
+        (d: z.infer<ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>>) => Promise<void>>>
     {
-      const obj:  Record<keyof E,Record<Prefix<keyof (E[keyof E]["messagesItCanReceive"]), "send">,(d: ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>) => Promise<void>>> = {}
+      const obj:  Record<keyof E,Record<Prefix<keyof (E[keyof E]["messagesItCanReceive"]), "send">,(d: z.infer<ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>>) => Promise<void>>> = {}
       Object.entries(this.endpoints)
         .map(([channelName, channelConfig]) => {
           
@@ -201,11 +201,19 @@ export namespace customWebsocket {
         
           Object.entries(channelInfo.messagesItCanReceive).forEach(([messageName, schema]) => {
             obj[channelInfo.name] = {
+              ...obj[channelInfo.name],
               [`send${messageName}`]: (v: E[typeof channelInfo.name]["messagesItCanReceive"][typeof messageName]) => {
-                // if (!schema.parse(v)) { 
-                  // panic("sent data does not match the format if the message")
+                // const validator = schema as ZodSchema<ZodRawShape>
+                // const validationResult = validator.safeParse(v)
+                // if (!v.error) {
+                //   panic("sent data does not match the format if the message")
                 // }
-                console.log("sending data",schema)
+                try {
+                  schema.parse(v)
+                  console.log("sending data", schema)
+                } catch (e) {
+                  console.log(e)
+                }
               } 
             }
         })

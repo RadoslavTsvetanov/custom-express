@@ -13,9 +13,9 @@ const port = { value: 8080 };
 const wsRouter = new customWebsocket.CustomWebSocketRouter(new Port(5555), {
   hello: {
     messagesItCanReceive: {
-      newData: {
-        message: ""
-      }
+      newData: z.object({
+        message: z.string().min(20)
+      })
       
     },
     messagesItCanSend: {
@@ -33,7 +33,7 @@ const wsRouter = new customWebsocket.CustomWebSocketRouter(new Port(5555), {
 //   }
 // })
 
-console.log(await wsRouter.generateClient().hello.sendnewData({message: "hi"}))
+console.log(await wsRouter.generateClient().hello.sendnewData({message: ""})  )
 
 
 
