@@ -110,6 +110,11 @@ you can alsao lpug it into existing express project and never use express again 
 
 # Docs
 
+## Getting a never from a function
+
+Getting a never from a function means you mesed something for example 
+
+
 ## Note on method chaining 
 
 for ts to make its magic you need to use emthod chaining since for new components to appear on the old type  we need to make an intersection on the types so you need to use method chaining 
