@@ -33,7 +33,7 @@ export namespace customWebsocket {
   
   export type Client<MessagesThatTheServerCanSend extends Record<string, unknown>, MessagesTheServerCanHandle extends Record<string, unknown>> = {
     onReceivedMessage: Record<
-      keyof MessagesThatTheServerCanSend,
+      Prefix<removeNonStringEntriesFromKeyOf<keyof MessagesThatTheServerCanSend>,"on">,
       (ws: CustomWebsocket<MessagesTheServerCanHandle[keyof MessagesTheServerCanHandle]>) => void
     >,
     sendMsg(data: MessagesTheServerCanHandle[keyof MessagesTheServerCanHandle]): void
@@ -181,7 +181,7 @@ export namespace customWebsocket {
         // Prefix<keyof (E[keyof E]["messagesItCanReceive"]), "send">,
         (d: z.infer<ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>>) => Promise<void>>>
     {
-      const obj:  Record<keyof E,Record<Prefix<keyof (E[keyof E]["messagesItCanReceive"]), "send">,(d: z.infer<ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>>) => Promise<void>>> = {}
+      const obj:  Record<keyof E,Record<Prefix<removeNonStringEntriesFromKeyOf<keyof (E[keyof E]["messagesItCanReceive"])>, "send">,(d: z.infer<ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>>) => Promise<void>>> = {}
       Object.entries(this.endpoints)
         .map(([channelName, channelConfig]) => {
           
@@ -224,14 +224,15 @@ export namespace customWebsocket {
 
       }
 
+    
+    h(): ExtractValueTypesFromRecord<E[keyof E]["messagesItCanSend"]>
+    
 generateListeners(
   path: Url,
-  messageReceivers: Record<keyof E /* although it shows an error here this works */, (data: Prefix<E[keyof E]["messagesItCanReceive"]>) => void>
-): 
-  customWebsocket.Client<
-  E[keyof E]["messagesItCanSend"], 
-  E[keyof E]["messagesItCanReceive"]
->
+  messageReceivers: Record<Prefix<removeNonStringEntriesFromKeyOf<keyof E[keyof E]["messagesItCanSend"]>, "on"> /* although it shows an error here this works */,
+  (data: z.infer<ExtractValueTypesFromRecord<E[keyof E]["messagesItCanSend"]>>) => void>
+
+)
     {
   const endpoint = this.endpoints[path.value];
   

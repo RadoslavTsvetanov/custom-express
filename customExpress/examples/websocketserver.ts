@@ -19,11 +19,12 @@ const wsRouter = new customWebsocket.CustomWebSocketRouter(new Port(5555), {
       
     },
     messagesItCanSend: {
-      sendHelloTheOtherListeners: {
-        message: ""
-      }
+      sendHelloTheOtherListeners: z.object({
+        message: z.string().nonempty()
+      })
     }
-  }
+  },
+  
 })
 
 
@@ -33,7 +34,16 @@ const wsRouter = new customWebsocket.CustomWebSocketRouter(new Port(5555), {
 //   }
 // })
 
-console.log(await wsRouter.generateClient().hello.sendnewData({message: ""})  )
+
+wsRouter.generateListeners(new Url(new GetSet("j")), {
+  // onhello: v => {
+  //   v.message
+  // },
+  onsendHelloTheOtherListeners: v => {
+   v.message 
+ } 
+})
+console.log(await wsRouter.generateClient().hello.sendnewData()  )
 
 
 
