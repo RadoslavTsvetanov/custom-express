@@ -11,10 +11,10 @@ import type { ApiPath } from "../types/apiApth.ts";
 import { panic } from "../utils/panic.ts";
 import type { Prefix, PrefixKeysOfRecord } from "../metaprogramming/prefix.ts";
 import type { Url } from "../types/networking/url.ts";
-import type { ExtractValueTypesFromRecord } from "../types/extractValueTypesFromRecord.ts";
-import type { removeNonStringEntriesFromKeyOf } from "../types/removesNonStringKeysFromKeyOf.ts";
-import type { Pair, transform } from "../types/pair.ts";
-import type { TuplifyUnion } from "../types/unionintotuple.ts";
+import type { ExtractValueTypesFromRecord } from "../metaprogramming/extractValueTypesFromRecord.ts";
+import type { removeNonStringEntriesFromKeyOf } from "../metaprogramming/removesNonStringKeysFromKeyOf.ts";
+import type { Pair, transform } from "../metaprogramming/pair.ts";
+import type { TuplifyUnion } from "../metaprogramming/unionintotuple.ts";
 
 type InferMessages<T extends Record<string, ZodSchema>> = {
   [K in keyof T]: { type: K; data: ZodInfer<T[K]> };
