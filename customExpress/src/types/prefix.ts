@@ -1,1 +1,0 @@
-export type Prefix<T extends string, Prefix extends string> = `${Prefix}${T}`

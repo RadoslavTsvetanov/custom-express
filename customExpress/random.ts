@@ -1,11 +1,8 @@
-import  express  from 'express';
-const app = express();
-const router = express.Router();
+import type { Prefix } from "./src/metaprogramming/prefix";
 
-router.get('/use', (req, res) => { 
-    res.status(200).json({});
-})
+type h = [{ hi: string }, { koko: string }];
 
-app.use(router)
+export type FunctionArgsArray<T extends string> = {
+  [K in T]: (arg: K) => void;
+}[T][];
 
-app.listen(3001)

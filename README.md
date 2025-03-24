@@ -791,3 +791,52 @@ function Hi(){
 
 
 
+## Commonly asked questions 
+
+### I am using a bundler and the client is outside the root of the project what to do 
+
+First of all this question commonly arrises when needing to make a docker container for something which uses the exported client 
+
+
+For example you have the folloing 
+
+
+
+```
+/frontend 
+- index.ts (uses the client)
+/backend (exports the client)
+```
+
+if we make a docker file for the frontend it will throw n error since we are importing it from outside the root of the project 
+
+there are 3 solutions
+
+you can publish your backend as an npm package and import the client 
+
+you can out your backend inside the frontend folder for just building the client 
+
+you can make the root of the frontend to be also the one for the backend
+
+
+
+Example:
+
+instead of having thrm as two seperate projects
+```
+/frontend
+- index.ts
+- package.json
+/ backeend
+- index.ts
+- package.json
+```
+
+have
+```
+package.json (for both the frontedn and the backend)
+/frontend
+- index.ts
+/backeend
+- index.ts
+```

@@ -4,6 +4,9 @@ export class GetSet<V> {
     public getV(): V  {
         return this.v;
     }
+    valueOf() {
+        return this.v;
+    }
 
     public setV(v: V) {
         this.v = v;

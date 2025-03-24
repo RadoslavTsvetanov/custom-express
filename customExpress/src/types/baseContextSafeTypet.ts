@@ -10,5 +10,8 @@ export abstract class ContextSafeType<V>{
     }
 
     public get value(): V { return this.v; }
+    valueOf() {
+        return this.v
+    }
     abstract customValidator(v: V): boolean
 }

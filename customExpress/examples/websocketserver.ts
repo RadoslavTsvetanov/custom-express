@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { z } from "zod";
+import { z, type TypeOf } from "zod";
 import { customWebsocket } from "../src/builtins/WebSocketServer";
 import { Port } from "../src/types/networking/port";
 import { ApiPath } from "../src/types/apiApth";
@@ -11,16 +11,28 @@ const port = { value: 8080 };
 
 // Create WebSocket Router
 const wsRouter = new customWebsocket.CustomWebSocketRouter(new Port(5555), {
-  hello: {
+  helloRoute: {
     messagesItCanReceive: {
       newData: z.object({
         message: z.string().min(20)
+      }),
+      newNotification: z.object({
+        authToken: z.string(),
+        data: z.object({
+          metadata: z.string(),
+          message: z.string()
+        })
       })
       
     },
     messagesItCanSend: {
       sendHelloTheOtherListeners: z.object({
         message: z.string().nonempty()
+      }),
+      sayByeToRestOfTheListeners: z.object({
+        byeConfig: z.object({
+          people: z.array(z.string())
+        })
       })
     }
   },
@@ -35,16 +47,33 @@ const wsRouter = new customWebsocket.CustomWebSocketRouter(new Port(5555), {
 // })
 
 
-wsRouter.generateListeners(new Url(new GetSet("j")), {
+wsRouter.generateListeners(new Url(new GetSet("http://localhost:4000")), {
   // onhello: v => {
   //   v.message
   // },
-  onsendHelloTheOtherListeners: v => {
-   v.message 
+  sendHelloTheOtherListeners: async v => {
+    v.message
+  },
+  sayByeToRestOfTheListeners: async v => {
+    v
  } 
-})
-console.log(await wsRouter.generateClient().hello.sendnewData()  )
 
+})
+
+
+const wsClient = wsRouter.generateClient()
+
+console.log(await wsClient.helloRoute.newData({
+  message: "hi"
+}))
+
+console.log(await wsClient.helloRoute.newNotification({
+  authToken: "abc",
+  data: {
+    metadata: "hello",
+    message: "world"
+  }
+}))
 
 
 // Define Zod validation schemas

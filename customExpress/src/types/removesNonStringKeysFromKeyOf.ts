@@ -2,4 +2,4 @@ export type removeNonStringEntriesFromKeyOf<T extends string | number | symbol> 
 
 
 
-type h = removeNonStringEntriesFromKeyOf<string | symbol>
+type h = removeNonStringEntriesFromKeyOf<"h" | 1>

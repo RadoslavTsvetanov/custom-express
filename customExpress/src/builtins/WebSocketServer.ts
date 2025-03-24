@@ -1,16 +1,30 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { z, ZodSchema, infer as ZodInfer, ZodObject, type ZodRawShape } from "zod";
+import {
+  z,
+  ZodSchema,
+  infer as ZodInfer,
+  ZodObject,
+  type ZodRawShape,
+} from "zod";
 import type { Port } from "../types/networking/port.ts";
 import type { ApiPath } from "../types/apiApth.ts";
 import { panic } from "../utils/panic.ts";
-import type { Prefix } from "../types/prefix.ts";
+import type { Prefix, PrefixKeysOfRecord } from "../metaprogramming/prefix.ts";
 import type { Url } from "../types/networking/url.ts";
 import type { ExtractValueTypesFromRecord } from "../types/extractValueTypesFromRecord.ts";
 import type { removeNonStringEntriesFromKeyOf } from "../types/removesNonStringKeysFromKeyOf.ts";
+import type { Pair, transform } from "../types/pair.ts";
+import type { TuplifyUnion } from "../types/unionintotuple.ts";
 
 type InferMessages<T extends Record<string, ZodSchema>> = {
   [K in keyof T]: { type: K; data: ZodInfer<T[K]> };
 };
+
+export type FunctionArgsArray<T extends string | number> = {
+  [K in T]: (arg: K) => void;
+}[T][];
+
+type FnArray<T extends any[]> = { [K in keyof T]: (arg: T[K]) => void };
 
 interface TypedMessage<T extends string, D> {
   type: T;
@@ -30,26 +44,37 @@ class CustomWebsocket<MessagesThatCanSent> {
 }
 
 export namespace customWebsocket {
-  
-  export type Client<MessagesThatTheServerCanSend extends Record<string, unknown>, MessagesTheServerCanHandle extends Record<string, unknown>> = {
+  export type Client<
+    MessagesThatTheServerCanSend extends Record<string, unknown>,
+    MessagesTheServerCanHandle extends Record<string, unknown>
+  > = {
     onReceivedMessage: Record<
-      Prefix<removeNonStringEntriesFromKeyOf<keyof MessagesThatTheServerCanSend>,"on">,
-      (ws: CustomWebsocket<MessagesTheServerCanHandle[keyof MessagesTheServerCanHandle]>) => void
-    >,
-    sendMsg(data: MessagesTheServerCanHandle[keyof MessagesTheServerCanHandle]): void
-  }
-
+      Prefix<
+        removeNonStringEntriesFromKeyOf<keyof MessagesThatTheServerCanSend>,
+        "on"
+      >,
+      (
+        ws: CustomWebsocket<
+          MessagesTheServerCanHandle[keyof MessagesTheServerCanHandle]
+        >
+      ) => void
+    >;
+    sendMsg(
+      data: MessagesTheServerCanHandle[keyof MessagesTheServerCanHandle]
+    ): void;
+  };
 
   export interface ChannelConfig<
-    TSend extends Record<unknown, ZodSchema>,
-    TReceive extends Record<unknown, ZodSchema>
+    TSend extends Record<keyof TSend, ZodSchema>,
+    TReceive extends Record<keyof TReceive, ZodSchema>
   > {
     messagesItCanSend: TSend;
     messagesItCanReceive: TReceive;
   }
 
   export class CustomWebSocketRouter<
-    ChannelNames extends string,E extends Record<ChannelNames, ChannelConfig<any, any>>
+    ChannelNames extends string,
+    E extends Record<ChannelNames, ChannelConfig<any, any>>
   > {
     private port: Port;
     private wss: WebSocketServer;
@@ -81,16 +106,26 @@ export namespace customWebsocket {
       }
     }
 
-    addChannel<TSend, TRecieve,ChannelName extends ApiPath<string>>(name: ChannelName, channelConfig: ChannelConfig<TSend,TRecieve>): ChannelName["value"] extends keyof E ? never : CustomWebSocketRouter<ChannelNames & ChannelName, E & ChannelConfig<TSend, TRecieve>>{
-      const res = Object.keys(this.endpoints).some(channelName => channelName === name.value)
+    addChannel<TSend, TRecieve, ChannelName extends ApiPath<string>>(
+      name: ChannelName,
+      channelConfig: ChannelConfig<TSend, TRecieve>
+    ): ChannelName["value"] extends keyof E
+      ? never
+      : CustomWebSocketRouter<
+          ChannelNames & ChannelName,
+          E & ChannelConfig<TSend, TRecieve>
+        > {
+      const res = Object.keys(this.endpoints).some(
+        (channelName) => channelName === name.value
+      );
       if (res) {
-        panic(`channel name ${name} is alredy in use please use another name`)
+        panic(`channel name ${name} is alredy in use please use another name`);
       }
 
       return new customWebsocket.CustomWebSocketRouter(this.port, {
         ...this.endpoints,
-        ...channelConfig 
-      })
+        ...channelConfig,
+      });
     }
 
     start() {
@@ -174,96 +209,73 @@ export namespace customWebsocket {
       });
     }
 
-    generateClient(): Record<keyof E,
-      Record<
-
-        Prefix<removeNonStringEntriesFromKeyOf<keyof (E[keyof E]["messagesItCanReceive"])>, "send">, //TODO make this work so that we dont have squiggles
-        // Prefix<keyof (E[keyof E]["messagesItCanReceive"]), "send">,
-        (d: z.infer<ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>>) => Promise<void>>>
-    {
-      const obj:  Record<keyof E,Record<Prefix<removeNonStringEntriesFromKeyOf<keyof (E[keyof E]["messagesItCanReceive"])>, "send">,(d: z.infer<ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>>) => Promise<void>>> = {}
+    generateClient(): Record<
+      keyof E,
+      transform<E[keyof E]["messagesItCanReceive"]>
+    > {
+      const obj: Record<
+        keyof E,
+        Record<
+          Prefix<
+            removeNonStringEntriesFromKeyOf<
+              keyof E[keyof E]["messagesItCanReceive"]
+            >,
+            "send"
+          >,
+          (
+            d: z.infer<
+              ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>
+            >
+          ) => Promise<void>
+        >
+      > = {};
       Object.entries(this.endpoints)
         .map(([channelName, channelConfig]) => {
-          
-          console.log(channelName,channelConfig.messagesItCanReceive)
-          console.log("oooo`")
+          console.log(channelName, channelConfig.messagesItCanReceive);
+          console.log("oooo`");
           return {
             name: channelName,
-            messagesItCanReceive: channelConfig.messagesItCanReceive  
-           }
-         })
-        .forEach(channelInfo => {
-        // obj[channelInfo.name] = {
-        //   dataSender: async (v) => {
-        //     console.log("sending data", v)
-        //   }
-        // }
-        
-          Object.entries(channelInfo.messagesItCanReceive).forEach(([messageName, schema]) => {
-            obj[channelInfo.name] = {
-              ...obj[channelInfo.name],
-              [`send${messageName}`]: (v: E[typeof channelInfo.name]["messagesItCanReceive"][typeof messageName]) => {
-                // const validator = schema as ZodSchema<ZodRawShape>
-                // const validationResult = validator.safeParse(v)
-                // if (!v.error) {
-                //   panic("sent data does not match the format if the message")
-                // }
-                try {
-                  schema.parse(v)
-                  console.log("sending data", schema)
-                } catch (e) {
-                  console.log(e)
-                }
-              } 
-            }
+            messagesItCanReceive: channelConfig.messagesItCanReceive,
+          };
         })
-      })
+        .forEach((channelInfo) => {
+          // obj[channelInfo.name] = {
+          //   dataSender: async (v) => {
+          //     console.log("sending data", v)
+          //   }
+          // }
 
-  
-      return obj
+          Object.entries(channelInfo.messagesItCanReceive).forEach(
+            ([messageName, schema]) => {
+              obj[channelInfo.name] = {
+                ...obj[channelInfo.name],
+                [`send${messageName}`]: (
+                  v: E[typeof channelInfo.name]["messagesItCanReceive"][typeof messageName]
+                ) => {
+                  // const validator = schema as ZodSchema<ZodRawShape>
+                  // const validationResult = validator.safeParse(v)
+                  // if (!v.error) {
+                  //   panic("sent data does not match the format if the message")
+                  // }
+                  try {
+                    schema.parse(v);
+                    console.log("sending data", schema);
+                  } catch (e) {
+                    console.log(e);
+                  }
+                },
+              };
+            }
+          );
+        });
 
-      }
-
-    
-    h(): ExtractValueTypesFromRecord<E[keyof E]["messagesItCanSend"]>
-    
-generateListeners(
-  path: Url,
-  messageReceivers: Record<Prefix<removeNonStringEntriesFromKeyOf<keyof E[keyof E]["messagesItCanSend"]>, "on"> /* although it shows an error here this works */,
-  (data: z.infer<ExtractValueTypesFromRecord<E[keyof E]["messagesItCanSend"]>>) => void>
-
-)
-    {
-  const endpoint = this.endpoints[path.value];
-  
-  if (!endpoint) {
-    throw new Error(`Endpoint ${path.value} not found`);
-  }
-  
-  let ws: WebSocket | null = null;
-  const handlers: Record<string, ((data: any) => void)[]> = {};
-  
-  return {
-    onReceivedMessage: Object.fromEntries(
-      Object.keys(endpoint.messagesItCanSend).map(type => [
-        type,
-        (websocket: CustomWebsocket<any>) => {
-          const callbacks = handlers[type] || [];
-          callbacks.forEach(callback => callback(websocket));
-        }
-      ])
-    ) ,
-    
-    sendMsg(message) {
-      if (!ws || ws.readyState !== WebSocket.OPEN) {
-        throw new Error("WebSocket is not connected");
-      }
-      
-      ws.send(JSON.stringify(message));
+      return obj;
     }
-  };
-}
 
+    generateListeners(
+      path: Url,
+      messageReceivers: transform<E[keyof E]["messagesItCanSend"]>
+    ) {}
 
     getServer() {
       return this.wss;
