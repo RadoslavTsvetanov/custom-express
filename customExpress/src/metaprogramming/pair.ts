@@ -10,5 +10,5 @@ type g = {
 
 
 export type transform<T extends Record<string, ZodAny>> = {
-  [K in keyof T]: (data: z.infer<T[K]>) => Promise<void> 
+  [K in keyof T]: (data: z.infer<z.infer<T[K]>>) => Promise<void> 
 };

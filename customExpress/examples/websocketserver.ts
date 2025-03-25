@@ -36,7 +36,27 @@ const wsRouter = new customWebsocket.CustomWebSocketRouter(new Port(5555), {
       })
     }
   },
-  
+  userRoute: {
+    messagesItCanReceive: {
+      checkForInvalidUsersInRoom: z.object({
+        roomId: z.number(),
+        authKey: z.string(),
+        userId: z.number()
+      }),
+      deleteUser: z.object({
+        userId: z.string(),
+        authKey: z.string()
+      }) 
+    },
+    messagesItCanSend: {
+      invalidUserDetected: z.object({
+        userId: z.string()
+      }),
+      deletedUser: z.object({
+        userId: z.string()
+      })
+    }
+  }
 })
 
 
@@ -63,9 +83,7 @@ wsRouter.generateListeners(new Url(new GetSet("http://localhost:4000")), {
 
 const wsClient = wsRouter.generateClient()
 
-console.log(await wsClient.helloRoute.newData({
-  message: "hi"
-}))
+console.log(await wsClient.helloRoute.newData({ message: ""}) )
 
 console.log(await wsClient.helloRoute.newNotification({
   authToken: "abc",

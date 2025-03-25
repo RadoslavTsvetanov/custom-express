@@ -15,6 +15,7 @@ import type { ExtractValueTypesFromRecord } from "../metaprogramming/extractValu
 import type { removeNonStringEntriesFromKeyOf } from "../metaprogramming/removesNonStringKeysFromKeyOf.ts";
 import type { Pair, transform } from "../metaprogramming/pair.ts";
 import type { TuplifyUnion } from "../metaprogramming/unionintotuple.ts";
+import { Channel } from "node:diagnostics_channel";
 
 type InferMessages<T extends Record<string, ZodSchema>> = {
   [K in keyof T]: { type: K; data: ZodInfer<T[K]> };
@@ -80,7 +81,7 @@ export namespace customWebsocket {
     private wss: WebSocketServer;
     public endpoints: E;
 
-    constructor(port: Port, endpoints: E) {
+    constructor(port: Port, endpoints: E,/* handlers: transform<E[keyof E]["messagesItCanReceive"]> */) {
       this.port = port;
       this.wss = new WebSocketServer({ port: port.value });
       this.endpoints = endpoints ?? ({} as E);
@@ -112,9 +113,9 @@ export namespace customWebsocket {
     ): ChannelName["value"] extends keyof E
       ? never
       : CustomWebSocketRouter<
-          ChannelNames & ChannelName,
-          E & ChannelConfig<TSend, TRecieve>
-        > {
+        ChannelNames & ChannelName,
+        E & ChannelConfig<TSend, TRecieve>
+      > {
       const res = Object.keys(this.endpoints).some(
         (channelName) => channelName === name.value
       );
@@ -209,10 +210,13 @@ export namespace customWebsocket {
       });
     }
 
-    generateClient(): Record<
-      keyof E,
-      transform<E[keyof E]["messagesItCanReceive"]>
-    > {
+    generateClient():
+      {
+        [Channel in keyof E]: {
+          [K in keyof E[Channel]["messagesItCanReceive"]]: (d: z.infer<E[Channel]["messagesItCanReceive"][K]>) => Promise<void>
+      }
+    }
+     {
       const obj: Record<
         keyof E,
         Record<
