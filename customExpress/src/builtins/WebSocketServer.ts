@@ -16,10 +16,13 @@ import type { removeNonStringEntriesFromKeyOf } from "../metaprogramming/removes
 import type { Pair, transform } from "../metaprogramming/pair.ts";
 import type { TuplifyUnion } from "../metaprogramming/unionintotuple.ts";
 import { Channel } from "node:diagnostics_channel";
+import { Optionable } from "errors-as-types/lib/rust-like-pattern/option";
 
 type InferMessages<T extends Record<string, ZodSchema>> = {
   [K in keyof T]: { type: K; data: ZodInfer<T[K]> };
 };
+
+
 
 export type FunctionArgsArray<T extends string | number> = {
   [K in T]: (arg: K) => void;
@@ -45,26 +48,18 @@ class CustomWebsocket<MessagesThatCanSent> {
 }
 
 export namespace customWebsocket {
-  export type Client<
-    MessagesThatTheServerCanSend extends Record<string, unknown>,
-    MessagesTheServerCanHandle extends Record<string, unknown>
-  > = {
-    onReceivedMessage: Record<
-      Prefix<
-        removeNonStringEntriesFromKeyOf<keyof MessagesThatTheServerCanSend>,
-        "on"
-      >,
-      (
-        ws: CustomWebsocket<
-          MessagesTheServerCanHandle[keyof MessagesTheServerCanHandle]
-        >
-      ) => void
-    >;
-    sendMsg(
-      data: MessagesTheServerCanHandle[keyof MessagesTheServerCanHandle]
-    ): void;
-  };
 
+  export class WebsocketListener {
+    private ws
+    constructor(ws) {
+      this.ws = ws
+    }
+
+    startListening() {
+      this.ws.
+    }
+  }
+  
   export interface ChannelConfig<
     TSend extends Record<keyof TSend, ZodSchema>,
     TReceive extends Record<keyof TReceive, ZodSchema>
@@ -210,76 +205,101 @@ export namespace customWebsocket {
       });
     }
 
-    generateClient():
-      {
-        [Channel in keyof E]: {
-          [K in keyof E[Channel]["messagesItCanReceive"]]: (d: z.infer<E[Channel]["messagesItCanReceive"][K]>) => Promise<void>
+generateClient():
+  {
+    [Channel in keyof E]: {
+      [Message in keyof E[Channel]["messagesItCanReceive"]]: (
+        d: z.infer<E[Channel]["messagesItCanReceive"][Message]>
+      ) => void;
+    };
+  } {
+  const client: any = {};
+
+  Object.entries(this.endpoints).forEach(([channelName, channelConfig]) => {
+    client[channelName] = {};
+
+    Object.entries(channelConfig.messagesItCanReceive).forEach(
+      ([messageName, schema]) => {
+        client[channelName][messageName] = async (
+          data: z.infer<typeof schema>
+        ) => {
+          try {
+            schema.parse(data);
+            console.log(`Sending message to ${channelName}:`, {
+              type: messageName,
+              data,
+            });
+          } catch (error) {
+            console.error(`Invalid message format for ${messageName}:`, error);
+          }
+        };
       }
-    }
-     {
-      const obj: Record<
-        keyof E,
-        Record<
-          Prefix<
-            removeNonStringEntriesFromKeyOf<
-              keyof E[keyof E]["messagesItCanReceive"]
-            >,
-            "send"
-          >,
-          (
-            d: z.infer<
-              ExtractValueTypesFromRecord<E[keyof E]["messagesItCanReceive"]>
-            >
-          ) => Promise<void>
-        >
-      > = {};
-      Object.entries(this.endpoints)
-        .map(([channelName, channelConfig]) => {
-          console.log(channelName, channelConfig.messagesItCanReceive);
-          console.log("oooo`");
-          return {
-            name: channelName,
-            messagesItCanReceive: channelConfig.messagesItCanReceive,
-          };
-        })
-        .forEach((channelInfo) => {
-          // obj[channelInfo.name] = {
-          //   dataSender: async (v) => {
-          //     console.log("sending data", v)
-          //   }
-          // }
+    );
+  });
 
-          Object.entries(channelInfo.messagesItCanReceive).forEach(
-            ([messageName, schema]) => {
-              obj[channelInfo.name] = {
-                ...obj[channelInfo.name],
-                [`send${messageName}`]: (
-                  v: E[typeof channelInfo.name]["messagesItCanReceive"][typeof messageName]
-                ) => {
-                  // const validator = schema as ZodSchema<ZodRawShape>
-                  // const validationResult = validator.safeParse(v)
-                  // if (!v.error) {
-                  //   panic("sent data does not match the format if the message")
-                  // }
-                  try {
-                    schema.parse(v);
-                    console.log("sending data", schema);
-                  } catch (e) {
-                    console.log(e);
-                  }
-                },
-              };
-            }
-          );
-        });
+  return client;
+}
 
-      return obj;
-    }
+
 
     generateListeners(
       path: Url,
-      messageReceivers: transform<E[keyof E]["messagesItCanSend"]>
-    ) {}
+      messageReceivers: {
+  [Channel in keyof E]: {
+          [Message in keyof E[Channel]["messagesItCanSend"]]: {
+            handler: (d: z.infer<E[Channel]["messagesItCanSend"][Message]>) => Promise<void>,
+            unsafe? : boolean = false // since zod validation happens on both sides this stells the client to proceed the message even if it is not according to the schema 
+          }
+        }
+} 
+    ): WebsocketListener {
+const ws = new WebSocket(path.toString());
+  const listener = new WebsocketListener(ws);
+
+  ws.onopen = () => {
+    console.log("WebSocket connection established:", path);
+  };
+
+  ws.onmessage = async (event) => {
+    try {
+      const data = JSON.parse(event.data.toString());
+      const { channel, message, payload } = data as {
+        channel: keyof E,
+        message: E[keyof E]["messagesItCanSend"],
+        payload: E[keyof E]["messagesItCanSend"][keyof E[keyof E]["messagesItCanSend"]]
+      };
+      
+      if (
+        channel in messageReceivers &&
+        message in messageReceivers[channel]
+      ) {
+
+
+        // if (messageReceivers[channel][message].unsafe === false)  { // a bit strange but if i just place ! when its undefined it wont do thje check but it should 
+          try {
+
+        
+            (this.endpoints[channel][message].parse(payload))
+        await messageReceivers[channel][message].handler(payload)
+          } catch (e) {
+            if (messageReceivers[channel][message].unsafe) {
+              console.log("message does not match defined schema", JSON.stringify(payload))
+        await messageReceivers[channel][message].handler(payload)
+            }
+          }
+        // }
+        
+      } else {
+        console.warn("Unhandled message:", data);
+      }
+    } catch (error) {
+      console.error("Error processing message:", error);
+    }
+  };
+
+  return listener;
+
+    }
 
     getServer() {
       return this.wss;

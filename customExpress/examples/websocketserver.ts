@@ -5,6 +5,7 @@ import { Port } from "../src/types/networking/port";
 import { ApiPath } from "../src/types/apiApth";
 import { Url } from "../src/types/networking/url";
 import { GetSet } from "../src/utils/getSetClass";
+import { unsafe } from "bun";
 
 // Define WebSocket Port
 const port = { value: 8080 };
@@ -66,18 +67,32 @@ const wsRouter = new customWebsocket.CustomWebSocketRouter(new Port(5555), {
 //   }
 // })
 
-
 wsRouter.generateListeners(new Url(new GetSet("http://localhost:4000")), {
-  // onhello: v => {
-  //   v.message
-  // },
-  sendHelloTheOtherListeners: async v => {
-    v.message
+  helloRoute: {
+    sendHelloTheOtherListeners: {
+      handler: async v => {
+      console.log(v.message)
+      }
+    },
+    sayByeToRestOfTheListeners: {
+      handler: async v => {
+      console.log(v)
+      }
+    }
   },
-  sayByeToRestOfTheListeners: async v => {
-    v
- } 
-
+  userRoute: {
+    deletedUser: {
+      handler: async v => {
+      v
+      }
+    },
+    invalidUserDetected: {
+      handler: async v => {
+      v
+      },
+      unsafe: true
+    }
+  }
 })
 
 
@@ -92,6 +107,8 @@ console.log(await wsClient.helloRoute.newNotification({
     message: "world"
   }
 }))
+
+console.log(await wsClient.userRoute.checkForInvalidUsersInRoom())
 
 
 // Define Zod validation schemas

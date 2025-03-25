@@ -7,5 +7,3 @@ export type PrefixKeysOfRecord<T extends Record<string, unknown>> = Record<Prefi
 type Config = {
     hi: string
 }
-
-type j = PrefixKeysOfRecord<Config>
