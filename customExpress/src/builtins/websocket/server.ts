@@ -1,10 +1,9 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { z, ZodSchema } from "zod";
+import { z } from "zod";
 import type { Port } from "../../types/networking/port.ts";
-import type { Url } from "../../types/networking/url.ts";
 import type { WebsocketUrl } from "../../types/networking/urls/websocket.ts";
-import { Optionable } from "errors-as-types/lib/rust-like-pattern/option";
 import type { ChannelConfig, TypedMessage } from "./types.ts";
+import { WebsocketClient } from "./client.ts";
 
 class CustomWebsocket<MessagesThatCanSent> {
   readonly ws: WebSocket;
@@ -156,7 +155,6 @@ class CustomWebsocket<MessagesThatCanSent> {
 
     
     getCLientBuilder(url: WebsocketUrl) {
-      console.log(this.endpoints)
       return new WebsocketClient<ChannelNames,E,{}>(url, this.endpoints)
     }
 

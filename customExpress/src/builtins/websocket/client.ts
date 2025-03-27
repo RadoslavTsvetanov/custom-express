@@ -19,19 +19,11 @@ import type { z } from "zod";
       this.url = url.value;
       this.endpoints = endpoints;
       this.context = new Optionable(context).unpack_with_default({} as Context);
-      this.initWebSocket();
-    }
-
-    private initWebSocket() {
       this.ws = new WebSocket(this.url);
 
       this.ws.onopen = () => {
-        this.ws.send("data")
+        // this.ws.send("data")
         console.log("WebSocket connected:", this.url)
-      };
-      this.ws.onclose = () => {
-        console.warn("WebSocket closed. Attempting to reconnect...");
-        setTimeout(() => this.initWebSocket(), 3000); // Simple reconnect strategy
       };
       this.ws.onerror = (err) => console.error("WebSocket error:", err);
     }
@@ -91,8 +83,9 @@ import type { z } from "zod";
     }
 
       {
+        
       const client: any = {};
-
+      console.log("h")
       Object.entries(this.endpoints).forEach(([channelName, channelConfig]) => {
         client[channelName] = {};
 
@@ -102,9 +95,10 @@ import type { z } from "zod";
               data: z.infer<typeof schema>
             ) => {
               try {
+              const newws = new WebSocket(this.url) // horrible performance if possible make it all thingd from this class to reuse one connection so that one clientInsyance is one connection
+              newws.onopen = () => {
                 schema.parse(data);
-                console.log(data)
-                this.ws.send(
+                newws.send(
                   JSON.stringify({
                     channel: channelName,
                     message: messageName,
@@ -112,6 +106,7 @@ import type { z } from "zod";
                     context: this.context, // Include context in messages
                   })
                 );
+              }
                 console.log("after")
               } catch (error) {
                 console.error(`Invalid message format for ${messageName}:`, error);
