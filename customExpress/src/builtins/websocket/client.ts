@@ -28,15 +28,15 @@ import type { z } from "zod";
       this.ws.onerror = (err) => console.error("WebSocket error:", err);
     }
 
-    setupListeners(
+    setupListeners( // it is true | false instead of boolean since if it is true or false we can pass them as type values while if it is as a bool it will be apssed as a value not type so we cant check which one was passed
       messageReceivers: {
         [Channel in keyof E]: {
-          [Message in keyof E[Channel]["messagesItCanSend"]]: {
+            [Message in keyof E[Channel]["messagesItCanSend"]]: {
             handler: (
               d: z.infer<E[Channel]["messagesItCanSend"][Message]>
             ) => Promise<void>;
             unsafe?: boolean;
-          };
+          }
         };
       }
     ) {
