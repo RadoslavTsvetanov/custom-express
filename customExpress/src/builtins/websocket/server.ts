@@ -1,5 +1,5 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { z } from "zod";
+import { date, z } from "zod";
 import type { Port } from "../../types/networking/port.ts";
 import type { WebsocketUrl } from "../../types/networking/urls/websocket.ts";
 import type { ChannelConfig, TypedMessage } from "./types.ts";
@@ -94,6 +94,7 @@ class CustomWebsocket<MessagesThatCanSent> {
         ws.on("message", async (message) => {
           console.log("msg")
           const parsedMessage = this.transformMsg(message.toString());
+          console.log("parsed",parsedMessage)
           if (!parsedMessage) {
             this.sendUnprocessableMessageType(ws, {
               channel: "unknown",
@@ -103,16 +104,15 @@ class CustomWebsocket<MessagesThatCanSent> {
             return;
           }
 
-          const { type, data } = parsedMessage;
           for (const [channel, endpoint] of Object.entries(this.endpoints)) {
             const schema =
               endpoint.messagesItCanReceive[
-                type as keyof typeof endpoint.messagesItCanReceive
+                parsedMessage.message as keyof typeof endpoint.messagesItCanReceive
               ];
 
             if (!schema) continue; // Skip channels that don't handle this message type
 
-            const validationResult = schema.safeParse(data);
+            const validationResult = schema.safeParse(parsedMessage.payload);
             if (!validationResult.success) {
               ws.send(
                 JSON.stringify({
@@ -123,8 +123,9 @@ class CustomWebsocket<MessagesThatCanSent> {
               return;
             }
 
-            const handler = this.handlers[channel]?.[type];
-
+            const handler = this.handlers[channel as keyof E[keyof E]["messagesItCanSend"]]?.[parsedMessage.message.toString()];
+            console.log(this.handlers[channel])
+            console.log(this.handlers[channel][message.toString()])
             if (handler) {
               try {
                 const customWs = new CustomWebsocket(ws);
@@ -138,6 +139,9 @@ class CustomWebsocket<MessagesThatCanSent> {
                 );
               }
             } else {
+              console.log("didnt find handler for this mesage", 
+                parsedMessage
+              )
               this.sendUnprocessableMessageType(ws, {
                 channel,
                 handler: "onMessageReceived",

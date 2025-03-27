@@ -52,8 +52,8 @@ export const wsRouter = new CustomWebSocketRouter(
   },
   {
     helloRoute: {
-      newData: (v) => {
-        v.message;
+      newData: v => {
+        console.log("g",v.message);
       },
       newNotification: (v) => {
         v.data.message;

@@ -1,8 +1,9 @@
 import type { ZodSchema } from "zod";
 
 export interface TypedMessage<T extends string, D> {
-  type: T;
-  data: D;
+  channel: T
+  message: string 
+  payload: D;
 }
 
   
