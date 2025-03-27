@@ -4,6 +4,7 @@ import type { Port } from "../../types/networking/port.ts";
 import type { WebsocketUrl } from "../../types/networking/urls/websocket.ts";
 import type { ChannelConfig, TypedMessage } from "./types.ts";
 import { WebsocketClient } from "./client.ts";
+import type { none } from "errors-as-types/lib/rust-like-pattern/option";
 
 class CustomWebsocket<MessagesThatCanSent> {
   readonly ws: WebSocket;
@@ -22,25 +23,17 @@ class CustomWebsocket<MessagesThatCanSent> {
     ChannelNames extends string,
     E extends Record<ChannelNames, ChannelConfig<any, any>>
   > {
-    public endpoints: E;
-    readonly handlers: {
+    public readonly endpoints: E;
+    private handlers: {
       [Channel in keyof E]: {
         [Message in keyof E[Channel]["messagesItCanReceive"]]: (
           v: z.infer<E[Channel]["messagesItCanReceive"][Message]>
         ) => void;
       };
-    };
+    } | none = null; 
     constructor(
       endpoints: E,
-      handlers: {
-        [Channel in keyof E]: {
-          [Message in keyof E[Channel]["messagesItCanReceive"]]: (
-            v: z.infer<E[Channel]["messagesItCanReceive"][Message]>
-          ) => void;
-        };
-      }
     ) {
-      this.handlers = handlers;
       this.endpoints = endpoints ?? ({} as E);
     }
 
@@ -62,6 +55,19 @@ class CustomWebsocket<MessagesThatCanSent> {
       } catch {
         return null;
       }
+    }
+
+
+  implement(
+      handlers:   {
+        [Channel in keyof E]: {
+          [Message in keyof E[Channel]["messagesItCanReceive"]]: (
+            v: z.infer<E[Channel]["messagesItCanReceive"][Message]>
+          ) => void;
+        };
+      }
+    ) {
+      this.handlers = handlers
     }
 
     // addChannel<TSend, TRecieve, ChannelName extends ApiPath<string>>(
@@ -88,6 +94,9 @@ class CustomWebsocket<MessagesThatCanSent> {
     // }
 
     start(port: Port) {
+      if (this.handlers == undefined) {
+        
+      }
       const wss = new WebSocketServer({ port: port.value}) 
       console.log("ko")
       wss.on("connection", (ws) => {
