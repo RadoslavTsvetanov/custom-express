@@ -2,6 +2,45 @@ import { Optionable } from "errors-as-types/lib/rust-like-pattern/option";
 import type { WebsocketUrl } from "../../types/networking/urls/websocket";
 import type { ChannelConfig } from "./types";
 import type { z } from "zod";
+import { panic } from "../../utils/panic";
+
+// note unlike the WebsocketClient this does not reuse connection but establishes new ones each time start is called
+class WebsocketListener {
+  private handlers;
+  private url: string;
+  private endpoints
+  constructor(messageHandlers, url: WebsocketUrl, endpoints) {
+    this.handlers = messageHandlers;
+    this.url = url.value;
+    this.endpoints = endpoints
+  }
+
+  start() {
+    const ws = new WebSocket(this.url);
+    ws.onmessage = async (e) => {
+      const data = JSON.parse(e.data);
+      const { channel, message, payload } = data;
+
+      if (this.handlers[channel] && this.handlers[channel][message]) {
+        const { handler, unsafe } = this.handlers[channel][message];
+
+        if (
+          unsafe ||
+          (unsafe === undefined &&
+            this.endpoints[channel].messagesItCanReceive[message].unsafe === false)
+        ) {
+          await handler(payload);
+        } else {
+          panic(`Unsafe message received: ${channel}.${message}`);
+        }
+      } else {
+        panic(`Unhandled message: ${channel}.${message}`);
+      }
+    };
+  }
+}
+ // we make this class so that when you define a listener it does not start automaticcaly but when you tell it to 
+
 
   export class WebsocketClient
     <
@@ -10,16 +49,16 @@ import type { z } from "zod";
       Context extends Record<string, unknown>
     > {
 
-    private url: string;
+    private url: WebsocketUrl;
     public ws: WebSocket;
     private endpoints: E;
     private context: Context;
 
       constructor(url: WebsocketUrl, endpoints: E, context?: Context) {
-      this.url = url.value;
+      this.url = url;
       this.endpoints = endpoints;
       this.context = new Optionable(context).unpack_with_default({} as Context);
-      this.ws = new WebSocket(this.url);
+      this.ws = new WebSocket(this.url.value);
 
       this.ws.onopen = () => {
         // this.ws.send("data")
@@ -28,7 +67,7 @@ import type { z } from "zod";
       this.ws.onerror = (err) => console.error("WebSocket error:", err);
     }
 
-    setupListeners( // it is true | false instead of boolean since if it is true or false we can pass them as type values while if it is as a bool it will be apssed as a value not type so we cant check which one was passed
+    setupListeners( // it is true | false instead of boolean since if it is true or false we can pass them as type values while if it is as a bool it will be apssed as a value not type so we cant check which one was passed, Made it as a simple builder
       messageReceivers: {
         [Channel in keyof E]: {
             [Message in keyof E[Channel]["messagesItCanSend"]]: {
@@ -72,6 +111,27 @@ import type { z } from "zod";
         }
       };
     }
+
+
+
+
+    getReusableListener(
+
+      messageReceivers: {
+        [Channel in keyof E]: {
+            [Message in keyof E[Channel]["messagesItCanSend"]]: {
+            handler: (
+              d: z.infer<E[Channel]["messagesItCanSend"][Message]>
+            ) => Promise<void>;
+            unsafe?: boolean;
+          }
+        };
+      }
+
+    ) {
+      return new WebsocketListener(messageReceivers, this.url, this.endpoints)
+    }
+
 
     generateClient():
   {

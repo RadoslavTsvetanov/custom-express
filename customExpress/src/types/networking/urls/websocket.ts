@@ -1,4 +1,5 @@
 import { ContextSafeType } from "../../baseContextSafeTypet";
+import type { Port } from "../port";
 
 export class WebsocketUrl extends ContextSafeType<string>{
     customValidator(v: string): boolean {
@@ -7,4 +8,14 @@ export class WebsocketUrl extends ContextSafeType<string>{
         }
         return true
     }
+
+    static unsafe =
+         {
+            withLocalhost: (port: Port) => {
+                return new WebsocketUrl(`ws://localhost:${port}`)
+            }
+        }
+            
+    
+
 }

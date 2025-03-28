@@ -1,10 +1,12 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { date, z } from "zod";
+import { date, optional, z } from "zod";
 import type { Port } from "../../types/networking/port.ts";
 import type { WebsocketUrl } from "../../types/networking/urls/websocket.ts";
 import type { ChannelConfig, TypedMessage } from "./types.ts";
 import { WebsocketClient } from "./client.ts";
-import type { none } from "errors-as-types/lib/rust-like-pattern/option";
+import { Optionable, type none } from "errors-as-types/lib/rust-like-pattern/option";
+import type { IncomingMessage } from "http";
+import { panic } from "../../utils/panic.ts";
 
 class CustomWebsocket<MessagesThatCanSent> {
   readonly ws: WebSocket;
@@ -21,18 +23,29 @@ class CustomWebsocket<MessagesThatCanSent> {
 
   export class CustomWebSocketRouter<
     ChannelNames extends string,
-    E extends Record<ChannelNames, ChannelConfig<any, any>>
-  > {
+    E extends Record<ChannelNames, ChannelConfig<any, any>>,
+    Context extends Record<ContextKeys, unknown>,
+    ContextKeys extends string
+    > {
+    public context: Context = {} as Context// make private later
     public readonly endpoints: E;
     private handlers: {
+        beforeMessage?: (v: {ws: WebSocket, store: Context, message: TypedMessage<any /* !!! */,unknown>}) => void
+        onConnection: (ctx: {ws: WebSocket, req: IncomingMessage, store: Context}) => void
+      }
+        &
+    {
       [Channel in keyof E]: {
         [Message in keyof E[Channel]["messagesItCanReceive"]]: (
-          v: z.infer<E[Channel]["messagesItCanReceive"][Message]>
+          v: {data: z.infer<E[Channel]["messagesItCanReceive"][Message]>, store: Context}
         ) => void;
       };
     } | none = null; 
+    
+    
     constructor(
       endpoints: E,
+      context? : Context
     ) {
       this.endpoints = endpoints ?? ({} as E);
     }
@@ -57,15 +70,17 @@ class CustomWebsocket<MessagesThatCanSent> {
       }
     }
 
+    store<T extends Record<string, unknown>>(object: T):
+      CustomWebSocketRouter<ChannelNames, E, Context & typeof object, ContextKeys & keyof T>
+    {
+      return new CustomWebSocketRouter(this.endpoints, {
+        ...this.context,
+        ...object
+      })
+    }
 
   implement(
-      handlers:   {
-        [Channel in keyof E]: {
-          [Message in keyof E[Channel]["messagesItCanReceive"]]: (
-            v: z.infer<E[Channel]["messagesItCanReceive"][Message]>
-          ) => void;
-        };
-      }
+    handlers: typeof this.handlers
     ) {
       this.handlers = handlers
     }
@@ -94,16 +109,18 @@ class CustomWebsocket<MessagesThatCanSent> {
     // }
 
     start(port: Port) {
-      if (this.handlers == undefined) {
-        
+      if (this.handlers === undefined || this.handlers === null) {
+        panic("")
       }
       const wss = new WebSocketServer({ port: port.value}) 
       console.log("ko")
-      wss.on("connection", (ws) => {
+      wss.on("connection", (ws, req) => {
+        this.handlers?.onConnection({ws, req, store: this.context})
         ws.on("message", async (message) => {
-          console.log("msg")
+          
+          
           const parsedMessage = this.transformMsg(message.toString());
-          console.log("parsed",parsedMessage)
+          
           if (!parsedMessage) {
             this.sendUnprocessableMessageType(ws, {
               channel: "unknown",
@@ -112,6 +129,8 @@ class CustomWebsocket<MessagesThatCanSent> {
             });
             return;
           }
+
+          new Optionable(this.handlers?.beforeMessage).ifCanBeUnpacked(v => v({ ws, store: this.context, message: parsedMessage }))
 
           for (const [channel, endpoint] of Object.entries(this.endpoints)) {
             const schema =
@@ -133,12 +152,10 @@ class CustomWebsocket<MessagesThatCanSent> {
             }
 
             const handler = this.handlers[channel as keyof E[keyof E]["messagesItCanSend"]]?.[parsedMessage.message.toString()];
-            console.log(this.handlers[channel])
-            console.log(this.handlers[channel][message.toString()])
             if (handler) {
               try {
                 const customWs = new CustomWebsocket(ws);
-                await handler(validationResult.data);
+                await handler({ data: validationResult.data, store: this.context })
               } catch (error) {
                 ws.send(
                   JSON.stringify({
