@@ -1,0 +1,1 @@
+export type TODO = void // just so that i can add a type wihch satisfies the compiler
