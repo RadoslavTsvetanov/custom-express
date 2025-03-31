@@ -1,3 +1,4 @@
+import { Port } from "../../../../src/types/networking/port";
 import type { IAuth } from "../services/auth/interface";
 import type { ITrain } from "../services/train/interface";
 import type { IUser } from "../services/user/interface";
@@ -52,4 +53,7 @@ defintion
                 ) 
             }
         }
-})
+    })
+
+console.log(defintion.handlers)
+defintion.start(new Port(4444))
