@@ -1,5 +1,7 @@
+import type { VCallback } from "../../../../../types/voidcallback";
 import { logger } from "../utils/console";
 import { type ILeftRight, LeftRight } from "./leftRight";
+import type { Tick } from "./tick";
 import { CustomUnpackable,type IUnpackable } from "./unpackable/unpackable";
 
 export type none = null | undefined;
@@ -54,7 +56,7 @@ export const statics = {
 }
 
 
-export class Optionable<T> extends CustomUnpackable<T> {
+export class Optionable<T> extends CustomUnpackable<T> implements Tick<CustomUnpackable<T>>{
   constructor(v: T | none) {
     super(v as T, (v) => {
       return !this.is_none() //! chatbots will say this does not work ignore it, it works as expected
@@ -66,6 +68,10 @@ export class Optionable<T> extends CustomUnpackable<T> {
     return this.value === null || this.value === undefined;
   }
 
+  tick(callback: VCallback<CustomUnpackable<T>>){
+    callback(this)
+    return this
+  }
   try(options: {
     ifNotNone: (v: T) => void
     ifNone: () => void

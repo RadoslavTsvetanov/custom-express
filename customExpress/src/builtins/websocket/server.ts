@@ -1,29 +1,39 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { date, optional, z, ZodObject, ZodUnknown, type ZodRawShape } from "zod";
+import {
+  date,
+  optional,
+  z,
+  ZodObject,
+  ZodUnknown,
+  type ZodRawShape,
+} from "zod";
 import type { Port } from "../../types/networking/port.ts";
 import type { WebsocketUrl } from "../../types/networking/urls/websocket.ts";
 import type { ChannelConfig, TypedMessage } from "./types.ts";
 import { WebsocketClient } from "./client.ts";
 import type { IncomingMessage } from "http";
 import { panic } from "../../utils/panic.ts";
-import { Optionable, type none } from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/option.ts";
+import {
+  Optionable,
+  type none,
+} from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/option.ts";
 import type { keyofonlystringkeys } from "../../utils/metaprogramming/keyofonlystringkeys.ts";
 import { GetSet, type inferType } from "../../utils/getSetClass.ts";
+import { entries } from "../../utils/better-standard-library/mapObject.ts";
+import { BetterArray } from "../../utils/better-standard-library/array.ts";
 
-export class CustomWebsocketServer{
-
-}
+export class CustomWebsocketServer {}
 
 export class CustomWebSocketRouter<
   ChannelNames extends string,
-  E extends Record<
+  Channels extends Record<
     ChannelNames,
     ChannelConfig<
       any,
       any,
       {
-        validate: ZodObject<ZodRawShape>,
-        validateResponse: ZodObject<ZodRawShape>
+        validate: ZodObject<ZodRawShape>;
+        validateResponse: ZodObject<ZodRawShape>;
       }
     >
   >,
@@ -31,74 +41,82 @@ export class CustomWebSocketRouter<
   ContextKeys extends string
 > {
   public context: Context = {} as Context; // make private later
-  public readonly endpoints: E;
-  private readonly handlers:
-    GetSet<({
-      beforeMessage?: (v: {
-        ws: WebSocket;
-        store: Context;
-        message: TypedMessage<
-          keyofonlystringkeys<E[keyof E]>, { [key: string]: unknown }
-          &
-          z.infer<E[keyof E]["hooks"]["validate"]>
-        >;
-      }) => void,
-      afterMessage?: (v: {
-        msg: TypedMessage<
-          keyofonlystringkeys<E[keyof E]>, { [key: string]: unknown }
-          &
-          z.infer<E[keyof E]["hooks"]["validateResponse"]>
-        >,
-        ws: WebSocket
-      }) => void
-      onConnection: (ctx: {
-        ws: WebSocket;
-        req: IncomingMessage;
-        store: Context;
-      }) => void;
-    } & {
-      [Channel in keyof E]: {
-        [Message in keyof E[Channel]["messagesItCanReceive"]]: (v: {
-          data: z.infer<E[Channel]["messagesItCanReceive"][Message]>;
+  public readonly channels: Channels;
+  public j: Channels[keyof Channels][keyof Channels[keyof Channels]];
+  private readonly handlers: GetSet<
+    | ({
+        beforeMessage?: (v: {
+          ws: WebSocket;
+          store: Context;
+          message: TypedMessage<
+            keyofonlystringkeys<Channels[keyof Channels]>,
+            { [key: string]: unknown } & z.infer<
+              Channels[keyof Channels]["hooks"]["validate"]
+            >
+          >;
+        }) => void;
+        afterMessage?: (v: {
+          msg: TypedMessage<
+            keyofonlystringkeys<Channels[keyof Channels]>,
+            { [key: string]: unknown } & z.infer<
+              Channels[keyof Channels]["hooks"]["validateResponse"]
+            >
+          >;
+          ws: WebSocket;
+        }) => void;
+        onConnection: (ctx: {
+          ws: WebSocket;
+          req: IncomingMessage;
           store: Context;
         }) => void;
-      };
-    })
-    | none> = new GetSet<({
-      beforeMessage?: (v: {
-        ws: WebSocket;
-        store: Context;
-        message: TypedMessage<
-          keyofonlystringkeys<E[keyof E]>, { [key: string]: unknown }
-          &
-          z.infer<E[keyof E]["hooks"]["validate"]>
-        >;
-      }) => void,
-      afterMessage?: (v: {
-        msg: TypedMessage<
-          keyofonlystringkeys<E[keyof E]>, { [key: string]: unknown }
-          &
-          z.infer<E[keyof E]["hooks"]["validateResponse"]>
-        >,
-        ws: WebSocket
-      }) => void
-      onConnection: (ctx: {
-        ws: WebSocket;
-        req: IncomingMessage;
-        store: Context;
-      }) => void;
-    } & {
-      [Channel in keyof E]: {
-        [Message in keyof E[Channel]["messagesItCanReceive"]]: (v: {
-          data: z.infer<E[Channel]["messagesItCanReceive"][Message]>;
+      } & {
+        [Channel in keyof Channels]: {
+          [Message in keyof Channels[Channel]["messagesItCanReceive"]]: (v: {
+            data: z.infer<Channels[Channel]["messagesItCanReceive"][Message]>;
+            store: Context;
+          }) => void;
+        };
+      })
+    | none
+  > = new GetSet<
+    | ({
+        beforeMessage?: (v: {
+          ws: WebSocket;
+          store: Context;
+          message: TypedMessage<
+            keyofonlystringkeys<Channels[keyof Channels]>,
+            { [key: string]: unknown } & z.infer<
+              Channels[keyof Channels]["hooks"]["validate"]
+            >
+          >;
+        }) => void;
+        afterMessage?: (v: {
+          msg: TypedMessage<
+            keyofonlystringkeys<Channels[keyof Channels]>,
+            { [key: string]: unknown } & z.infer<
+              Channels[keyof Channels]["hooks"]["validateResponse"]
+            >
+          >;
+          ws: WebSocket;
+        }) => void;
+        onConnection: (ctx: {
+          ws: WebSocket;
+          req: IncomingMessage;
           store: Context;
         }) => void;
-      };
-    })
-    | none> (null, undefined, (v) => console.log("setting value"));
+      } & {
+        [Channel in keyof Channels]: {
+          [Message in keyof Channels[Channel]["messagesItCanReceive"]]: (v: {
+            data: z.infer<Channels[Channel]["messagesItCanReceive"][Message]>;
+            store: Context;
+          }) => void;
+        };
+      })
+    | none
+  >(null, undefined, (v) => console.log("setting value"));
 
-  constructor(endpoints: E, context?: Context) {
-    this.endpoints = endpoints ?? ({} as E);
+  constructor(endpoints: Channels, context?: Context) {
+    this.channels = endpoints ?? ({} as Channels);
   }
 
   private sendUnprocessableMessageType(
@@ -113,8 +131,6 @@ export class CustomWebSocketRouter<
     );
   }
 
-
-
   private transformMsg(v: string): TypedMessage<string, unknown> | null {
     try {
       return JSON.parse(v);
@@ -127,20 +143,19 @@ export class CustomWebSocketRouter<
     object: T
   ): CustomWebSocketRouter<
     ChannelNames,
-    E,
+    Channels,
     Context & typeof object,
     ContextKeys & keyof T
   > {
-    return new CustomWebSocketRouter(this.endpoints, {
+    return new CustomWebSocketRouter(this.channels, {
       ...this.context,
       ...object,
     });
   }
 
   implement(handlers: typeof this.handlers.value) {
-    this.handlers.setV(handlers)
-    console.log("iooi", this.handlers.value);
-    return this
+    this.handlers.setV(handlers);
+    return this;
   }
 
   // addChannel<TSend, TRecieve, ChannelName extends ApiPath<string>>(
@@ -167,91 +182,82 @@ export class CustomWebSocketRouter<
   // }
 
   start(port: Port) {
-    console.log("h", this.handlers.value)
-    this.handlers
-      .map(
-        handlers => {
-          console.log("lool",handlers)
-          new Optionable(handlers)
-          .unpack("handlers not defined")
-          .map((handlers) => {
-            const wss = new WebSocketServer({ port: port.value });
-            console.log("ko");
+    this.handlers.map((handlers) => {
+      new Optionable(handlers)
+        .unpack("handlers not defined")
+        .map((handlers) => {
+          const wss = new WebSocketServer({ port: port.value });
 
-            wss.on("connection", (ws, req) => {
-              handlers.onConnection({ ws, req, store: this.context });
+          wss.on("connection", (ws, req) => {
+            handlers.onConnection({ ws, req, store: this.context });
 
-              ws.on("message", async (message) => {
-                const parsedMessage = this.transformMsg(message.toString());
+            ws.on("message", async (message) => {
+              const parsedMessage = this.transformMsg(message.toString());
 
-                new Optionable(parsedMessage).try({
-                  ifNone: () => {
-                    this.sendUnprocessableMessageType(ws, {
-                      channel: "unknown",
-                      handler: "onMessageReceived",
-                      msg: {},
-                    });
-                  },
-                  ifNotNone: async (parsedMessage) => {
-                    new Optionable(handlers.beforeMessage).ifCanBeUnpacked((v) =>
-                      v({ ws, store: this.context, message: parsedMessage })
-                    );
+              new Optionable(parsedMessage).try({
+                ifNone: () => {
+                  this.sendUnprocessableMessageType(ws, {
+                    channel: "unknown",
+                    handler: "onMessageReceived",
+                    msg: {
+                      // error: `messages to this websockt server must follow the following shape {channel: string, message: string, payload: string}`
+                    },
+                  });
+                },
 
-                    for (const [channel, endpoint] of Object.entries(this.endpoints)) {
-                      const schema =
-                        endpoint.messagesItCanReceive[
-                        parsedMessage.message as keyof typeof endpoint.messagesItCanReceive
-                        ];
+                ifNotNone: async (parsedMessage) => {
+                  new Optionable(handlers.beforeMessage).ifCanBeUnpacked((v) =>
+                    v({ ws, store: this.context, message: parsedMessage })
+                  );
 
-                      if (!schema) continue; // Skip channels that don't handle this message type
+                  new Optionable(
+                    BetterArray.new(entries(this.channels)).filter(
+                      ([channelName, channelConfig]) =>
+                        channelName === parsedMessage.channel
+                    ).normalArray[0]
+                  ).try({
+                    ifNone: () =>
+                      console.log(
+                        `thiere is no open channel called ${parsedMessage.channel}`,
+                        JSON.stringify(parsedMessage)
+                      ),
 
-                      const validationResult = schema.safeParse(parsedMessage.payload);
-                      if (!validationResult.success) {
-                        ws.send(
-                          JSON.stringify({
-                            error: "Invalid message format",
-                            details: validationResult.error.format(),
-                          })
-                        );
-                        return;
-                      }
-
+                    ifNotNone: ([channelName, channelConfig]) => {
                       new Optionable(
-                        handlers[channel as keyof E[keyof E]["messagesItCanSend"]]?.[
-                        parsedMessage.message.toString()
+                        this.channels[channelName].messagesItCanReceive[
+                          parsedMessage.message as keyof Channels[keyof Channels]
                         ]
                       ).try({
-                        ifNone: () => {
-                          console.log("Didn't find handler for this message", parsedMessage);
-                          this.sendUnprocessableMessageType(ws, {
-                            channel,
-                            handler: "onMessageReceived",
-                            msg: parsedMessage,
-                          });
-                        },
-                        ifNotNone: async (handler) => {
-                          await handler({
-                            data: validationResult.data,
-                            store: this.context,
-                          })
-                          new Optionable(handlers.afterMessage).ifCanBeUnpacked(callback => callback(parsedMessage))
+                        ifNone: () =>
+                          console.log(
+                            `channel ${JSON.stringify(
+                              channelName
+                            )} does not accept message type ${
+                              parsedMessage.message
+                            }`
+                          ),
+
+                        ifNotNone: (messageConfig) => {
+                          console.log("f", messageConfig);
+                          console.log("[][]",parsedMessage.payload)
+                          messageConfig.parse(parsedMessage.payload);
                         },
                       });
-                    }
-                  },
-                });
-              });
-
-              ws.on("close", (code, reason) => {
-                console.log(`WebSocket closed with code ${code}: ${reason}`);
+                    },
+                  });
+                },
               });
             });
-          })
-  })
-}
 
+            ws.on("close", (code, reason) => {
+              console.log(`WebSocket closed with code ${code}: ${reason}`);
+            });
+          });
+        });
+    });
+  }
 
   getCLientBuilder(url: WebsocketUrl) {
-    return new WebsocketClient<ChannelNames, E, {}>(url, this.endpoints);
+    return new WebsocketClient<ChannelNames, Channels, {}>(url, this.channels);
   }
 }

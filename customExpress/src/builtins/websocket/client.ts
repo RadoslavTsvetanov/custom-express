@@ -170,7 +170,6 @@ export class WebsocketClient<
     };
   } {
     const client: any = {};
-    console.log("h");
     Object.entries(this.endpoints).forEach(([channelName, channelConfig]) => {
       client[channelName] = {};
 
