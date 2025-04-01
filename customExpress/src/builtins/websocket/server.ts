@@ -21,10 +21,6 @@ export class CustomWebSocketRouter<
     ChannelConfig<
       any,
       any,
-      // {
-        // validate: ZodObject<ZodRawShape>,
-        // validateResponse: ZodObject<ZodRawShape>
-    // }
       {
         validate: ZodObject<ZodRawShape>,
         validateResponse: ZodObject<ZodRawShape>
@@ -143,7 +139,8 @@ export class CustomWebSocketRouter<
 
   implement(handlers: typeof this.handlers.value) {
     this.handlers.setV(handlers)
-    console.log("iooi", this.handlers);
+    console.log("iooi", this.handlers.value);
+    return this
   }
 
   // addChannel<TSend, TRecieve, ChannelName extends ApiPath<string>>(
@@ -170,83 +167,87 @@ export class CustomWebSocketRouter<
   // }
 
   start(port: Port) {
+    console.log("h", this.handlers.value)
     this.handlers
       .map(
-        handlers => new Optionable(handlers)
-        .unpack("handlers not defined")
-        .map((handlers) => {
-        const wss = new WebSocketServer({ port: port.value });
-        console.log("ko");
+        handlers => {
+          console.log("lool",handlers)
+          new Optionable(handlers)
+          .unpack("handlers not defined")
+          .map((handlers) => {
+            const wss = new WebSocketServer({ port: port.value });
+            console.log("ko");
 
-        wss.on("connection", (ws, req) => {
-          handlers.onConnection({ ws, req, store: this.context });
+            wss.on("connection", (ws, req) => {
+              handlers.onConnection({ ws, req, store: this.context });
 
-          ws.on("message", async (message) => {
-            const parsedMessage = this.transformMsg(message.toString());
+              ws.on("message", async (message) => {
+                const parsedMessage = this.transformMsg(message.toString());
 
-            new Optionable(parsedMessage).try({
-              ifNone: () => {
-                this.sendUnprocessableMessageType(ws, {
-                  channel: "unknown",
-                  handler: "onMessageReceived",
-                  msg: {},
-                });
-              },
-              ifNotNone: async (parsedMessage) => {
-                new Optionable(handlers.beforeMessage).ifCanBeUnpacked((v) =>
-                  v({ ws, store: this.context, message: parsedMessage })
-                );
-
-                for (const [channel, endpoint] of Object.entries(this.endpoints)) {
-                  const schema =
-                    endpoint.messagesItCanReceive[
-                      parsedMessage.message as keyof typeof endpoint.messagesItCanReceive
-                    ];
-
-                  if (!schema) continue; // Skip channels that don't handle this message type
-
-                  const validationResult = schema.safeParse(parsedMessage.payload);
-                  if (!validationResult.success) {
-                    ws.send(
-                      JSON.stringify({
-                        error: "Invalid message format",
-                        details: validationResult.error.format(),
-                      })
+                new Optionable(parsedMessage).try({
+                  ifNone: () => {
+                    this.sendUnprocessableMessageType(ws, {
+                      channel: "unknown",
+                      handler: "onMessageReceived",
+                      msg: {},
+                    });
+                  },
+                  ifNotNone: async (parsedMessage) => {
+                    new Optionable(handlers.beforeMessage).ifCanBeUnpacked((v) =>
+                      v({ ws, store: this.context, message: parsedMessage })
                     );
-                    return;
-                  }
 
-                  new Optionable(
-                    handlers[channel as keyof E[keyof E]["messagesItCanSend"]]?.[
-                      parsedMessage.message.toString()
-                    ]
-                  ).try({
-                    ifNone: () => {
-                      console.log("Didn't find handler for this message", parsedMessage);
-                      this.sendUnprocessableMessageType(ws, {
-                        channel,
-                        handler: "onMessageReceived",
-                        msg: parsedMessage,
+                    for (const [channel, endpoint] of Object.entries(this.endpoints)) {
+                      const schema =
+                        endpoint.messagesItCanReceive[
+                        parsedMessage.message as keyof typeof endpoint.messagesItCanReceive
+                        ];
+
+                      if (!schema) continue; // Skip channels that don't handle this message type
+
+                      const validationResult = schema.safeParse(parsedMessage.payload);
+                      if (!validationResult.success) {
+                        ws.send(
+                          JSON.stringify({
+                            error: "Invalid message format",
+                            details: validationResult.error.format(),
+                          })
+                        );
+                        return;
+                      }
+
+                      new Optionable(
+                        handlers[channel as keyof E[keyof E]["messagesItCanSend"]]?.[
+                        parsedMessage.message.toString()
+                        ]
+                      ).try({
+                        ifNone: () => {
+                          console.log("Didn't find handler for this message", parsedMessage);
+                          this.sendUnprocessableMessageType(ws, {
+                            channel,
+                            handler: "onMessageReceived",
+                            msg: parsedMessage,
+                          });
+                        },
+                        ifNotNone: async (handler) => {
+                          await handler({
+                            data: validationResult.data,
+                            store: this.context,
+                          })
+                          new Optionable(handlers.afterMessage).ifCanBeUnpacked(callback => callback(parsedMessage))
+                        },
                       });
-                    },
-                    ifNotNone: async (handler) => {
-                      await handler({
-                        data: validationResult.data,
-                        store: this.context,
-                      })
-                      new Optionable(handlers.afterMessage).ifCanBeUnpacked(callback => callback(parsedMessage))
-                    },
-                  });
-                }
-              },
-            });
-          });
+                    }
+                  },
+                });
+              });
 
-          ws.on("close", (code, reason) => {
-            console.log(`WebSocket closed with code ${code}: ${reason}`);
-          });
-        });
-    }))
+              ws.on("close", (code, reason) => {
+                console.log(`WebSocket closed with code ${code}: ${reason}`);
+              });
+            });
+          })
+  })
 }
 
 

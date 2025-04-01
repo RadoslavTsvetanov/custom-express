@@ -57,7 +57,7 @@ export const statics = {
 export class Optionable<T> extends CustomUnpackable<T> {
   constructor(v: T | none) {
     super(v as T, (v) => {
-      return !this.is_none() 
+      return !this.is_none()
     });
     this.messageWhenYouCntUnpack = statics.messageForWhenOptionIsNone 
   }

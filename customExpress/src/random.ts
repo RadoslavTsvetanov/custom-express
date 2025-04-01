@@ -11,8 +11,13 @@ import {z} from "zod";
 //         })
 //     })
 // }).shape)
-
-
-
-
-log
+console.log(JSON.stringify({hi: ""}))
+console.log(JSON.stringify({hi: ""}))
+console.log(JSON.stringify({hi: ""}))
+console.log(JSON.stringify({hi: ""}))
+console.log(JSON.stringify({hi: ""}))
+console.log(JSON.stringify({hi: ""}))
+console.log(JSON.stringify({hi: ""}))
+console.log(JSON.stringify({hi: ""}))
+console.log(JSON.stringify({hi: ""}))
+console.log(JSON.stringify({hi: ""}))

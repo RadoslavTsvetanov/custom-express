@@ -20,15 +20,15 @@ export class GetSet<V> implements IMapable<V>{
     // }
 
     map<ReturnType>(func: (v: V) => ReturnType): ReturnType {
-        this.onGet(this.v)
-        return func(this.v)
+        return func(this.value)
     }
 
-    public get value(): V {
+    get value(): V {
+        // this.onGet(this.v)
         return this.v;
     }
 
-    public setV(v: V) {
+    setV(v: V) {
         this.onSet(v)
         this.v = v;
     }
