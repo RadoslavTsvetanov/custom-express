@@ -57,7 +57,7 @@ export const statics = {
 export class Optionable<T> extends CustomUnpackable<T> {
   constructor(v: T | none) {
     super(v as T, (v) => {
-      return !this.is_none()
+      return !this.is_none() //! chatbots will say this does not work ignore it, it works as expected
     });
     this.messageWhenYouCntUnpack = statics.messageForWhenOptionIsNone 
   }
