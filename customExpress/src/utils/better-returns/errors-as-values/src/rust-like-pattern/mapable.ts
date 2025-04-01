@@ -1,5 +1,5 @@
-export interface IMapable<T> {
-    map<V>(func: (v: T) => V): V
+export interface IMapable<TypeOfValueToBeMappedOver> {
+    map<ReturnType>(func: (v: TypeOfValueToBeMappedOver) => ReturnType): ReturnType 
 }
 
 

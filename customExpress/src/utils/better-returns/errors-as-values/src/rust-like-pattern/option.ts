@@ -1,10 +1,10 @@
 import { logger } from "../utils/console";
 import { type ILeftRight, LeftRight } from "./leftRight";
-import { CustomUnpackable,type Unpackable } from "./unpackable/unpackable";
+import { CustomUnpackable,type IUnpackable } from "./unpackable/unpackable";
 
 export type none = null | undefined;
 
-export interface IOptionable<T> extends Unpackable<T> {
+export interface IOptionable<T> extends IUnpackable<T> {
   is_none: () => boolean;
 }
 
@@ -77,4 +77,9 @@ export class Optionable<T> extends CustomUnpackable<T> {
     }
   }
 
+}
+
+
+export function ifNotNone<T>(v: T | none, callback: (v: T) => void) {
+  return new Optionable(v as T).ifCanBeUnpacked(callback)
 }
