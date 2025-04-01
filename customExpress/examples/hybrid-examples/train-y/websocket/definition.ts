@@ -1,11 +1,19 @@
+import { ExtractValueTypesFromRecord } from './../../../../src/metaprogramming/extractValueTypesFromRecord';
 import { z } from "zod";
 import { CustomWebSocketRouter } from "../../../../src/builtins/websocket/server";
 import { mutationsSchemas, schemas } from "../types/schemas";
 
 
-
 export const defintion = new CustomWebSocketRouter({
     train: {
+        hooks: {
+            validate: z.object({
+                shodior: z.number()
+            }),
+            validateResponse: z.object({
+                pipipupu: z.number()
+            })
+        },
         messagesItCanReceive: {
             newTrainData: z.object({
                 line: schemas.line   ,// liniq demek 102, 6, 280
@@ -20,12 +28,25 @@ export const defintion = new CustomWebSocketRouter({
         }
     },
     passanger: {
+        hooks: {
+            validate: z.object({
+                egene: z.number(),
+            }),
+            validateResponse: z.object({
+                ggg: z.number()
+            })
+        },
         messagesItCanReceive: {
-
         newPassangerData: z.object({
             ...mutationsSchemas.liveEntityData
         })
         },
-        messagesItCanSend: {}
+        messagesItCanSend: {},
     }
 })
+
+
+
+
+type u =  typeof defintion.h
+type g =  ExtractValueTypesFromRecord<u>

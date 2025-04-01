@@ -12,7 +12,7 @@ export class WebsocketUrl extends ContextSafeType<string>{
     static unsafe =
          {
             withLocalhost: (port: Port) => {
-                return new WebsocketUrl(`ws://localhost:${port}`)
+                return new WebsocketUrl(`ws://localhost:${port.value}`)
             }
         }
             
