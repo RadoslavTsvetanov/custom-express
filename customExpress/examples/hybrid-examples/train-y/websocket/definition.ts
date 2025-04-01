@@ -47,6 +47,6 @@ export const defintion = new CustomWebSocketRouter({
 
 
 
-
-type u =  typeof defintion.h
-type g =  ExtractValueTypesFromRecord<u>
+const g = defintion.j
+g
+// ^?

@@ -1,5 +1,6 @@
 // Fix the implementation of your websocket server
 import { Port } from "../../../../src/types/networking/port";
+import { env } from "../envs";
 import type { IAuth } from "../services/auth/interface";
 import type { ITrain } from "../services/train/interface";
 import type { IUser } from "../services/user/interface";
@@ -21,15 +22,15 @@ defintion
       auth: {} as IAuth,
       train: {} as ITrain,
     },
-  }) // Initialize with actual services instead of empty object
+  })
   .implement({
-    onConnection: (v) => {
+    onConnection: v => {
       console.log("New connection established");
     },
-    afterMessage: (v) => {
+    afterMessage: v => {
       console.log("Message processed:", v.msg.payload);
     },
-    beforeMessage: (v) => {
+    beforeMessage: v => {
       console.log(`
         Log
         ${JSON.stringify(v.message)}
@@ -59,4 +60,4 @@ defintion
       },
     },
   })
-  .start(new Port(3000));
+  .start(new Port(env.runningPort));
