@@ -1,5 +1,66 @@
 # custom-express
 
+Wirting more with less
+
+## Documentation about the websocket
+
+
+#### Hooks 
+
+
+##### Sender 
+To avoid redudndancy and code duplication you can hook into the luifecycle of requests into the client to not just the server since logically a websocket is split into a listener and a sender on both sicdes and they expose both expose hooks
+
+###### beforeSend 
+
+in the client this hook is ran befire sending the data actually, for example every essage needs to have an id in it so you either do
+
+clientBuilder.generateClient().map(a => {
+a.train.sendalert({...rest_of_data, id: id})
+a.train.sendMessage({....rest_of_the_data, id: id})
+})
+
+or you do 
+
+clientBuilder.generateClient({
+beforeSend: msg =>  {...msg, id: getID() /* yes you add it  */ }
+}).map(a => {
+a.train.sendalert(data)
+a.train.sendMessage(data)
+})
+
+
+it also works like that with creating a server 
+
+definition
+.add({
+beforeSend: msg => msg.payload = {...msg.payload, id: getID() }
+}).
+implement({
+	onNewAlert: ({ws}) => ws.send({msg: "hi"}) // before send will automatically add id to this
+})
+
+##### Listener
+
+###### beforeHandle
+
+in this listener hook you can transform the data before it arriving to your handler
+
+Imagine you want to create a user class from the id you recieve from a message so without it you would need to do it like this 
+
+
+clientBuilder().generateListener().add({
+onNewAlert: msg => User.new(msg.payload.id).alert("hihi"),
+onNewMessage: msg => User.new(msg.payload.id).message("hihi")
+})
+
+and with it you would do 
+
+
+clientBuilder().generateListener().beforeHandle(msg => {...msg, user: User /*yes you can add properties directly to the message that didnt exist before*/).add({
+onNewAlert: ({user}) => user.alert("hihi"),
+onNewMessage: ({user}) => user.message("jihi")
+})
 
 # Features 
 
