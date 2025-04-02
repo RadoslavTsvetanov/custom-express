@@ -7,9 +7,77 @@ Wirting more with less
 
 #### Hooks 
 
+Note that hooks can be global or local, local hooks behave in the same way but they apply only to one handler and are declared inside the handler and server more as defining clearer steps in a handler (note that like in global each new hook gets the context that the one before it left so the first beforeSend could change what the next beforeSend will have acces to) for example this is cool when we want to loggically seperate the auth step and we will have something like this (see the below example )
 
+life-cycle event is stored as a queue, aka first-in first-out. So Elysia will always respect the order of code from top-to-bottom followed by the order of life-cycle events.
+
+Note that if you do not explicitely ovverride the return by default the current handler will pass the context it recieved to the next handler, if you return the END utility variable nothing will be ran after the handler 
+
+```
+import { Elysia } from 'elysia'
+
+new Elysia()
+    .onBeforeHandle(msg => {
+    	if(msg.payload.authToken === null){
+     	// a token shoukd be provided
+     	ws.close()
+      		}
+	}
+        console.log('1')
+	return {...msg, : ""}
+    })
+    .onBeforeHandle(({authToken /* note we can access hihi*/}) => {
+    // the provided token should be valid 
+    if(!TokenExists(authToken)){
+    ws.close()
+    }
+    console.log(5)
+    })
+    .onAfterHandle(() => {
+        console.log('3')
+    })
+    .onAfterHandler(() => console.log(4))
+    .handler('/newalert', () => 'hi', {
+        beforeHandle({authToken}) {
+            console.log('2')
+	    return {
+     		userId: getUserIdFromAuthToken(authToken)
+	    }
+        },
+	beforeHandle({userId /* *note that the above handler only defines the userId so we wont have access to anything else/} => {
+ 		console.log("18")
+   		return {
+     			user: User.new(userId)
+		}
+	})
+	handler: ({user} /* note it only has access to user nothing else*/) => user.alert();console.log("10"); return {koko: generateRequestMetadataForLog(), kuku: ""},
+ 	afterHandle: (msg, {koko}) => {
+  	const logResult = log(koko)
+  	console.log(8)
+	return {
+ 		...msg, 
+   		logResult
+		}
+ 	}
+    }).
+    afterHandle({logResult} => {
+    if(logResult){
+    // do something you got the point 
+    }
+    })
+    .listen(3000)
+
+Console should log the following:
+// finish this example
+1
+5
+2
+3
+4
+```
 ##### Sender 
 To avoid redudndancy and code duplication you can hook into the luifecycle of requests into the client to not just the server since logically a websocket is split into a listener and a sender on both sicdes and they expose both expose hooks
+
 
 ###### beforeSend 
 
@@ -40,6 +108,7 @@ implement({
 	onNewAlert: ({ws}) => ws.send({msg: "hi"}) // before send will automatically add id to this
 })
 ```
+
 ##### Listener
 
 ###### beforeHandle
@@ -62,6 +131,82 @@ onNewAlert: ({user}) => user.alert("hihi"),
 onNewMessage: ({user}) => user.message("jihi")
 })
 ```
+
+###### guard
+
+this is a type of beforeHandle which checks if an object has the properties of the schema inside guard and if not it runs a handler, if the handler is left omitted it refuses the connection by default 
+
+example
+```ts
+///rest of the code
+.guard({
+id: z.sttring()},
+(ws) => { console.lof("sus user") })
+
+
+```
+
+###### match 
+
+this is a tyope of beforeHandle which checks if a entity is of this type it works like guard but instead of checking if a value is there it also checks for differences and if they differ it triggers the handler which by def is to close the connection
+
+###### transform 
+
+a type of beforeHandle which gets the current body and transofrm it into something else, note that depending in the placement it can before a validator or after one and so it can serve different usecases (either make every request sompliant if it before or transform a validated request into something more useful)
+
+###### 
+
+### Overriding order 
+
+since every hook needs to be given a unique id this opens the gate to overrding order 
+
+
+For example 
+
+```ts
+.guard("hiuhi", () => console.log(0))
+.guard("omnimaning it", () => {console.log(1)})
+.before("omnimaninn it " /* not it is typesafe so dont worry */, () => {
+console.log(2)})
+```
+v
+
+will result into 
+```
+0
+2
+1
+```
+this is helpful if you use a middleware which applies some kind of hook and you want to be before it you can do it like this and not needing to edit the library, To understand this better since the example is not that good imagine this middleware which comes from a node package (e,g, it is not a good idea to edit it)
+
+```
+/ lib code
+app.validate("jaking").validate("omnimaning")
+
+/ your code
+
+app.use(ingMidlleware)
+
+
+
+```
+
+
+and you want to do somethign before omnimaning but after jaking you can do it like this 
+
+app.before("omnimaning", { // yeah you can define multiple handlers like that too 
+() => {},
+() => {}
+})
+
+there is also after hook which works exaclty as you think it would 
+
+
+#### afterHandle
+
+
+it is exexcuted after you handler and it is useful for common scenarios, for example you have two handlers and after they are done each of them needs to 
+
 # Features 
 
 ## openapi generation using just ts syntax and express route defining paradigm
