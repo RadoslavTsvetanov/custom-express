@@ -109,7 +109,16 @@ implement({
 })
 ```
 
+###### afterSend
+
+runs after each sent message 
+
+
 ##### Listener
+
+###### onError 
+
+runs whenever an exception is thrown in a beforeHandler, handler or afterHandler 
 
 ###### beforeHandle
 
