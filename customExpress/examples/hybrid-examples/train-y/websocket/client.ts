@@ -1,3 +1,4 @@
+import { multer } from 'multer';
 import { Port } from "../../../../src/types/networking/port";
 import { WebsocketUrl } from "../../../../src/types/networking/urls/websocket";
 import { defintion } from "./definition";
@@ -14,3 +15,33 @@ const listener = clientBuilder.setupListeners<false>({
         }
     }
 })
+clientBuilder.getReusableListener()
+    .hook({
+        name: "jiji", 
+        type: "beforeMessage",
+        handler: v => {
+            return {
+                h: ""
+            }
+        }
+    })
+    .before({
+        nameOfHookWhichWeWantToBeBefore: "jiji",
+        name: "biji",
+        handler: v => {
+
+        },
+    })    .hook({
+        name: "buhi",
+        type: "beforeMessage",
+        handler: v => {
+            v.h // since this is the return type of jiji
+            
+            return {}
+        }
+    })
+    .hook({
+        name: "lolo",
+        type: "beforeMessage",
+        handler: () => {return {}}
+    })

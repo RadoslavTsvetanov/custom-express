@@ -3,7 +3,7 @@ import { GetSet } from "../getSetClass";
 
 export class OrderedRecord<Keys extends string, V extends { key: Keys }> {
   public readonly elements: GetSet<V[]> = new GetSet<V[]>([]);
-  private indexesMap: Record<Keys, number> = {};
+  private indexesMap: Record<Keys, number> = {} as Record<Keys, number> // since every value is stored in an  array for quick access we keep a list of the indexes where each value is stored 
 
   constructor(elements: V[]) {
     elements.forEach((element, index) => {
@@ -12,9 +12,26 @@ export class OrderedRecord<Keys extends string, V extends { key: Keys }> {
     this.elements.setV(elements);
   }
 
+  public jojo: keyof typeof this.elements.value
+
   get(key: Keys): Optionable<V> {
-    console.log("hhh", this.elements.value[this.indexesMap[key]])
     return new Optionable(this.elements.value[this.indexesMap[key]]);
+  }
+
+  get normalObject(): {
+    [K in keyof typeof this.elements.value]: Omit<>
+  } {
+
+  }
+
+  placeBefore<NewValueKey extends string>(key: Keys, newValue: Omit<V, "key"> & {
+    key: NewValueKey
+  }) {
+    return this.add(newValue, this.indexesMap[key] - 1)
+  }
+
+  placeAfter<NewValueKey extends string>(key:  Keys, newValue: Omit<V, "key"> & {key: NewValueKey}) {
+    return this.add(newValue, this.indexesMap[key] + 1)
   }
 
   getIndexOfKey(key: Keys): number | undefined {
@@ -37,8 +54,8 @@ export class OrderedRecord<Keys extends string, V extends { key: Keys }> {
   add<NewKey extends string>(
     v: Omit<V, "key"> & { key: NewKey extends Keys ? never : NewKey },
     position?: number
-  ): NewKey extends Keys ? OrderedRecord<Keys | NewKey, V> : never {
-    if (!this.get(v.key).is_none()) {
+  ): NewKey extends Keys ? never  : OrderedRecord<Keys | NewKey, V> {
+    if (!this.get(v.key).is_none()) { // ignore this error we are just double checking 
       throw new Error("key already exists")
     }
 

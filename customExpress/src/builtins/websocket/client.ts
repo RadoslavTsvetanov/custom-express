@@ -4,17 +4,96 @@ import type { z, ZodObject, ZodRawShape } from "zod";
 import { panic } from "../../utils/panic";
 import { Optionable } from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/option";
 import { logger } from "../../utils/better-returns/errors-as-values/src/utils/console";
+import type { OrderedRecord } from "../../utils/better-standard-library/RecordCompatibeArray";
+
+const hooks = ["before", "after"] as const;
+type MakeHookType<T extends string> = `${T}Message`;
+type HookTypes = MakeHookType<(typeof hooks)[number]>;
+function afterfix(s: string) {
+  return `${s}Message`;
+}
+
+type HooksEntry<HookNames, HandlerParamType, HandlerReturnType> = {
+  key: HookNames;
+  handler: (v: HandlerParamType) => HandlerReturnType;
+  type: HookTypes;
+};
 
 // note unlike the WebsocketClient this does not reuse connection but establishes new ones each time start is called
-class WebsocketListener {
+class WebsocketListener<
+  HookNames extends string,
+  Hooks extends Record<HookNames, HooksEntry<HookNames, unknown, unknown>>,
+  LastHookReturnType extends Record<string, unknown> = {
+    headers: { [x: string]: Optionable<string> };
+  },
+  LastHook extends (v: unknown) => LastHookReturnType = (v: {
+    headers: { [x: string]: Optionable<string> };
+  }) => LastHookReturnType
+> {
   private handlers;
   private url: string;
   private endpoints;
-  public hooks
+  public hooks: Hooks;
   constructor(messageHandlers, url: WebsocketUrl, endpoints) {
     this.handlers = messageHandlers;
     this.url = url.value;
     this.endpoints = endpoints;
+  }
+
+
+  public k() {
+    return 
+  }
+
+  before<HookName extends HookNames, NewHookName extends string, >(v: {
+    name: NewHookName
+    nameOfHookWhichWeWantToBeBefore: HookName,
+    // type: Hooks[HookName]["type"],
+    handler: (v: Parameters<Hooks[HookName]["handler"]>[0]) => Parameters<Hooks[HookName]["handler"]>[0]
+  }): WebsocketListener<
+    HookNames | NewHookName,
+    Hooks & HooksEntry<NewHookName, Parameters<Hooks[HookName]["handler"]>[0], NewHookReturnType>,
+    LastHookReturnType,
+    LastHook
+  > {
+    const newHookType = this.hooks[v.nameOfHookWhichWeWantToBeBefore].type
+
+    this.hooks
+  
+  
+  }
+
+
+  hook<
+    HookReturnTypeKeys extends string,
+    HookName extends string,
+    HookReturnType extends { [K in HookReturnTypeKeys]: unknown }
+  >(v: {
+    name: HookName /* extends HookNames ? never : HookName */ ;
+    type: HookTypes;
+    handler: (v: LastHookReturnType) => HookReturnType;
+  }): HookName extends ""
+    ? never
+    // : HookName extends HookNames
+    // ? never
+    :  WebsocketListener<
+        HookNames & HookName,
+        Record<HookNames & HookName, HooksEntry<HookNames & HookName>>,
+        HookReturnType,
+        (v: LastHookReturnType) => HookReturnType
+      > {
+    if (v.name === "") {
+      panic("hook name cant be  an empty string");
+    }
+    if (!hooks.some((hook) => afterfix(hook) === v.type)) {
+      panic(
+        `hook type ${
+          v.type
+        } is not accepted, currently accepted are ${JSON.stringify(hooks)}`
+      );
+    }
+
+    return;
   }
 
   start() {
@@ -46,11 +125,17 @@ class WebsocketListener {
 
 export class WebsocketClient<
   ChannelNames extends string,
-  E extends Record<ChannelNames, ChannelConfig<any, any, {
-        validate: ZodObject<ZodRawShape>,
-        validateResponse: ZodObject<ZodRawShape>
+  E extends Record<
+    ChannelNames,
+    ChannelConfig<
+      any,
+      any,
+      {
+        validate: ZodObject<ZodRawShape>;
+        validateResponse: ZodObject<ZodRawShape>;
       }
-  >>,
+    >
+  >,
   Context extends Record<string, unknown>
 > {
   private url: WebsocketUrl;
@@ -62,7 +147,7 @@ export class WebsocketClient<
     this.url = url;
     this.endpoints = endpoints;
     this.context = new Optionable(context).unpack_with_default({} as Context);
-    console.log("ooo",JSON.stringify(this.url.valueOf()))
+    console.log("ooo", JSON.stringify(this.url.valueOf()));
     this.ws = new WebSocket(this.url.value);
 
     this.ws.onopen = () => {
@@ -147,7 +232,7 @@ export class WebsocketClient<
       } catch (error) {
         console.error("Error processing WebSocket message:", error);
       }
-    }
+    };
   }
 
   getReusableListener(messageReceivers: {

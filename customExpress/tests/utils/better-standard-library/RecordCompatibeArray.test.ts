@@ -25,7 +25,6 @@ describe("OrderedRecord", () => {
     });
 
     test("should return None if key does not exist", () => {
-console.log("lll",record.get("c"))
         expect(record.get("c").is_none()).toBe(true);
     });
 
@@ -65,4 +64,38 @@ console.log("lll",record.get("c"))
             record.add({ key: "a", value: 50 });
         }).toThrow();
     });
+
+
+    test("should place a new element before the given key", () => {
+        const newRecord = record.placeBefore("b", { key: "c", value: 15 });
+        expect(newRecord.getIndexOfKey("c")).toBe(1);
+        expect(newRecord.getIndexOfKey("b")).toBe(2);
+    });
+
+    test("should place a new element after the given key", () => {
+        const newRecord = record.placeAfter("a", { key: "c", value: 15 });
+        expect(newRecord.getIndexOfKey("c")).toBe(1);
+        expect(newRecord.getIndexOfKey("b")).toBe(2);
+    });
+
+    test("should not place before a non-existent key", () => {
+        expect(() => record.placeBefore("c", { key: "d", value: 25 })).toThrow();
+    });
+
+    test("should not place after a non-existent key", () => {
+        expect(() => record.placeAfter("c", { key: "d", value: 25 })).toThrow();
+    });
+
+    test("should maintain order correctly when placing multiple elements", () => {
+        const  newRecord = record.placeBefore("b", { key: "c", value: 15 });
+        const newNewRecord = newRecord.placeAfter("c", { key: "d", value: 17 });
+
+        expect(newNewRecord.getIndexOfKey("a")).toBe(0);
+        expect(newNewRecord.getIndexOfKey("c")).toBe(1);
+        expect(newNewRecord.getIndexOfKey("d")).toBe(2);
+        expect(newNewRecord.getIndexOfKey("b")).toBe(3);
+    });
+
+
+
 });
