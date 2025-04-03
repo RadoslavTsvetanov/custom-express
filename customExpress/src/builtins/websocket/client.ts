@@ -10,6 +10,7 @@ class WebsocketListener {
   private handlers;
   private url: string;
   private endpoints;
+  public hooks
   constructor(messageHandlers, url: WebsocketUrl, endpoints) {
     this.handlers = messageHandlers;
     this.url = url.value;
@@ -179,7 +180,6 @@ export class WebsocketClient<
             data: z.infer<typeof schema>
           ) => {
             try {
-              console.log("rrr",this.url.value)
               const newws = new WebSocket(this.url.value); // horrible performance if possible make it all thingd from this class to reuse one connection so that one clientInsyance is one connection
               newws.onopen = () => {
                 schema.parse(data);

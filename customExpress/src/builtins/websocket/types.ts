@@ -6,6 +6,8 @@ export interface TypedMessage<T extends string, D> {
   payload: D;
 }
 
+
+
   
 export interface ChannelConfig<
     TSend extends Record<keyof TSend, ZodSchema & Hooks["validateResponse"]>,

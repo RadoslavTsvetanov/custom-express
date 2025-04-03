@@ -14,6 +14,7 @@ import { WebsocketClient } from "./client.ts";
 import type { IncomingMessage } from "http";
 import { panic } from "../../utils/panic.ts";
 import {
+  ifNotNone,
   Optionable,
   type none,
 } from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/option.ts";
@@ -21,6 +22,9 @@ import type { keyofonlystringkeys } from "../../utils/metaprogramming/keyofonlys
 import { GetSet, type inferType } from "../../utils/getSetClass.ts";
 import { entries } from "../../utils/better-standard-library/mapObject.ts";
 import { BetterArray } from "../../utils/better-standard-library/array.ts";
+import type { VCallback } from "../../types/voidcallback.ts";
+import type { IMapable, ISimpleMapable, Mapable } from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/mapable.ts";
+import type { IPipeable } from "../../utils/better-returns/errors-as-values/src/pipe.ts";
 
 export class CustomWebsocketServer {}
 
@@ -38,14 +42,28 @@ export class CustomWebSocketRouter<
     >
   >,
   Context extends Record<ContextKeys, unknown>,
-  ContextKeys extends string
-> {
+  ContextKeys extends string,
+  BaseRequest = {}
+  > implements
+  ISimpleMapable<CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>>, IPipeable<CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>>,
+  IMapable<CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>, CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>>
+{
+  oublic readonly dynamicProperties: GetSet
   public context: Context = {} as Context; // make private later
   public readonly channels: Channels;
-  public j: Channels[keyof Channels][keyof Channels[keyof Channels]];
-  private readonly handlers: GetSet<
-    | ({
-        beforeMessage?: (v: {
+  private hooks : {
+      // note Register hook into every handler of the current instance that came after. so any handler added before the hook wont be in the scope if the hook 
+    before?: {
+        // this runs before any kind of transformation is done to an incoming message
+        validation?: VCallback<{ ws: WebSocket, message: string }>,         
+        transform ?: <ReturnType>(message: TypedMessage<any, unknown>)  => ReturnType // this runs before every send of the built in clint for sending messages so it is good in cases where you want to add a field to any of the messagesItCanSend without explicitely doing it everywhere 
+        
+        
+      // , it is helpful for early returns and things like that
+        /*
+        
+        */
+        handleMessage?: VCallback<{
           ws: WebSocket;
           store: Context;
           message: TypedMessage<
@@ -54,8 +72,9 @@ export class CustomWebSocketRouter<
               Channels[keyof Channels]["hooks"]["validate"]
             >
           >;
-        }) => void;
-        afterMessage?: (v: {
+        }>;
+      },
+        afterMessage?: VCallback<{ // called directly after a message handler is executed 
           msg: TypedMessage<
             keyofonlystringkeys<Channels[keyof Channels]>,
             { [key: string]: unknown } & z.infer<
@@ -63,16 +82,59 @@ export class CustomWebSocketRouter<
             >
           >;
           ws: WebSocket;
-        }) => void;
-        onConnection: (ctx: {
+        }>;
+        onConnection: VCallback<{
           ws: WebSocket;
           req: IncomingMessage;
           store: Context;
-        }) => void;
+        }>;
+      }
+  private readonly handlers: GetSet< // TODO seperate the first object tyoe into one called hooks 
+    | ({
+      before?: {
+        validation?: VCallback<{ ws: WebSocket, message: string }>, // this runs before any kind of transformation is done to an incoming message
+        // TODO: add the rest,
+        transform ?: <ReturnType>(message: TypedMessage<any, unknown>)  => ReturnType // ran after validate of a channel so it recieves a message of type validated
+        // , it is helpful for early returns and things like that 
+        /* For example you have a user channel and you want to pass a user DTO directly to every subsiquent message handler you would do it like thid 
+
+      (msg: typeof channel.validate) => {
+        returm {ws: ws, msg: {...msg, user: UserService.getUser(msg.userId // this userid is ensured to be there from the validate of the channel)} }
+      }
+
+        */
+        message?: VCallback<{
+          ws: WebSocket;
+          store: Context;
+          message: TypedMessage<
+            keyofonlystringkeys<Channels[keyof Channels]>,
+            { [key: string]: unknown } & z.infer<
+              Channels[keyof Channels]["hooks"]["validate"]
+            >
+          >;
+        }>;
+      },
+      after?: {
+        Message?: VCallback<{
+          msg: TypedMessage<
+            keyofonlystringkeys<Channels[keyof Channels]>,
+            { [key: string]: unknown } & z.infer<
+              Channels[keyof Channels]["hooks"]["validateResponse"]
+            >
+          >;
+          ws: WebSocket;
+        }>;
+
+      },
+        onConnection: VCallback<{
+          ws: WebSocket;
+          req: IncomingMessage;
+          store: Context;
+        }>;
       } & {
         [Channel in keyof Channels]: {
           [Message in keyof Channels[Channel]["messagesItCanReceive"]]: (v: {
-            data: z.infer<Channels[Channel]["messagesItCanReceive"][Message]>;
+            data: z.infer<Channels[Channel]["messagesItCanReceive"][Message]>  & Channels[Channel]["hooks"]["validate"]/* here place the return type of transform in before since it is transforms every message to this */;
             store: Context;
           }) => void;
         };
@@ -119,6 +181,15 @@ export class CustomWebSocketRouter<
     this.channels = endpoints ?? ({} as Channels);
   }
 
+  public use< >(app: CustomWebSocketRouter) { 
+    return new CustomWebSocketRouter
+  }
+
+  map(func: (v: CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>) => CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>): CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys> {
+      return func(this)
+  }
+
+
   private sendUnprocessableMessageType(
     ws: WebSocket,
     invocationInfo: { channel: string; msg: object; handler: string }
@@ -131,13 +202,23 @@ export class CustomWebSocketRouter<
     );
   }
 
-  private transformMsg(v: string): TypedMessage<string, unknown> | null {
+  private transformMsg(v: string): Optionable<TypedMessage<keyofonlystringkeys<Channels[keyof Channels]>, unknown> > {
     try {
-      return JSON.parse(v);
+      return new Optionable(JSON.parse(v));
     } catch {
-      return null;
+      return new Optionable<TypedMessage<keyofonlystringkeys<Channels[keyof Channels]>, unknown>>(null);
     }
   }
+
+  pipe(handler: VCallback<CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>>) {
+    return handler(this)
+  }
+
+  simpleMap(func: (v: CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>) => CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>): CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys> {
+      return func(this)
+  }
+
+  
 
   store<T extends Record<string, unknown>>(
     object: T
@@ -181,6 +262,8 @@ export class CustomWebSocketRouter<
   //   });
   // }
 
+
+
   start(port: Port) {
     this.handlers.map((handlers) => {
       new Optionable(handlers)
@@ -192,9 +275,10 @@ export class CustomWebSocketRouter<
             handlers.onConnection({ ws, req, store: this.context });
 
             ws.on("message", async (message) => {
-              const parsedMessage = this.transformMsg(message.toString());
+            
+              ifNotNone(handlers.before?.validation, handler => handler({ ws, message: message.toString() }))
 
-              new Optionable(parsedMessage).try({
+              this.transformMsg(message.toString()).try({
                 ifNone: () => {
                   this.sendUnprocessableMessageType(ws, {
                     channel: "unknown",
@@ -206,7 +290,7 @@ export class CustomWebSocketRouter<
                 },
 
                 ifNotNone: async (parsedMessage) => {
-                  new Optionable(handlers.beforeMessage).ifCanBeUnpacked((v) =>
+                  new Optionable(handlers.before?.message).ifCanBeUnpacked((v) =>
                     v({ ws, store: this.context, message: parsedMessage })
                   );
 
@@ -239,7 +323,7 @@ export class CustomWebSocketRouter<
 
                         ifNotNone: (messageConfig) => {
                           console.log("f", messageConfig);
-                          console.log("[][]",parsedMessage.payload)
+                          console.log("[][]", parsedMessage.payload);
                           messageConfig.parse(parsedMessage.payload);
                         },
                       });
