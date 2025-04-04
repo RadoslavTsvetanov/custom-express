@@ -122,6 +122,8 @@ runs whenever an exception is thrown in a beforeHandler, handler or afterHandler
 
 ###### beforeHandle
 
+
+
 in this listener hook you can transform the data before it arriving to your handler
 
 Imagine you want to create a user class from the id you recieve from a message so without it you would need to do it like this 
@@ -140,6 +142,15 @@ onNewAlert: ({user}) => user.alert("hihi"),
 onNewMessage: ({user}) => user.message("jihi")
 })
 ```
+
+Another use case is to use it for custom parsing for example there is a text format we dont support in our builtin parse hook (which is a wrapper around onBeforeRequest)
+
+
+###### parse
+
+.parse("json" | "yml")
+
+
 
 ###### guard
 
