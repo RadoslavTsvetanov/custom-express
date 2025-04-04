@@ -1,4 +1,3 @@
-import { ExtractValueTypesFromRecord } from './../../../../src/metaprogramming/extractValueTypesFromRecord';
 import { z } from "zod";
 import { CustomWebSocketRouter } from "../../../../src/builtins/websocket/server";
 import { mutationsSchemas, schemas } from "../types/schemas";
@@ -44,9 +43,3 @@ export const defintion = new CustomWebSocketRouter({
         messagesItCanSend: {},
     }
 })
-
-
-
-const g = defintion.j
-g
-// ^?
