@@ -96,13 +96,12 @@ public get toNormalObject(): {
   }
 }
 
-
+// EXample usage  and how it should work 
 const initialElements = [
   { key: "apple" as const, value: 10 } ,
   { key: "banana" as const, value: 20 } ,
 ] as const;
-const ggg = new OrderedRecord<readonly [{key: "apple", value: 10},{key:"banana", value: "20"}],{key: string, value: number}>(initialElements)
-type o = typeof ggg.g
+const ggg = new OrderedRecord(initialElements)
 // Create an OrderedRecord instance
 const fruits = ggg.add({
   key: "lolo",
@@ -114,11 +113,12 @@ const fruits = ggg.add({
 
 type j = typeof fruits["elements"]["value"]["3"]
 
-fruits.toNormalObject.
+fruits.toNormalObject.apple.value // shpuld be of type 1-
+fruits.toNormalObject.koiki.value // should be of type 6
 
 
-fruits.elements.value[3].key
+fruits.elements.value[3] // should be of {6, "koiki"}
 // ^? 
 
 
-fruits.getByPosition(2).ifCanBeUnpacked(v => )
+fruits.getByPosition(2).ifCanBeUnpacked(v => v /* {readonly key: "lolo";readonly value: 4;}*/)

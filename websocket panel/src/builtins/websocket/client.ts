@@ -5,6 +5,7 @@ import { panic } from "../../utils/panic";
 import { ifNotNone, Optionable } from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/option";
 import { logger } from "../../utils/better-returns/errors-as-values/src/utils/console";
 import type { OrderedRecord } from "../../utils/better-standard-library/RecordCompatibeArray";
+import type { Port } from "../../types/networking/port";
 
 const hooks = ["before", "after"] as const;
 type MakeHookType<T extends string> = `${T}Message`;
@@ -46,6 +47,11 @@ class WebsocketListener<
   public k() {
     return this.hooks.jojo
   }
+
+  startGui(port: Port) {
+    
+  }
+
 
   before<HookName extends HookNames, NewHookName extends string, >(v: {
     name: NewHookName
