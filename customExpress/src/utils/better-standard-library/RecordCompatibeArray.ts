@@ -11,7 +11,7 @@ type Widen<T> =
 
 export class OrderedRecord<
   V extends readonly Schema[],
-  Schema extends {key: string} 
+  Schema extends { key: string }
 > {
   public get getElementsType(): V {  // use only as means to gget the type of the elemnts inside e.g. get the V generic
     return
@@ -22,8 +22,18 @@ export class OrderedRecord<
     this.elements.setV(elements);
   }
 
+  public getByPosition<Index extends readonly number>(index: Index): Optionable<V[Index]>
 
-  get(key: V[number]["key"]): Optionable<V[number]> {
+public get toNormalObject(): {
+  [K in V[number]["key"]]: Omit<Extract<V[number], { key: K }>, "key">
+} {
+  return this.elements.value.reduce((acc, item) => {
+    acc[item.key] = item; // We can safely assume `item` matches the type since it's of type `V[number]`
+    return acc;
+  }, {} as { [K in V[number]["key"]]: Omit<Extract<V[number], { key: K }>,"key"> });
+}
+
+  get(key: V[number]["key"]): Optionable<V[]> {
     return new Optionable(this.elements.value.find((el) => el.key === key));
   }
 
@@ -102,8 +112,13 @@ const fruits = ggg.add({
   key: "koiki"
 } as const); // again important to be as const to get the type info 
 
-type j = typeof fruits["elements"]["value"]["2"]
+type j = typeof fruits["elements"]["value"]["3"]
+
+fruits.toNormalObject.
 
 
 fruits.elements.value[3].key
 // ^? 
+
+
+fruits.getByPosition(2).ifCanBeUnpacked(v => )
