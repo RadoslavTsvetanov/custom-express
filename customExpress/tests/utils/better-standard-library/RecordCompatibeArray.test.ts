@@ -14,8 +14,8 @@ describe("OrderedRecord", () => {
 
     beforeEach(() => {
         record = new OrderedRecord([
-            { key: "a", value: 10 },
-            { key: "b", value: 20 }
+            { key: "a", value: 10 } ,
+            { key: "b", value: 20 } 
         ]);
     });
 

@@ -1,8 +1,8 @@
 import type { WebsocketUrl } from "../../types/networking/urls/websocket";
 import type { ChannelConfig } from "./types";
-import type { z, ZodObject, ZodRawShape } from "zod";
+import type { z, ZodObject, ZodRawShape, ZodSchema } from "zod";
 import { panic } from "../../utils/panic";
-import { Optionable } from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/option";
+import { ifNotNone, Optionable } from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/option";
 import { logger } from "../../utils/better-returns/errors-as-values/src/utils/console";
 import type { OrderedRecord } from "../../utils/better-standard-library/RecordCompatibeArray";
 
@@ -22,7 +22,7 @@ type HooksEntry<HookNames, HandlerParamType, HandlerReturnType> = {
 // note unlike the WebsocketClient this does not reuse connection but establishes new ones each time start is called
 class WebsocketListener<
   HookNames extends string,
-  Hooks extends Record<HookNames, HooksEntry<HookNames, unknown, unknown>>,
+  Hooks extends OrderedRecord<HookNames, HooksEntry<HookNames, object, object>[]>,
   LastHookReturnType extends Record<string, unknown> = {
     headers: { [x: string]: Optionable<string> };
   },
@@ -41,8 +41,10 @@ class WebsocketListener<
   }
 
 
+  use(wsListener: WebsocketListener)
+
   public k() {
-    return 
+    return this.hooks.jojo
   }
 
   before<HookName extends HookNames, NewHookName extends string, >(v: {
@@ -60,7 +62,7 @@ class WebsocketListener<
 
     this.hooks
   
-  
+  return 
   }
 
 
@@ -77,8 +79,8 @@ class WebsocketListener<
     // : HookName extends HookNames
     // ? never
     :  WebsocketListener<
-        HookNames & HookName,
-        Record<HookNames & HookName, HooksEntry<HookNames & HookName>>,
+        HookNames | HookName,
+        OrderedRecord<HookNames | HookName, [...Hooks["getElementsType"],HooksEntry<HookNames & HookName, LastHookReturnType, HookReturnType>]>,
         HookReturnType,
         (v: LastHookReturnType) => HookReturnType
       > {
@@ -292,3 +294,71 @@ export class WebsocketClient<
     return client;
   }
 }
+
+
+
+class ExtendedWebsocketListener<
+  HookNames extends string,
+  Hooks extends OrderedRecord<HookNames, HooksEntry<HookNames, unknown, unknown>[]>,
+  LastHookReturnType extends Record<string, unknown>,
+  LastHook extends (v: unknown) => LastHookReturnType
+> extends WebsocketListener<HookNames, Hooks, LastHookReturnType, LastHook> {
+  constructor(
+    messageHandlers: any,
+    url: WebsocketUrl,
+    endpoints: any
+  ) {
+    super(messageHandlers, url, endpoints);
+  }
+
+
+  guard(v: {
+    schema: ZodObject<ZodRawShape>,
+    name: string,
+    type: HookTypes,
+    config?: {
+      handlerOnFailedValidation: (v: LastHookReturnType) => void // = (v) => {console.log(JSON.stringify(v), "didnot pass guard")} //TODO:  in the future make it so that it just sends an error message and closes the connection
+    }  
+  }) {
+    return this.hook({
+      ...v,
+      handler: ctx => {
+        const validationResult = v.schema.partial().safeParse(v)
+        if (validationResult.success) {
+          return v
+        } 
+        ifNotNone(v.config, (c => c.handlerOnFailedValidation(ctx)))
+        throw new Error("")
+
+
+      } 
+    })
+  }
+
+  match(v: {// match is helpful when you want to defend from extra fields, for example to protect from params pollution
+
+    schema: ZodObject<ZodRawShape>,
+    name: string,
+    type: HookTypes,
+    config?: {
+      handlerOnFailedValidation: (v: LastHookReturnType) => void // = (v) => {console.log(JSON.stringify(v), "didnot pass guard")} //TODO:  in the future make it so that it just sends an error message and closes the connection
+    } 
+  }) {
+    return this.hook({
+      ...v,
+      handler: ctx => {
+        const validationResult = v.schema.strict().safeParse(v)
+        if (validationResult.success) {
+          return v
+        } 
+        ifNotNone(v.config, (c => c.handlerOnFailedValidation(ctx)))
+        throw new Error("")
+
+
+      } 
+    })
+  }
+
+}
+
+export { WebsocketListener };

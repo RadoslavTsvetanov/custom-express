@@ -22,6 +22,6 @@ const nnn = builder.getReusableListener().hook({
     name: "j",
     type: "afterMessage",
     handler: v => {
-        
+        return {}
     }
 })
