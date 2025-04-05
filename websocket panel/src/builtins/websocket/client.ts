@@ -1,11 +1,15 @@
 import type { WebsocketUrl } from "../../types/networking/urls/websocket";
 import type { ChannelConfig } from "./types";
 import type { z, ZodObject, ZodRawShape, ZodSchema } from "zod";
-import { panic } from "../../utils/panic";
-import { ifNotNone, Optionable } from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/option";
+import { panic } from "../../../../packages/better-standard-library/panic";
+import {
+  ifNotNone,
+  Optionable,
+} from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/option";
 import { logger } from "../../utils/better-returns/errors-as-values/src/utils/console";
 import type { OrderedRecord } from "../../utils/better-standard-library/RecordCompatibeArray";
 import type { Port } from "../../types/networking/port";
+import { parseTypes } from "../../types/parseTypes";
 
 const hooks = ["before", "after"] as const;
 type MakeHookType<T extends string> = `${T}Message`;
@@ -23,7 +27,10 @@ type HooksEntry<HookNames, HandlerParamType, HandlerReturnType> = {
 // note unlike the WebsocketClient this does not reuse connection but establishes new ones each time start is called
 class WebsocketListener<
   HookNames extends string,
-  Hooks extends OrderedRecord<HookNames, HooksEntry<HookNames, object, object>[]>,
+  Hooks extends OrderedRecord<
+    HookNames,
+    HooksEntry<HookNames, object, object>[]
+  >,
   LastHookReturnType extends Record<string, unknown> = {
     headers: { [x: string]: Optionable<string> };
   },
@@ -41,52 +48,60 @@ class WebsocketListener<
     this.endpoints = endpoints;
   }
 
-
-  use(wsListener: WebsocketListener)
+  use(wsListener: WebsocketListener);
 
   public k() {
-    return this.hooks.jojo
+    return this.hooks.jojo;
   }
 
-  startGui(port: Port) {
-    
-  }
+  startGui(port: Port) {}
 
-
-  before<HookName extends HookNames, NewHookName extends string, >(v: {
-    name: NewHookName
-    nameOfHookWhichWeWantToBeBefore: HookName,
+  before<HookName extends HookNames, NewHookName extends string>(v: {
+    name: NewHookName;
+    nameOfHookWhichWeWantToBeBefore: HookName;
     // type: Hooks[HookName]["type"],
-    handler: (v: Parameters<Hooks[HookName]["handler"]>[0]) => Parameters<Hooks[HookName]["handler"]>[0]
+    handler: (
+      v: Parameters<Hooks[HookName]["handler"]>[0]
+    ) => Parameters<Hooks[HookName]["handler"]>[0];
   }): WebsocketListener<
     HookNames | NewHookName,
-    Hooks & HooksEntry<NewHookName, Parameters<Hooks[HookName]["handler"]>[0], NewHookReturnType>,
+    Hooks &
+      HooksEntry<
+        NewHookName,
+        Parameters<Hooks[HookName]["handler"]>[0],
+        NewHookReturnType
+      >,
     LastHookReturnType,
     LastHook
   > {
-    const newHookType = this.hooks[v.nameOfHookWhichWeWantToBeBefore].type
+    const newHookType = this.hooks[v.nameOfHookWhichWeWantToBeBefore].type;
 
-    this.hooks
-  
-  return 
+    this.hooks;
+
+    return;
   }
-
 
   hook<
     HookReturnTypeKeys extends string,
     HookName extends string,
     HookReturnType extends { [K in HookReturnTypeKeys]: unknown }
   >(v: {
-    name: HookName /* extends HookNames ? never : HookName */ ;
+    name: HookName /* extends HookNames ? never : HookName */;
     type: HookTypes;
     handler: (v: LastHookReturnType) => HookReturnType;
   }): HookName extends ""
     ? never
-    // : HookName extends HookNames
-    // ? never
-    :  WebsocketListener<
+    : // : HookName extends HookNames
+      // ? never
+      WebsocketListener<
         HookNames | HookName,
-        OrderedRecord<HookNames | HookName, [...Hooks["getElementsType"],HooksEntry<HookNames & HookName, LastHookReturnType, HookReturnType>]>,
+        OrderedRecord<
+          HookNames | HookName,
+          [
+            ...Hooks["getElementsType"],
+            HooksEntry<HookNames & HookName, LastHookReturnType, HookReturnType>
+          ]
+        >,
         HookReturnType,
         (v: LastHookReturnType) => HookReturnType
       > {
@@ -301,70 +316,91 @@ export class WebsocketClient<
   }
 }
 
-
-
 class ExtendedWebsocketListener<
   HookNames extends string,
-  Hooks extends OrderedRecord<HookNames, HooksEntry<HookNames, unknown, unknown>[]>,
+  Hooks extends OrderedRecord<
+    HookNames,
+    HooksEntry<HookNames, unknown, unknown>[]
+  >,
   LastHookReturnType extends Record<string, unknown>,
   LastHook extends (v: unknown) => LastHookReturnType
 > extends WebsocketListener<HookNames, Hooks, LastHookReturnType, LastHook> {
-  constructor(
-    messageHandlers: any,
-    url: WebsocketUrl,
-    endpoints: any
-  ) {
+  constructor(messageHandlers: any, url: WebsocketUrl, endpoints: any) {
     super(messageHandlers, url, endpoints);
   }
 
-
   guard(v: {
-    schema: ZodObject<ZodRawShape>,
-    name: string,
-    type: HookTypes,
+    schema: ZodObject<ZodRawShape>;
+    name: string;
+    type: HookTypes;
     config?: {
-      handlerOnFailedValidation: (v: LastHookReturnType) => void // = (v) => {console.log(JSON.stringify(v), "didnot pass guard")} //TODO:  in the future make it so that it just sends an error message and closes the connection
-    }  
+      handlerOnFailedValidation: (v: LastHookReturnType) => void; // = (v) => {console.log(JSON.stringify(v), "didnot pass guard")} //TODO:  in the future make it so that it just sends an error message and closes the connection
+    };
   }) {
     return this.hook({
       ...v,
-      handler: ctx => {
-        const validationResult = v.schema.partial().safeParse(v)
+      handler: (ctx) => {
+        const validationResult = v.schema.partial().safeParse(v);
         if (validationResult.success) {
-          return v
-        } 
-        ifNotNone(v.config, (c => c.handlerOnFailedValidation(ctx)))
-        throw new Error("")
-
-
-      } 
-    })
+          return v;
+        }
+        ifNotNone(v.config, (c) => c.handlerOnFailedValidation(ctx));
+        throw new Error("");
+      },
+    });
   }
 
-  match(v: {// match is helpful when you want to defend from extra fields, for example to protect from params pollution
+  match(v: {
+    // match is helpful when you want to defend from extra fields, for example to protect from params pollution
 
-    schema: ZodObject<ZodRawShape>,
-    name: string,
-    type: HookTypes,
+    schema: ZodObject<ZodRawShape>;
+    name: string;
+    type: HookTypes;
     config?: {
-      handlerOnFailedValidation: (v: LastHookReturnType) => void // = (v) => {console.log(JSON.stringify(v), "didnot pass guard")} //TODO:  in the future make it so that it just sends an error message and closes the connection
-    } 
+      handlerOnFailedValidation: (v: LastHookReturnType) => void; // = (v) => {console.log(JSON.stringify(v), "didnot pass guard")} //TODO:  in the future make it so that it just sends an error message and closes the connection
+    };
   }) {
     return this.hook({
       ...v,
-      handler: ctx => {
-        const validationResult = v.schema.strict().safeParse(v)
+      handler: (ctx) => {
+        const validationResult = v.schema.strict().safeParse(v);
         if (validationResult.success) {
-          return v
-        } 
-        ifNotNone(v.config, (c => c.handlerOnFailedValidation(ctx)))
-        throw new Error("")
-
-
-      } 
-    })
+          return v;
+        }
+        ifNotNone(v.config, (c) => c.handlerOnFailedValidation(ctx));
+        throw new Error("");
+      },
+    });
   }
 
+  private parseJson() {
+    return this.hook({
+      name: "jsonParser",
+      type: "beforeMessage",
+      handler: (v) => {
+        return JSON.parse(v);
+      },
+    });
+  }
+
+  private parseYml() {
+    return this.hook({
+      name: "parseYlm",
+      type: "beforeMessage",
+      handler: (v) => {
+        return ymlParser(v);
+      },
+    });
+  }
+
+  parse(type: parseTypes) {
+    switch (type) {
+      case "json":
+        return this.parseYml();
+      case "yml":
+        return this.parseJson();
+    }
+  }
 }
 
 export { WebsocketListener };

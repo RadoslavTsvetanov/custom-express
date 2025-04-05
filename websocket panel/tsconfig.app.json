@@ -6,7 +6,10 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -22,5 +25,14 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "../packages/better-standard-library/safe-envs/env.ts",
+    "../packages/better-standard-library/data_structures/getSetClass.ts",
+    "../packages/better-standard-library/data_structures/contextsafetype.ts",
+    "../packages/better-standard-library/panic.ts",
+    "../packages/better-standard-library/mapObject.ts",
+    "../packages/better-standard-library/logging.ts",
+    "../packages/better-standard-library/types/voidcallback.ts"
+  ]
 }

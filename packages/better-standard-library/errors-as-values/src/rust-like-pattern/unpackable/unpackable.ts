@@ -1,4 +1,4 @@
-import { panic } from "../../../../../panic";
+import { panic } from "../../../../../../../../packages/better-standard-library/panic";
 import { type ILeftRight, LeftRight } from "../leftRight";
 import { Mapable } from "../mapable";
 export interface IUnpackable<T> {
@@ -9,7 +9,7 @@ export interface IUnpackable<T> {
   unpack_or: (d: () => T) => T;
   unpack_with_default: (d: T) => T;
   expect: (msg: string) => T;
-  ifCanBeUnpacked: (handler: (v: T) => void) => void
+  ifCanBeUnpacked: (handler: (v: T) => void) => void;
 }
 
 export class CustomUnpackable<T> implements IUnpackable<T> {
@@ -32,9 +32,9 @@ export class CustomUnpackable<T> implements IUnpackable<T> {
   // }
   ifCanBeUnpacked(handler: (v: T) => void): void {
     if (this.canBeUnpacked()) {
-     handler(this.value);
-   }
-  } 
+      handler(this.value);
+    }
+  }
 
   expect(msg: string): T {
     if (!this.canBeUnpacked()) {
@@ -44,11 +44,10 @@ export class CustomUnpackable<T> implements IUnpackable<T> {
   }
   unpack(errorMsg?: string): Mapable<T> {
     if (!this.canBeUnpacked()) {
-      
       if (errorMsg) {
-        panic(errorMsg)
+        panic(errorMsg);
       }
-      
+
       throw new Error(this.cantUnpackMessage);
     }
     return new Mapable(this.value);
