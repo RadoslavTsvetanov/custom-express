@@ -225,7 +225,48 @@ there is also after hook which works exaclty as you think it would
 #### afterHandle
 
 
-it is exexcuted after you handler and it is useful for common scenarios, for example you have two handlers and after they are done each of them needs to 
+it is exexcuted after you handler and it is useful for common scenarios, for example you have two handlers and after they are done each of them needs to do the same thing. 
+
+Whe  used in normal http api you have access to the response object before it is being sent so you can use it to modify the request before it is sent. For example you do an operation on the backend and if the operation was succefull you refresh the user token 
+
+```ts
+handle("/do-something", (req) => {
+	
+	const result = trySomething("")
+	return {
+		wasSuccesful: result.success
+	}
+
+})
+handle("do-anotherthing", req => {
+
+		const result = tryAnotherThing("")
+		return {
+			wasSuccesful: result.success
+		}
+	}
+)
+afterHandle(req, res) => {
+
+	if(res.wasSuucefull){
+		res.headers.newToken = genToken(req.userId) // yes you get access to the request that the handker 			recieved too
+	}
+}
+
+}
+```
+
+#### Disclaimer i took a lot of inspiration from hono and elysia js for these hooks (btw take a look at them one more time to get more features)
+
+without this you would have needed to do either do the logic in the two routes seperately ir to wrap them both in a function.  Think of this like a middleware you can put after requests not before them
+
+##### Using subrouters for optional hooks
+
+since hooks are on router level 
+
+```ts
+
+```
 
 # Features 
 
