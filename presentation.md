@@ -1,6 +1,5 @@
 # Slides
 
-## Tell 
 
 ## Intro 
 
@@ -13,20 +12,34 @@
 ### Ask if they have ever used code genration and forgot to rerun the generator after a change and got stuck wondering where is the error meanwhile they just needed to run it again 
 
 
-or instead if asking mention the countless times you have made these mistakes and have seen others do them too and windered couldnt someone make a backend toolkit which solves all these issues
+### or instead if asking mention the countless times you have made these mistakes and have seen others do them too and windered couldnt someone make a backend toolkit which solves all these issues
 
+### Say that your TYPE SAFE library fixes or atleast tries to fix these issues 
 
 ## Type safety
 
-### Explain how it it helps with the all the problems and how auto infering clients is better than code generation for prototyping 
+### Explain how it it helps with the all the problems and how auto infering clients is better than code generation for prototyping and ease of mind 
 
-### Effects 
+### Tell how with type safety you offload some mental bandwidth to the compiler and the more work i can outsource to the compiler the better especially if it is someredunandt thing like remembering request types, names that are alredy used etc....
 
-#### emphasize how the more code you have the more your brain is clutered with when you are reading code so it is very important for your code to be as simple as possible and as short as possible (however you shouldnt sacrifise a little bit of less code for a lot more complexity, hence why overabstraction is bad)
+### Explain why its so great and you emphasize it so much
 
-#### tell how effects remove a lot of code while  minimizing the abstraction so that the logic being kept from you is minimal 
+### Features
 
-show example of how much cleaner it is
+### Go through the docs for this but make a Section called THE eSSENTIALS 
+
+### The slide should be called Features and when you get to it say since i have formatted it pretty well in the docs and i dont think i can do it as good here with examples and etc... we will see it from the docs, then open nvim or the browser and go to essentials page in the docs 
+
+
+### Effects
+
+#### Tell how to make the world a better place you also included some things in the framework as utilities that are not specific  
+
+#### emphasize how the more code you have the more your brain is clutered with when you are reading code so it is very important for your code to be as simple as possible and as short as possible (however you shouldnt sacrifise a little bit of less code for a lot more complexity, hence why overabstraction is bad) 
+
+#### tell how effects remove a lot of code while  minimizing the abstraction so that the logic being kept from you is minimal and can be easily guesses
+
+#### show example of how much cleaner it is
 
 #### tell how annopying and hard to read is to have very nested function calls 
 

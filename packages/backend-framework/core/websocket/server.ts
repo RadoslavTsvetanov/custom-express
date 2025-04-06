@@ -12,7 +12,7 @@ import {
 } from "../../utils/better-returns/errors-as-values/src/rust-like-pattern/option.ts";
 import type { keyofonlystringkeys } from "../../utils/metaprogramming/keyofonlystringkeys.ts";
 import { GetSet } from "../../../../packages/better-standard-library/data_structures/getSetClass.ts";
-import { entries } from "../../../../packages/better-standard-library/mapObject.ts";
+import { entries } from "../../../better-standard-library/src/mapObject.ts";
 import { BetterArray } from "../../utils/better-standard-library/array.ts";
 import type { VCallback } from "../../../../packages/better-standard-library/types/voidcallback.ts";
 import type {

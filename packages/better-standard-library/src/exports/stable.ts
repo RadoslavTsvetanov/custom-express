@@ -1,0 +1,1 @@
+import * as r from "@better-standard-internal"

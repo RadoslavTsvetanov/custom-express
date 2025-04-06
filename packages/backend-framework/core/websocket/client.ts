@@ -1,7 +1,7 @@
 import type { WebsocketUrl } from "../../types/networking/urls/websocket";
 import type { ChannelConfig } from "./types";
 import type { z, ZodObject, ZodRawShape, ZodSchema } from "zod";
-import { panic } from "../../../../packages/better-standard-library/panic";
+import { panic } from "../../../better-standard-library/src/panic";
 import {
   ifNotNone,
   Optionable,
