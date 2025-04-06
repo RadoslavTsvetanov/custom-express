@@ -1,9 +1,0 @@
-# 520 error is thrown since sometimes the frontend recieves an empty response -> basically the proxy sends an empty response
-#
-#
-# also the service directly also everytime gives a response
-#
-#
-#
-#
-# so the problem is in the reverse proxy and more specifically the problem is in that the reverse proxy ssometimes sends a empty response
