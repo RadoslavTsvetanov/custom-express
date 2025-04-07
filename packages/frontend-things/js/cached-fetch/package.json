@@ -1,3 +1,12 @@
 {
-    "name": "fetch-which-based-on-a-handler-saves-response-and-returns-it-or-performs-the-request-again"
+    "name": "fetch-which-based-on-a-handler-saves-response-and-returns-it-or-performs-the-request-again",
+    "version": "1.0.0",
+    "type": "module",
+    "dependencies": {
+        "better-standard-library": "workspace:*",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
 }

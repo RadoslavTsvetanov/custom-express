@@ -1,3 +1,12 @@
 {
-    "name": "better-standard-library-for-js" 
+    "name": "better-standard-library" ,
+    "version": "1.0.0",
+  "type": "module",
+    "dependencies": {
+        "better-standard-library": "workspace:*",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
 }

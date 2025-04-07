@@ -76,9 +76,24 @@ much cleaner if you ask me
 
 
 
-#### my own async api spec
+## my own async api spec
 
-##### tell how every language agnostic protocol needs a way to define its spec in a language agnostic way 
+### tell how every language agnostic protocol needs a way to define its spec in a language agnostic way 
 
 now tell about asuync api spec and how you were so excited to not need to think of this for your app but then you while you were hit with somthing while reading the spec 
 
+## technologies
+
+### ts (although a bit redundant i must say it is written in ts since there are plenty of ts libs that are not written in ts as strage as it sounds, for example hono, or nest which uses a but of rust or it was another framework idk)
+
+#### I use it since it is the language i am using the most and so i likely need this the most in ts 
+
+#### Contrary to popular opinions ts is also a very good language (superset to be exact) thanks to its very rich type system one that i have seen inly scala to be better
+
+#### it is the most used language for frontend development and this framework tries to make connecting a backend and a fronted easy 
+
+### Monorepo (turborepo or nx) although not a typical tehnology i am deeply indebted to it since it made the dev process of maintaining  multiple related but not united by bussiness logic projects very easy 
+
+### express since i did not want to reinvent the wheel for http rpute handling 
+
+### uwebscokets since they are faster and better alternative to ws

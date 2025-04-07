@@ -1,1 +1,9 @@
-import * as r from "@better-standard-internal"
+import * as e from "../data_structures/RecordCompatibeArray"
+
+
+
+
+export const stable = {
+    ...e,
+    
+}
