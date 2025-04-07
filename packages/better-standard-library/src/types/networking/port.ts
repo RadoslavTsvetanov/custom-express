@@ -1,5 +1,4 @@
-import { ContextSafeType } from "../baseContextSafeTypet";
-
+import { ContextSafeType } from "../../errors-as-values/baseContextSafeTypet";
 
 export class Port extends ContextSafeType<number>{
     customValidator(v: number): boolean {

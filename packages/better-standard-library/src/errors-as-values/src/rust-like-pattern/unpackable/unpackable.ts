@@ -1,4 +1,4 @@
-import { panic } from "../../../../../../../../packages/better-standard-library/panic";
+import { panic } from "../../../../panic";
 import { type ILeftRight, LeftRight } from "../leftRight";
 import { Mapable } from "../mapable";
 export interface IUnpackable<T> {

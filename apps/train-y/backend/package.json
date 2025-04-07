@@ -1,11 +1,11 @@
 {
-  "name": "cached-fetch",
+  "name": "@train-y/backend",
   "version": "1.0.0",
-  "type": "module",
   "module": "index.ts",
-  "dependencies": {
+  "type": "module",
+  "devDependencies": {
     "@types/bun": "latest",
-    "@custom-express/better-standard-library": "1.0.0"
+    "@custom-express/framework":"1.0.0" 
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

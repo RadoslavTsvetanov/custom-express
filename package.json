@@ -1,11 +1,11 @@
 {
   "name": "custom-express",
+  "version": "1.0.0",
   "module": "index.ts",
   "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
+  "private": true,
+  "scripts": {
+    "start": "bun run index.ts"
   },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  }
+  "workspaces": ["packages/**/*"]
 }

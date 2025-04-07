@@ -1,6 +1,8 @@
 import { Optionable } from "../errors-as-values/src/rust-like-pattern/option";
 import { GetSet } from "./getSetClass";
 
+type WithKey<T> = {key: string} & T
+
 type Widen<T> = T extends string
   ? string
   : T extends number
@@ -16,7 +18,7 @@ type Widen<T> = T extends string
 export class OrderedRecord<
   V extends readonly Schema[],
   Schema extends { key: string }
-> {
+> extends Array<Schema>{
   public get getElementsType(): V {
     // use only as means to gget the type of the elemnts inside e.g. get the V generic
     return;
@@ -24,6 +26,7 @@ export class OrderedRecord<
   public readonly elements: GetSet<V> = new GetSet<V>([] as unknown as V);
 
   constructor(elements: V) {
+    super(...elements)
     this.elements.setV(elements);
   }
 
@@ -105,6 +108,9 @@ export class OrderedRecord<
       return new OrderedRecord<typeof newArray>(newArray);
     });
   }
+
+
+  reduce
 }
 
 // // EXample usage  and how it should work

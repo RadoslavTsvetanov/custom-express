@@ -1,14 +1,6 @@
-import type { VCallback } from "../types/voidcallback";
-import {
-  Mapable,
-  type IMapable,
-} from "../../../websocket panel/src/utils/better-returns/errors-as-values/src/rust-like-pattern/mapable";
-import {
-  ifNotNone,
-  Optionable,
-} from "../../../websocket panel/src/utils/better-returns/errors-as-values/src/rust-like-pattern/option";
+import type { IMapable, ISimpleMapable } from "../errors-as-values/src/rust-like-pattern/mapable";
 
-export class GetSet<V> implements IMapable<V> {
+export class GetSet<V> implements ISimpleMapable<V> {
   private v: V;
 
   private onSet: VCallback<V> = (v: V) => {};
@@ -25,9 +17,8 @@ export class GetSet<V> implements IMapable<V> {
   //     return new Mapable(this.v);
   // }
 
-  map<ReturnType>(func: (v: V) => ReturnType): ReturnType {
-    return func(this.value);
-  }
+  simpleMap: (func: (v: V) => V) => V;
+
 
   get value(): V {
     // this.onGet(this.v)

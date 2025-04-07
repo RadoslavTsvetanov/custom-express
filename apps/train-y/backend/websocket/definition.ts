@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { CustomWebSocketRouter } from "../../../../src/builtins/websocket/server";
 import { mutationsSchemas, schemas } from "../types/schemas";
-
+import {CustomWebSocketRouter} from "@custom-express/framework"
 
 export const defintion = new CustomWebSocketRouter({
     train: {
