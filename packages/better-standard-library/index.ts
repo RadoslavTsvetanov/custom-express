@@ -1,3 +1,4 @@
+import { SpecRoutePathEndpointEntry } from './../types/openapi/main';
 export * from "./src/panic"
 export * from "./src/data_structures/RecordCompatibeArray"
 export * from "./src/data_structures/array"
@@ -11,3 +12,7 @@ export * from "./src/types/networking/urls/websocket"
 export * from "./src/metaprogramming/OptionalObject"
 export * from "./src/metaprogramming/With"
 export * from "./src/types/UnknownRecord"
+export * from "./src/mapObject"
+export * from "./src/errors-as-values/mapThatIsLikeInRust"
+export * from "./src/metaprogramming/prefix"
+export * from "./src/metaprogramming/afterfix"

@@ -1,12 +1,12 @@
-import { OrderedRecord, URecord, With } from "@custom-express/better-standard-library";
-import { z, ZodSchema, ZodUnknown } from "zod";
+import { AfterfixKeysOfRecord, ITrueMap, OrderedRecord, URecord, With } from "@custom-express/better-standard-library";
+import { z, ZodObject, ZodRawShape, ZodSchema, ZodUnknown } from "zod";
 import { IncomingMessage } from 'http';
 
 // -------------------------------------
 // Utility Types
 // -------------------------------------
 
-type Handler<Context, ReturnType> = (context: Context) => ReturnType;
+export type Handler<Context, ReturnType> = (context: Context) => ReturnType;
 type WithKey<T extends URecord> = With<T, "key", string>;
 
 // A generic hook handler function type
@@ -29,14 +29,23 @@ export interface TypedMessage<ChannelNames extends string, Payload> {
 }
 
 type MessageHandler<ContextType, ReturnType> = {
-  hooks: ServerHooks<
+  hooks: AfterfixKeysOfRecord<ServerHooks<
     OrderedRecord<[], WithKey<{ execute: Handler<unknown, unknown> }>>,
-    OrderedRecord<[], WithKey<{ execute: Handler<unknown, unknown> }>>, string>;
+    OrderedRecord<[], WithKey<{ execute: Handler<unknown, unknown> }>>, string
+  >, "r">;
   handler: Handler<ContextType,ReturnType>; // if nothing is return from a handler its simpley that after hooks wont be ran  
 };
 
 export type ChannelConfig<Messages extends string> = {
-  [Message in Messages]: MessageHandler<unknown, unknown>;
+  messagesItCanReceive: Record<
+    string,
+    {
+      config: ITrueMap<MessageHandler<unknown, unknown>>,
+      parse: ZodObject<ZodRawShape>
+    }
+  >
+    messagesItCanSend: Record<string, ZodObject<ZodRawShape>>
+  
 };
 
 // -------------------------------------
@@ -71,8 +80,8 @@ export type ServerHooks<
     WithKey<{execute: Handler }>> = OrderedRecord<[], WithKey<{ execute: Handler<unknown, unknown> }>>,
   Errors extends string = string
 > = {
-  beforeRequest:  Hook<TypedMessage<unknown, unknown>>  /* BeforeRequest */;
-  afterRequest: Hook<TypedMessage<unknown, unknown>>/* AfterRequest */;
+  beforeHandle:  ITrueMap<Hook<TypedMessage<unknown, unknown>>>  /* BeforeRequest */;
+  afterHandle:   ITrueMap <Hook<TypedMessage<unknown, unknown>>>/* AfterRequest */;
   onError: (error: Errors) => void;
 };
 

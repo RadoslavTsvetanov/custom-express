@@ -1,3 +1,5 @@
+import type { TrueMap } from "../errors-as-values/mapThatIsLikeInRust";
+import type { Mapable } from "../errors-as-values/src/rust-like-pattern/mapable";
 import { Optionable } from "../errors-as-values/src/rust-like-pattern/option";
 import { GetSet } from "./getSetClass";
 
@@ -15,7 +17,7 @@ type Widen<T> = T extends string
   ? { [K in keyof T]: Widen<T[K]> }
   : T;
 
-export class OrderedRecord<
+export class OrderedRecordBase<
   V extends readonly Schema[],
   Schema extends { key: string }
 > extends Array<Schema>{
@@ -110,7 +112,6 @@ export class OrderedRecord<
   }
 
 
-  reduce
 }
 
 // // EXample usage  and how it should work
@@ -141,3 +142,14 @@ export class OrderedRecord<
 // fruits
 //   .getByPosition(2)
 //   .ifCanBeUnpacked((v) => v /* {readonly key: "lolo";readonly value: 4;}*/);
+
+export class OrderedRecord
+  <
+    V extends readonly Schema[],
+    Schema extends { key: string }
+  >
+  extends OrderedRecordBase
+  <
+    V, 
+    Schema 
+  > implements TrueMap<V>{}

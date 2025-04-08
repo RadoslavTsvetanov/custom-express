@@ -1,7 +1,8 @@
+import { id } from './../../../../../apps/train-y/backend/types/id';
 import { WebSocketServer, WebSocket } from "ws";
 import { z, ZodObject, type ZodRawShape } from "zod";
-import { BetterArray, GetSet, ifNotNone, keyofonlystringkeys, Optionable, panic, Port, VCallback } from "@custom-express/better-standard-library"
-import { ChannelConfig, GlobalHooks, GlobalOnlyHooks, ServerHooks, TypedMessage } from "../types";
+import { BetterArray, entries, GetSet, ifNotNone, keyofonlystringkeys, Optionable, panic, Port, VCallback } from "@custom-express/better-standard-library"
+import { ChannelConfig, GlobalHooks, GlobalOnlyHooks, Handler, ServerHooks, TypedMessage } from "../types";
 
 
 // ---------
@@ -18,6 +19,13 @@ export class CustomWebSocketRouter<
   >,
   Context extends Record<ContextKeys, unknown>,
   ContextKeys extends string,
+
+  LastHookReturnType extends Record<string, unknown> = {
+    headers: { [x: string]: Optionable<string> };
+  },
+  LastHook extends (v: unknown) => LastHookReturnType = (v: {
+    headers: { [x: string]: Optionable<string> };
+  }) => LastHookReturnType,
   BaseRequest = {}
 > {
   public readonly prefix: GetSet<Optionable<string>>
@@ -30,15 +38,9 @@ export class CustomWebSocketRouter<
   protected readonly channels: Channels;
   protected hooks: Optionable<GlobalHooks>;
 
-
-
-
   constructor(endpoints: Channels, context?: Context) {
     this.channels = endpoints ?? ({} as Channels);
   }
-
-
-
 
   public plug<
     NewChannelNames extends string,
@@ -123,9 +125,6 @@ export class CustomWebSocketRouter<
 
           wss.on("connection", (ws, req) => {
 
-
-
-
             this.hooks.ifCanBeUnpacked(({ onConnection }) => {
               onConnection.independent.forEach(handler => handler({ ws, message: req }))
 
@@ -137,11 +136,7 @@ export class CustomWebSocketRouter<
 
             ws.on("message", async (message) => {
 
-
               // TODO: introdice a hook which intercepts the message before it si being parsed 
-
-
-
 
               this.transformMsg(message.toString()).try({
 
@@ -158,18 +153,23 @@ export class CustomWebSocketRouter<
                 ifNotNone: async (parsedMessage) => {
 
                   try {
-                    this.hooks.ifCanBeUnpacked(({ beforeRequest }) => {
-                      beforeRequest.independent
-                        .forEach(handler => handler({
-                          ws,
-                          message: parsedMessage
-                        }))
-                    })
+                    this.hooks.ifCanBeUnpacked(({ beforeHandle, afterHandle, onError }) => {
+                      beforeHandle.map(hook => {
+                        hook.independent.forEach(handler => handler({
+                            ws,
+                            message: parsedMessage
+                          }))
+                        hook.ordered.reduce(
+                          (acc, fn) => fn.handler(acc),
+                          hook.ordered[0].handler({ ws, message: req }) // Call the first function to get the initial value
+                        )
+                      })
 
+                    })
                     new Optionable(
                       BetterArray.new(entries(this.channels)).filter(
                         ([channelName, channelConfig]) =>
-                          channelName === parsedMessage.channel
+                          channelName === parsedMessage.channel // iif you are searching the cause of a bug uit probably is not this so dont bother trying to uderstand why the compiler isnt happy here
                       ).normalArray[0]
                     ).try({
                       ifNone: () =>
@@ -180,9 +180,8 @@ export class CustomWebSocketRouter<
 
                       ifNotNone: ([channelName, channelConfig]) => {
                         new Optionable(
-                          this.channels[channelName].messagesItCanReceive[
-                          parsedMessage.message as keyof Channels[keyof Channels]
-                          ]
+                          channelConfig.messagesItCanReceive[parsedMessage.message /* as keyof Channels[keyof Channels]["messagesItCanReceive"] */]
+
                         ).try({
                           ifNone: () =>
                             console.log(
@@ -192,26 +191,51 @@ export class CustomWebSocketRouter<
                               }`
                             ),
 
-                          ifNotNone: (messageConfig) => {
-                            console.log("f", messageConfig);
-                            console.log("[][]", parsedMessage.payload);
-                            messageConfig.parse(parsedMessage.payload);
+                          ifNotNone: ({ config, parse, }) => {
+                            // console.log("f", messageConfig);
+                            // console.log("[][]", parsedMessage.payload);
+                            config.map(
+                              ({ handler, hooks: { beforeHandler, afterHandler } }) => {
+
+                                beforeHandler.map(hook => {
+                                  hook.independent.forEach(h => h({ ws, message: parsedMessage }));
+                                  [hook.ordered.reduce(
+                                    (acc, fn) => fn.handler(acc),
+                                    hook.ordered[0].handler({ ws, message: req }) // Call the first function to get the initial value
+                                  )]
+                                    .map(pipeResult => [handler(pipeResult)]
+                                      .map(resultOfHandler => {
+                                        afterHandler.map(hook => {
+                                          hook.independent.forEach(h => ({ ws, message: resultOfHandler }))
+                                          hook.ordered.reduce(
+                                            (acc, fn) => fn.handler(acc),
+                                            hook.ordered[0].handler({ ws, message: resultOfHandler }) // Call the first function to get the initial value
+                                          )
+                                        })
+                                      })
+                                    )
+                                })
+
+
+                              })
                           },
                         });
                       },
                     });
 
-
-
                     this.hooks.ifCanBeUnpacked(hooks => {
-                      hooks.afterRequest.independent.forEach(handler => handler(/* pasaas the result of the handler of the executed message */))
+                      hooks.afterHandle.map(hook => {
+
+                        hook.independent.forEach(handler => handler(/* pasaas the result of the handler of the executed message */))
+                        hook.ordered.reduce
+                      })
                     })
                   } catch (err) {
 
                     this.hooks.ifCanBeUnpacked(({ onError }) => onError(err))
 
                     // here call the onError handler if the message handler 
-                    handler.onError.try({
+                    onError.try({
                       ifNotNone: () => { }
                     })
 
@@ -269,4 +293,11 @@ export class CustomWebSocketRouter<
       ...
     })
   }
+
+
+  hook<NewHookName extends string, HookReturnType>(config: {
+    name: NewHookName,
+    type: string,
+    handler: Handler<LastHookReturnType,HookReturnType> 
+  }){} // adds a new hook 
 }
