@@ -1,27 +1,22 @@
-# custom-express
+# Blazesockets 
 
-Wirting more with less
+Writing more with less
 
-## Documentation about the websocket
 
+## Documentation 
 
 #### Hooks 
 
-Note that hooks can be global or local, local hooks behave in the same way but they apply only to one handler and are declared inside the handler and server more as defining clearer steps in a handler (note that like in global each new hook gets the context that the one before it left so the first beforeSend could change what the next beforeSend will have acces to) for example this is cool when we want to loggically seperate the auth step and we will have something like this (see the below example )
-
-life-cycle event is stored as a queue, aka first-in first-out. So Elysia will always respect the order of code from top-to-bottom followed by the order of life-cycle events.
+Note that hooks can be global or local, local hooks behave in the same way but they apply only to one handler and are declared inside the handler and serve as a way of defining clearer steps in a handler (note that like in global each new hook gets the context that the one before it left so the first beforeSend could change what the next beforeSend will have acces to) for example this is cool when we want to loggically seperate the auth step and we will have something like this (see the below example )
 
 Note that if you do not explicitely ovverride the return by default the current handler will pass the context it recieved to the next handler, if you return the END utility variable nothing will be ran after the handler 
 
-```
-import { Elysia } from 'elysia'
-
-new Elysia()
-    .onBeforeHandle(msg => {
+```ts
+    .onBeforeHandle(({msg, ws: s }) => {
     	if(msg.payload.authToken === null){
      	// a token shoukd be provided
      	ws.close()
-      		}
+      }
 	}
         console.log('1')
 	return {...msg, : ""}
@@ -76,19 +71,20 @@ Console should log the following:
 4
 ```
 ##### Sender 
-To avoid redudndancy and code duplication you can hook into the luifecycle of requests into the client to not just the server since logically a websocket is split into a listener and a sender on both sicdes and they expose both expose hooks
+To avoid redudndancy and code duplication you can hook into the luifecycle of requests into the sender (e.g. the sender from the `ws` object provided in the context) to not just the server since logically a websocket is split into a listener and a sender on both sides and they both expose hooks
 
 
 ###### beforeSend 
 
-in the client this hook is ran befire sending the data actually, for example every essage needs to have an id in it so you either do
+in the client this hook is ran before sending the data, for example every message needs to have an id in it so you either do
+
 ```ts
 clientBuilder.generateClient().map(a => {
-a.train.sendalert({...rest_of_data, id: id})
-a.train.sendMessage({....rest_of_the_data, id: id})
+  a.train.sendalert({...rest_of_data, id: id}) a bit redundant 
+  a.train.sendMessage({....rest_of_the_data, id: id}) a bit redundant 
 })
 
-or you do 
+//  or you do 
 
 clientBuilder.generateClient({
 beforeSend: msg =>  {...msg, id: getID() /* yes you add it  */ }
@@ -100,7 +96,7 @@ a.train.sendMessage(data)
 
 // it also works like that with creating a server 
 
-definition
+definition // this modifies the sender field of the `ws` object provided to you in the starting point of a message 
 .add({
 beforeSend: msg => msg.payload = {...msg.payload, id: getID() }
 }).
@@ -112,6 +108,20 @@ implement({
 ###### afterSend
 
 runs after each sent message 
+
+*NOTE* since hooks can be global or local here you can too provide a hook only to a group of the handlers,
+for example 
+
+
+```ts
+definition.add({
+  local: {
+    auth: {
+      /// your hooks 
+    } // here you will get intellisense with all the channels you can send messages to 
+  }
+}) // the method is overloaded
+```
 
 
 ##### Listener
@@ -148,33 +158,37 @@ Another use case is to use it for custom parsing for example there is a text for
 
 ###### parse
 
-.parse("json" | "yml")
+ although there is nothing stopping you from using this in a afterHandle stack it is not useful to use it and it will cause bugs probably
 
+```ts
+.parse("json" | "yml")
+```
 
 
 ###### guard
 
-this is a type of beforeHandle which checks if an object has the properties of the schema inside guard and if not it runs a handler, if the handler is left omitted it refuses the connection by default 
+this is a type of beforeHandle which checks if an object has the properties of the schema inside guard and if not it runs a handler, if the handler is left omitted it refuses the connection by default (a reminder it is kept in the same stack as all other beforeHandles) 
 
 example
 ```ts
 ///rest of the code
 .guard({
 id: z.sttring()},
-(ws) => { console.lof("sus user") })
+(ws) => { console.lof("sus user") }) // here we define a handler to run when the validation fails, note that if a guard fails all the hooks after it (beforeHandle ordered, the handler, after Handle ordered hooks). However hooks like afterHandle will be ran since they are ran after every request (this could change in future iterations) 
 
 
 ```
 
 ###### match 
 
-this is a tyope of beforeHandle which checks if a entity is of this type it works like guard but instead of checking if a value is there it also checks for differences and if they differ it triggers the handler which by def is to close the connection
+this is a tyope of beforeHandle which checks if a entity is of this type it works like guard but instead of checking if a value is there it also checks for differences and if they differ it triggers the handler which by def is to close the connection. Regarding to behaviour and failure 9it is the same as `guard`
 
 ###### transform 
 
-a type of beforeHandle which gets the current body and transofrm it into something else, note that depending in the placement it can before a validator or after one and so it can serve different usecases (either make every request sompliant if it before or transform a validated request into something more useful)
+a type of beforeHandle which gets the current body and transofrm it into something else
+*Note* that depending in the placement it can before a validator or after one and so it can serve different usecases (either make every request compliant if it before or transform a validated request into something more useful)
+*Note* : this hook is just a basic hook handler wrapper which enforces you to return something (by something we mean different from `END` too)
 
-###### 
 
 ### Overriding order 
 
@@ -199,16 +213,13 @@ will result into
 ```
 this is helpful if you use a middleware which applies some kind of hook and you want to be before it you can do it like this and not needing to edit the library, To understand this better since the example is not that good imagine this middleware which comes from a node package (e,g, it is not a good idea to edit it)
 
-```
-/ lib code
-app.validate("jaking").validate("omnimaning")
+```ts
+// lib code
+const ingMiddleware  = app.validate("jaking").validate("omnimaning")
 
-/ your code
+// your code
 
-app.use(ingMidlleware)
-
-
-
+app2.use(ingMidlleware)
 ```
 
 
@@ -222,7 +233,7 @@ app.before("omnimaning", { // yeah you can define multiple handlers like that to
 there is also after hook which works exaclty as you think it would 
 
 
-#### afterHandle
+##### afterHandle
 
 
 it is exexcuted after you handler and it is useful for common scenarios, for example you have two handlers and after they are done each of them needs to do the same thing. 
@@ -256,56 +267,36 @@ afterHandle(req, res) => {
 }
 ```
 
-#### Disclaimer i took a lot of inspiration from hono and elysia js for these hooks (btw take a look at them one more time to get more features)
-
 without this you would have needed to do either do the logic in the two routes seperately ir to wrap them both in a function.  Think of this like a middleware you can put after requests not before them
 
-##### Using subrouters for optional hooks
+#### Disclaimer i took a lot of inspiration from hono and elysia js for these hooks (btw take a look at them one more time to get more features)
 
-since hooks are on router level 
 
+##### Using subrouters for conditional hooks
+
+if you apply hooks to a prefixed app or to a certain channel definer they will become local instead if explicitely overriden 
 ```ts
 
 ```
 
-# Features 
+### Utils  
 
-## openapi generation using just ts syntax and express route defining paradigm
+although our core was to simplify the development of websockets we also went our way to define some systems which might not be making building websocket system easier directly we made some utilities which help in day to day writing of logic inside websockets
 
-Example (pseudo ts)
-
-## req validation like in fastapi
-```ts
-
-  app.get(  
-  "/users/:id",
-  {
-    body: z.object({}),
-    params: z.object({}),
-    response: z.object({})
-  }
-  () => {
-
-...
-
-}
-)
+####
 
 
-```
-## better type safety
-
-Although that is bot a fault of express we have added better type safety around some common things you need when making apis
-
-## safe envs 
+#### safe envs 
 we have added a package which provides a type safe way to refrnce envs and also enables you to define custom getters
 
 
-## Building on top of openapi 
+
+
+#### Building on top of openapi 
 
 Openapi is great but i think it can be improved so i extended the openapi schema that way existing tooling can still use the definitions it just wont show/use the extra
 
-### Pseudo open api
+#### Pseudo open api
 
 we call it that since it is openapi but without the full path names but instead relative to the router
 
@@ -358,206 +349,8 @@ const app2 = new WebSExpress()
 
 app.use(app2.getRouter())
 ```
-
-# Use cases
-
-## Standalone project
-
- you can use it as you defacto library and only use it
-
-## Hybrid
-
-you can use it for some path and use express for others since they can easilt morph into one another and like that get the benefits only at the routes you want since  it does come with some negatives and you wouldnt like them to affect your whole code base
-
-you can alsao lpug it into existing express project and never use express again but still not needing to migrate your codebase
-
-
-
-
-
-# Docs
-
-## Getting a never from a function
-
-Getting a never from a function means you mesed something for example 
-
-
-## Note on method chaining 
-
-for ts to make its magic you need to use emthod chaining since for new components to appear on the old type  we need to make an intersection on the types so you need to use method chaining 
-
+-------
 ```ts
-Method Chaining
-
-Elysia code should always use method chaining.
-
-As Elysia type system is complex, every methods in Elysia returns a new type reference.
-
-This is important to ensure type integrity and inference.
-
-import { Elysia
- } from 'elysia'
-
-new Elysia
-()
-    .state
-('build', 1)
-    // Store is strictly typed
-    .get
-('/', ({ store
-: { build
- } }) => build
-)
-    .listen
-(3000)
-
-In the code above state returns a new ElysiaInstance type, adding a build type.
-❌ Don't: Use Elysia without method chaining
-
-Without using method chaining, Elysia doesn't save these new types, leading to no type inference.
-
-import { Elysia
- } from 'elysia'
-
-const app
- = new Elysia
-()
-
-app
-.state
-('build', 1)
-
-app
-.get
-('/', ({ store
-: { build } }) => build
-)
-Property 'build' does not exist on type '{}'.
-
-app
-.listen
-(3000)
-
-We recommend to always use method chaining to provide an accurate type inference.
-```
-
-```ts
- Main Navigation
-Cheat Sheet
-Plugins
-Blog
-
-Sidebar Navigation
-Getting Started
-
-At Glance
-
-Quick Start
-
-Tutorial
-
-Key Concept
-
-Table of Content
-Essential
-
-Route
-
-Handler
-
-Life Cycle
-
-Validation
-
-Plugin
-
-Best Practice
-Patterns
-
-Macro
-
-Configuration
-
-Cookie
-
-Web Socket
-
-Unit Test
-
-Mount
-
-Trace
-Recipe
-
-OpenAPI
-
-Opentelemetry
-
-Drizzle
-
-React Email
-
-Better Auth
-Eden
-
-Overview
-
-Installation
-Eden Treaty
-
-Overview
-
-Parameters
-
-Response
-
-Web Socket
-
-Config
-
-Unit Test
-
-Legacy (Treaty 1)
-
-Eden Fetch
-Plugins
-
-Overview
-
-Bearer
-
-CORS
-
-Cron
-
-GraphQL Apollo
-
-GraphQL Yoga
-
-HTML
-
-JWT
-
-OpenTelemetry
-
-Server Timing
-
-Static
-
-Stream
-
-Swagger
-
-trpc
-Integration
-
-Nextjs
-
-Expo
-
-Astro
-
-SvelteKit
 Key Concept
 We highly recommended you to read this page before start using Elysia.
 
@@ -695,59 +488,11 @@ In this example, ip property is shared between ip and server instance because we
 This force you to think about the scope of each property preventing you from accidentally sharing the property between instances.
 
 Learn more about this in scope.
-Method Chaining
-
-Elysia code should always use method chaining.
-
-As Elysia type system is complex, every methods in Elysia returns a new type reference.
-
-This is important to ensure type integrity and inference.
-
-import { Elysia
- } from 'elysia'
-
-new Elysia
-()
-    .state
-('build', 1)
-    // Store is strictly typed
-    .get
-('/', ({ store
-: { build
- } }) => build
-)
-    .listen
-(3000)
-
-In the code above state returns a new ElysiaInstance type, adding a build type.
-❌ Don't: Use Elysia without method chaining
-
-Without using method chaining, Elysia doesn't save these new types, leading to no type inference.
-
-import { Elysia
- } from 'elysia'
-
-const app
- = new Elysia
-()
-
-app
-.state
-('build', 1)
-
-app
-.get
-('/', ({ store
-: { build } }) => build
-)
-Property 'build' does not exist on type '{}'.
 
 app
 .listen
 (3000)
 
-We recommend to always use method chaining to provide an accurate type inference.
-Dependency
 
 By default, each instance will be re-execute everytime it's applied to another instance.
 
@@ -860,29 +605,11 @@ however for requests defintions (body, parameters etc...) we recommend not using
 ```ts
 
 req.body.hhhh // if not there will resolve to undefined and nullable will throw an error since its undefined not null
-
 ```
-
-```ts
-
-```
-# Questions 
-
-## Why are we using zod 
-
-
-First of all Zod is amazing and allows you to add checks on top of the normal type system
-
-Second since we need to dynamically add information to our openapi spec and types cant be accessed during runtime we are "outsourcing" our types to zod which is an object 
-
-
-
 
 # aim of the project
 - a lightweight library
 - compatilbe with express
-- be as feauture rich as possible without teurning it into a framework
-
 
 # Things to steal feautures from 
 - encore js
@@ -890,175 +617,65 @@ Second since we need to dynamically add information to our openapi spec and type
 - hono js
 - nest js
 
+## examples
 
-# Features that will be implemented nexts
-
-## Guards
-
-https://elysiajs.com/essential/plugin.html#scope, however they will look a bit different you will be defining them on a subroute level since it will be hard to implement them to get to subroutes too, also if you define a guard on the router and then another one on the route level they will combine, on the guards you can define a guard on the 
-query body etc...
-
-They are a bit out of order but guards are abstraction on top of the before and after request hook, before is for the req body, params query etcc... and after is for the response, you can define them on verb and subroute level.
-You could use them on route level but you can just placethe logic inside a customValidator on one of the generic zod types when defining your validator
-
-
-## hooks
-
-like elysia hooks https://elysiajs.com/essential/life-cycle , https://elysiajs.com/integrations/cheat-sheet.html, again hust like the guards they are on the subroute level and implementing them to be passed will be entire feature entirly (we need to decide how will they even be appiled will it be from parent to child or from child to parent). They can be defined on the verb, subrouter and subroute level
-
-
-```ts
-Lifecycle Hook
-
-Intercept an Elysia event in order
-
-See Lifecycle
-
-import { Elysia, t } from 'elysia'
-
-new Elysia()
-    .onRequest(() => {
-        console.log('On request')
-    })
-    .on('beforeHandle', () => {
-        console.log('Before handle')
-    })
-    .post('/mirror', ({ body }) => body, {
-        body: t.Object({
-            username: t.String(),
-            password: t.String()
-        }),
-        afterHandle: () => {
-            console.log("After handle")
-        }
-    })
-    .listen(3000)
-```
-
-## Custom parsers 
-
-You can define a subrouter or a subroute parser which is again an abstraction over the beforeRequest hook they can again be defined on the verb, route and subroute levels 
-
-
-```ts
-Guard
-
-Enforce a data type of sub routes
-
-See Scope
-
-import { Elysia
-, t
- } from 'elysia'
-
-new Elysia
-()
-    .guard
-({
-        response
-: t
-.String
-()
-    }, (app
-) => app
-
-        .get
-('/', () => 'Hi')
-        // Invalid: will throws error, and TypeScript will report error
-        .get
-('/invalid', () => 1)
-Argument of type '() => number' is not assignable to parameter of type 'InlineHandler<MergeSchema<UnwrapRoute<InputSchema<never>, TModule<{}, {}>, "/invalid">, MergeSchema<{}, MergeSchema<{}, { body: unknown; headers: unknown; query: unknown; params: {}; cookie: unknown; response: { 200: string; }; }, "">, "">, "">, { ...; } & { ...; }, "/invalid">'.
-  Type '() => number' is not assignable to type '(context: { body: unknown; query: Record<string, string>; params: {}; headers: Record<string, string | undefined>; cookie: Record<string, Cookie<string | undefined>>; ... 8 more ...; error: <const Code extends 200 | "OK", const T extends Code extends 200 ? { ...; }[Code] : Code extends "Continue" | ... 58 more ... |...'.
-    Type 'number' is not assignable to type 'Response | MaybePromise<string | ElysiaCustomStatusResponse<200, string, 200>>'.
-    )
-    .listen
-(3000)
-```
-
-# What are we currently working on ?
-
-## TypeSockets
-
-we are trying to make end to end typesafe cleint server socket communicstion tooling 
-
-
-Here is roughly what we are trying to achieve: 
-
-
-```ts
-
-
-
-server.channe("/someroute",{
-	onMessage: (msgType: MsgTypes) => {
-		
-	}
-	messagesThatCanBePublished: {
-		quit: { // like this you define the name of the message
-			field: number
-		}
-	
-	}
-})
-
-
-export const server.generateCleint()
-
-
-```
-
-like this you define your ws socket handler as you can see you can define a channel, a channel is like a http route but for websockets and you define the schema of your requests so that you can get typesafety on your client too
-
-
-
-```
-import {client} from "../"
-
-
-client.someRoute.onMessage({
-	quit: (msg: {fieldId}) => {
-			.... // your handler
-		}
-
-
-})
-
-
-
-like this we can define typesafe communication between a cleint and a webso0cket server and this opens the doors to many thiings
-
-
-for example you can create
-
-
-// react component 
-function Hi(){
-	const [name, setName] = usestate<someRoute.quitType>()
-	useEffect(() => {
-
-		cleint.someRoute.onMessage({
-
-			quit: (g) => {
-					setName("gg") // X
-					setNAme(g) will work
-			}
-		})
-		
-	},[])
-
-
-	return <div></div>
-}
-
-
-
-```
-
-
-
-
+To see example usage and some advanced usage (for example how to use guard so that we ensure all messages from a certain channel return a common subset of properties in a type safe way) go to the guthub page and search for the examples folder (TODO: add github link to the examples)
 
 ## Commonly asked questions 
+
+
+### is there a way to port an existing express project to your framework 
+
+Well we are thinking of a silution but for now dont forget that you can use our app inside an existing express app and that way you can have our app as an extension of your 
+
+### Getting a never from a function
+
+Getting a never from a function means you messed something for example adding a channelwith a name of a channel that already is already in use will return never, since we cant place error messages in the type system you can alway run a code that rureturns never to see the runtime error
+
+
+
+
+### typesafety not working 
+you are not method chaining 
+
+```ts
+❌ Broken Method Chaining (no type safety):
+class RpcNode {
+  connect() {
+    console.log("Connected");
+    // Forgot to return 'this'!
+  }
+
+  send(data: string) {
+    console.log(`Sending: ${data}`);
+    return this;
+  }
+}
+
+const node = new RpcNode();
+
+// This will error or not work as expected
+node.connect().send("hello");
+
+✅ Fixed Version (method chaining + type safety):
+
+class RpcNode {
+  connect(): this {
+    console.log("Connected");
+    return this;
+  }
+
+  send(data: string): this {
+    console.log(`Sending: ${data}`);
+    return this;
+  }
+}
+
+const node = new RpcNode();
+
+node.connect().send("hello").connect(); // All good, fully type-safe
+```
+
 
 ### I am using a bundler and the client is outside the root of the project what to do 
 
@@ -1079,7 +696,7 @@ if we make a docker file for the frontend it will throw n error since we are imp
 
 there are 3 solutions
 
-you can publish your backend as an npm package and import the client 
+you can publish your client as an npm package and import the client (i reccoomend setting up a monorepo instead of publishing to npm )
 
 you can out your backend inside the frontend folder for just building the client 
 
