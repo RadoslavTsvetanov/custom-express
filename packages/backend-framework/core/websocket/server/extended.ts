@@ -3,16 +3,24 @@ import { IMapable, ISimpleMapable } from "@custom-express/better-standard-librar
 import { CustomWebSocketRouter } from "./core";
 import { ChannelConfig } from '../types';
 import { z, ZodObject, ZodRawShape } from 'zod';
-import { map, TrueMap } from '@custom-express/better-standard-library';
+import { map, Optionable, TrueMap } from '@custom-express/better-standard-library';
 
 export class EXtended<
   ChannelNames extends string,
   Channels extends Record<
     ChannelNames,
-    ChannelConfig<>
-    >,
+    ChannelConfig<infer T>
+  >,
   Context extends Record<ContextKeys, unknown>,
-  ContextKeys extends string
+  ContextKeys extends string,
+
+  LastHookReturnType extends Record<string, unknown> = {
+    headers: { [x: string]: Optionable<string> };
+  },
+  LastHook extends (v: unknown) => LastHookReturnType = (v: {
+    headers: { [x: string]: Optionable<string> };
+  }) => LastHookReturnType,
+  BaseRequest = {}
 > extends CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys> implements
     ISimpleMapable<
       CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>

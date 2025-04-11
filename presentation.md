@@ -97,3 +97,38 @@ now tell about asuync api spec and how you were so excited to not need to think 
 ### express since i did not want to reinvent the wheel for http rpute handling 
 
 ### uwebscokets since they are faster and better alternative to ws
+
+## Reactive entities
+
+<script>
+although this started as a purely websocket frameowrk i notcied a trend where i am essentially not exposing resources but instead entites whiich have to react to one another i included a thing called reactive entites (TODO: find from your notes the description and insert it)</script>
+
+## Examples
+
+TODO: find an open source project which relies heavily on websockets and show how cleaner it would be with your lib, if you cant find show train-y 
+
+TODO: showcase the reactive entites usage using a simple app and see how muxh easier it is 
+
+## Whats next ?
+
+<script_to_tell>
+Well lets see what we have at github issues, sorry if i am jumping too much between the presentation and external resources but presentations are quite inflexible to the way you can organize data (since markdown altough goated does not able you with as much as a gui can)
+</script_to_tell>
+
+<action>
+switch to your project manager software and switch to the most importnat and start going through them 
+<action>
+
+
+
+<directions>
+also dont forget to mention the refactor part 
+</directions>
+
+<action>
+switch to your types folder
+</action>
+
+<script>
+also another thing that is very very important is to find a person who understands typescript more than me to help me refactor this abomination since adding a new type here gets exponentially harder and harder and i have no idea how to manage this. And why i am emphasizing on this? - well unlike most projects you see on the fest or hacktues where the ideas are left in the trash bin after the event and the fufture plans slide is therre just because it should be i really believe this is a thing that will actually be used and willl continue maintaining it 
+</script>

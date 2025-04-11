@@ -111,37 +111,36 @@ export class OrderedRecordBase<
     });
   }
 
-
 }
 
 // // EXample usage  and how it should work
-// const initialElements = [
-//   { key: "apple" as const, value: 10 },
-//   { key: "banana" as const, value: 20 },
-// ] as const;
-// const ggg = new OrderedRecord(initialElements);
-// // Create an OrderedRecord instance
-// const fruits = ggg
-//   .add({
-//     key: "lolo",
-//     value: 4,
-//   } as const)
-//   .add({
-//     value: 6,
-//     key: "koiki",
-//   } as const); // again important to be as const to get the type info
+const initialElements = [
+  { key: "apple" as const, value: 10 },
+  { key: "banana" as const, value: 20 },
+] as const;
+const ggg = new OrderedRecord(initialElements);
+// Create an OrderedRecord instance
+const fruits = ggg
+  .add({
+    key: "lolo",
+    value: 4,
+  } as const)
+  .add({
+    value: 6,
+    key: "koiki",
+  } as const); // again important to be as const to get the type info
 
-// type j = (typeof fruits)["elements"]["value"]["3"];
+type j = (typeof fruits)["elements"]["value"]["3"];
 
-// fruits.toNormalObject.apple.value; // shpuld be of type 1-
-// fruits.toNormalObject.koiki.value; // should be of type 6
+fruits.toNormalObject.apple.value; // shpuld be of type 1-
+fruits.toNormalObject.koiki.value; // should be of type 6
 
-// fruits.elements.value[3]; // should be of {6, "koiki"}
-// // ^?
+fruits.elements.value[3]; // should be of {6, "koiki"}
+// ^?
 
-// fruits
-//   .getByPosition(2)
-//   .ifCanBeUnpacked((v) => v /* {readonly key: "lolo";readonly value: 4;}*/);
+fruits
+  .getByPosition(2)
+  .ifCanBeUnpacked((v) => v /* {readonly key: "lolo";readonly value: 4;}*/);
 
 export class OrderedRecord
   <
@@ -152,4 +151,17 @@ export class OrderedRecord
   <
     V, 
     Schema 
-  > implements TrueMap<V>{}
+  > {
+  
+  public get lastElement(): V[V["length"]] {
+    return this.elements.value[0]
+  }
+  
+  
+  }
+
+
+
+
+
+const g = new  OrderedRecord([{key: "jiji", handler: () => {g: ""}}]).lastElement

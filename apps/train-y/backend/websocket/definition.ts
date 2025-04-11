@@ -1,44 +1,50 @@
 import { z } from "zod";
 import { mutationsSchemas, schemas } from "../types/schemas";
-import {CustomWebSocketRouter} from "@custom-express/framework"
+import { WebsocketRouter, HookOrderedRecord } from "@custom-express/framework";
+import { OrderedRecord } from "@custom-express/better-standard-library";
 
-export const defintion = new CustomWebSocketRouter({
+export const defintion = new WebsocketRouter({
     train: {
-        hooks: {
-            validate: z.object({
-                shodior: z.number()
-            }),
-            validateResponse: z.object({
-                pipipupu: z.number()
-            })
-        },
         messagesItCanReceive: {
-            newTrainData: z.object({
-                line: schemas.line   ,// liniq demek 102, 6, 280
-                ...mutationsSchemas.liveEntityData
-            }),
+            newTrainData: {
+                config: {
+                    hooks: {
+                        beforeHandler: {
+                            ordered: new HookOrderedRecord([
+                                {
+                                    key: "example-key",
+                                    execute: (context) => {
+                                        // optionally type ctx here
+                                        return "";
+                                    },
+                                },
+                                {
+                                    key: "koko",
+                                    execute: (context) => {
+                                        return {
+                                            l: "l"
+                                        }
+                                    }
+                                }
+                            ]),
+                        },
+                    },
+                    handler: (context) => {
+                        // do something with ctx
+                        return {}
+                    },
+                },
+                parse: z.object({
+                    line: schemas.line,
+                    ...mutationsSchemas.liveEntityData,
+                }),
+            },
         },
         messagesItCanSend: {
             trainData: z.object({
                 line: schemas.line,
-                ...mutationsSchemas.liveEntityData
-            })
-        }
-    },
-    passanger: {
-        hooks: {
-            validate: z.object({
-                egene: z.number(),
+                ...mutationsSchemas.liveEntityData,
             }),
-            validateResponse: z.object({
-                ggg: z.number()
-            })
         },
-        messagesItCanReceive: {
-        newPassangerData: z.object({
-            ...mutationsSchemas.liveEntityData
-        })
-        },
-        messagesItCanSend: {},
-    }
-})
+    },
+});

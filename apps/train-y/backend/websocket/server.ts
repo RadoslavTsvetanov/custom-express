@@ -22,8 +22,7 @@ defintion
       auth: {} as IAuth,
       train: {} as ITrain,
     },
-  })
-  .implement({
+  }).
     onConnection: v => {
       console.log("New connection established");
     },

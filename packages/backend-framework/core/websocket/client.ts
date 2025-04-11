@@ -1,4 +1,4 @@
-import { Optionable, OrderedRecord } from "@custom-express/better-standard-library";
+import { ifNotNone, Optionable, OrderedRecord } from "@custom-express/better-standard-library";
 
 const hooks = ["before", "after"] as const;
 type MakeHookType<T extends string> = `${T}Message`;

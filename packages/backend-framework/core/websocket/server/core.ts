@@ -1,25 +1,35 @@
-import { id } from './../../../../../apps/train-y/backend/types/id';
 import { WebSocketServer, WebSocket } from "ws";
 import { z, ZodObject, type ZodRawShape } from "zod";
-import { BetterArray, entries, GetSet, ifNotNone, keyofonlystringkeys, Optionable, panic, Port, VCallback } from "@custom-express/better-standard-library"
-import { ChannelConfig, GlobalHooks, GlobalOnlyHooks, Handler, ServerHooks, TypedMessage } from "../types";
+import { BetterArray, entries, GetSet, ifNotNone, keyofonlystringkeys, map, Optionable, panic, Port, VCallback } from "@custom-express/better-standard-library"
+import { ChannelConfig, GlobalHooks, GlobalOnlyHooks, Handler, MessagesEntries, ServerHooks, TypedMessage } from "../types";
 
 
 // ---------
 // This is the core class with only domain/bussiness logic e.g. without any utilities like map pipe etc... to see them go below to CustomWebsocketRouter where they are implemented i decided
 // --------
 
+function runOrderedHooks<T>(
+  ordered: { handler: (arg: T) => T }[],
+  initial: T
+): T {
+  if (!ordered.length) return initial;
 
+  return ordered.slice(1).reduce(
+    (acc, fn) => fn.handler(acc),
+    ordered[0].handler(initial)
+  );
+}
 
 export class CustomWebSocketRouter<
   ChannelNames extends string,
   Channels extends Record<
     ChannelNames,
-    ChannelConfig<unknown>
+    ChannelConfig<infer T, infer U>
   >,
   Context extends Record<ContextKeys, unknown>,
   ContextKeys extends string,
-
+  BeforeHandle extends Hook<TypedMessage<unknown, unknown>>,
+  Hooks extends ServerHooks<BeforeHandle, unknown>
   LastHookReturnType extends Record<string, unknown> = {
     headers: { [x: string]: Optionable<string> };
   },
@@ -117,21 +127,19 @@ export class CustomWebSocketRouter<
 
 
   start(port: Port) {
-    new Map(Object.entries(this.channels)).forEach((handlers) => {
-      new Optionable(handlers)
+    new Map(Object.entries(this.channels)).forEach((channelHandlers) => {
+      new Optionable(channelHandlers)
         .unpack("handlers not defined")
         .map((handlers) => {
           const wss = new WebSocketServer({ port: port.value });
 
           wss.on("connection", (ws, req) => {
 
-            this.hooks.ifCanBeUnpacked(({ onConnection }) => {
-              onConnection.independent.forEach(handler => handler({ ws, message: req }))
+            this.hooks.ifCanBeUnpacked(({ onConnection: {independent, ordered} }) => {
+              independent.forEach(handler => handler({ ws, message: req }))
 
-              onConnection.ordered.slice(1).reduce(
-                (acc, fn) => fn(acc),
-                onConnection.ordered[0].handler({ ws, message: req }) // Call the first function to get the initial value
-              );
+              runOrderedHooks(ordered, {ws, messge: req})
+
             })
 
             ws.on("message", async (message) => {
@@ -154,15 +162,13 @@ export class CustomWebSocketRouter<
 
                   try {
                     this.hooks.ifCanBeUnpacked(({ beforeHandle, afterHandle, onError }) => {
-                      beforeHandle.map(hook => {
-                        hook.independent.forEach(handler => handler({
+                      beforeHandle.map(({independent, ordered}) => {
+                        independent.forEach(handler => handler({
                             ws,
                             message: parsedMessage
                           }))
-                        hook.ordered.reduce(
-                          (acc, fn) => fn.handler(acc),
-                          hook.ordered[0].handler({ ws, message: req }) // Call the first function to get the initial value
-                        )
+                        runOrderedHooks(ordered, { ws, message: req })
+                          
                       })
 
                     })
@@ -182,6 +188,8 @@ export class CustomWebSocketRouter<
                         new Optionable(
                           channelConfig.messagesItCanReceive[parsedMessage.message /* as keyof Channels[keyof Channels]["messagesItCanReceive"] */]
 
+                          // call the global handler 
+
                         ).try({
                           ifNone: () =>
                             console.log(
@@ -191,9 +199,9 @@ export class CustomWebSocketRouter<
                               }`
                             ),
 
+                          // TODO: call the local onError handler
                           ifNotNone: ({ config, parse, }) => {
-                            // console.log("f", messageConfig);
-                            // console.log("[][]", parsedMessage.payload);
+                            
                             config.map(
                               ({ handler, hooks: { beforeHandler, afterHandler } }) => {
 
@@ -206,52 +214,42 @@ export class CustomWebSocketRouter<
                                     .map(pipeResult => [handler(pipeResult)]
                                       .map(resultOfHandler => {
                                         afterHandler.map(hook => {
-                                          hook.independent.forEach(h => ({ ws, message: resultOfHandler }))
-                                          hook.ordered.reduce(
-                                            (acc, fn) => fn.handler(acc),
-                                            hook.ordered[0].handler({ ws, message: resultOfHandler }) // Call the first function to get the initial value
+                                          hook.independent.forEach(h => ({ ws, message: resultOfHandler }));
+                                          map(
+                                            runOrderedHooks(hook.ordered, { ws, message: resultOfHandler }),
+                                            resultOfAfterHandler => {
+
+                                              this.hooks.ifCanBeUnpacked(hooks => { // should recieve the context that the handler recievedd and also the context that the adfterHandler returned
+                                                hooks.afterHandle.map(({independent, ordered}) => { 
+
+                                                  independent.forEach(
+                                                    handler => handler({ws ,msg: resultOfAfterHandler})
+                                                  )
+                                                  runOrderedHooks(ordered, { ws, message: req })
+                                                })
+                                              })
+                                            }
                                           )
                                         })
                                       })
                                     )
                                 })
-
-
                               })
                           },
                         });
                       },
                     });
 
-                    this.hooks.ifCanBeUnpacked(hooks => {
-                      hooks.afterHandle.map(hook => {
-
-                        hook.independent.forEach(handler => handler(/* pasaas the result of the handler of the executed message */))
-                        hook.ordered.reduce
-                      })
-                    })
                   } catch (err) {
+                    
+                    this.hooks.ifCanBeUnpacked(({ onError }) => onError(err)) 
 
-                    this.hooks.ifCanBeUnpacked(({ onError }) => onError(err))
-
-                    // here call the onError handler if the message handler 
-                    onError.try({
-                      ifNotNone: () => { }
-                    })
-
+                    // here call the onError handler of the message handler 
 
                   }
                 },
 
-
-
-
               });
-
-
-
-
-
 
             });
 
@@ -276,13 +274,23 @@ export class CustomWebSocketRouter<
   // it hahves like elysia plugins
   // usefull for adding big batches of context for example e,g, a big store which you have reused previously, for example all of services for interacting with a auth provider which you are reusing
 
-  addChannel<NewName extends string>(config: {
+  addChannel<
+    NewName extends string,
+    MessagesItCanSend extends string,
+  MessagesItCanReceive extends string>(config: {
     name: NewName;
-    handlers: {
-      [x: string]: {};
-    };
-    hooks: ServerHooks;
-  }): NewName extends ChannelNames ? never : CustomWebSocketRouter<> {
+  }
+    &
+    ChannelConfig<
+      MessagesEntries<MessagesItCanSend,MessagesItCanReceive>,
+      ServerHooks
+    >
+
+  ): NewName extends ChannelNames
+    ? never
+    : CustomWebSocketRouter<
+      
+  > {
     Object.entries(this.channels).forEach(([channelName, value]) => {
       if (channelName === config.name) {
         panic(`Channel ${channelName} is already defined`)
@@ -299,5 +307,9 @@ export class CustomWebSocketRouter<
     name: NewHookName,
     type: string,
     handler: Handler<LastHookReturnType,HookReturnType> 
-  }){} // adds a new hook 
+  }): CustomWebSocketRouter<
+    > {
+    
+  } // adds a new hook 
 }
+
