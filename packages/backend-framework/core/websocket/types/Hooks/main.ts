@@ -1,7 +1,8 @@
-import { OrderedRecord } from "@custom-express/better-standard-library";
+import { ITrueMap, OrderedRecord } from "@custom-express/better-standard-library";
 import { WithKey } from "../main";
 import { Handler } from "../Message/main";
 import {IncomingMessage} from "http"
+import { UnknownRecord } from "@custom-express/better-standard-library/src/types/unknwonString";
 
 export type HookOrderedRecordEntry<T = unknown, U = unknown> = WithKey<{
   execute: Handler<T, U>;
@@ -12,14 +13,40 @@ export class HookOrderedRecord<
   // for now you are not supposed to touch this
 > extends OrderedRecord<Elements, HookOrderedRecordEntry> {}
 
-export interface Hook<EnteringContext, Mappers extends > extends ITrueMap<Hook<EnteringContext>>
-{
-  ordered: OrderedRecord<
-   /* ! make it so that the first aarguemnt of the hooks tuple is a hook that returns the */,
-    WithKey<{ handler: HookHandler<unknown, { msg: IncomingMessage, ctx: EnteringContext }> }>>;
+// Example Usage 
 
-  // For running independent handlers (e.g. logging, side effects)
-  independent: IndependentHandler<EnteringContext>[];
+
+{ // declaring new scope so that we can reuse names in the kater examples without the compiler being a bitch 
+  const hooks = new HookOrderedRecord([{ key: "first", execute: () => { } }] as const).add({ key: "d", execute: () => 23 } as const)
+  { // again to introduce it in a new scope so that i can later reuse these burner names
+    const g = hooks.elements.value[0]
+    // should be 
+    // const g: {
+    //     readonly key: "first";
+    //     readonly execute: () => void;
+    // }
+  }
+
+  {
+    const g = hooks.elements.value[1]
+    should be const g: {
+    readonly key: "first";
+    readonly execute: () => void;
+}
+
+  }
+
+}
+
+
+
+
+
+export interface Hook<EnteringContext, Mappers extends UnknownRecord> extends ITrueMap<Hook<EnteringContext>>
+{
+  ordered: HookOrderedRecord<unknown, unknown>
+  independent: IndependentHandler<EnteringContext>[];// For running independent handlers (e.g. logging, side effects)
+
 };
 
 export type GlobalOnlyHooks = {

@@ -135,9 +135,18 @@ type j = (typeof fruits)["elements"]["value"]["3"];
 fruits.toNormalObject.apple.value; // shpuld be of type 10
 fruits.toNormalObject.koiki.value; // should be of type 6
 
-fruits.elements.value[3]; // should be of {6, "koiki"}
-// ^?
+const gg = fruits.elements.value[3]; // should be of {6, "koiki"}
 
+const g2 = fruits.elements.value[0] // should be  {
+    // readonly key: "apple";
+    // readonly value: 10;
+// }
+
+const g3= fruits.elements.value[3]
+// shoukd be {
+//     readonly value: 6;
+//     readonly key: "koiki";
+// }
 fruits
   .getByPosition(2)
   .ifCanBeUnpacked((v) => v /* {readonly key: "lolo";readonly value: 4;}*/);
@@ -152,17 +161,26 @@ export class OrderedRecord
     V, 
     Schema 
   > {
-  
+
   public get lastElement(): V[V["length"]] {
     return this.elements.value[this.elements.value.length - 1]
   }
-  
-  
-  }
+
+}
 
 
 
 
 
-const g = new  OrderedRecord([{key: "jiji", handler: () => {g: ""}}] as const)
+const g = new  OrderedRecord([{key: "jiji", handler: () => {g: ""}}] as const).add({key: "gyog", handler: () => 4}as const)
 
+const a = g.elements.value[0]
+// should be {
+//     readonly key: "jiji";
+//     readonly handler: () => void;
+// }
+const gt = g.elements.value[1]
+// should be const gt: {
+//     readonly key: "gyog";
+//     readonly handler: () => 4;
+// }

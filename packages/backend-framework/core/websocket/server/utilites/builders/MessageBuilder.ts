@@ -1,6 +1,7 @@
 import { OrderedRecord } from "@custom-express/better-standard-library";
-import { Handler, HookOrderedRecord, HookOrderedRecordEntry, MessageHandler, MessageItCanReceive } from "../../../types";
 import { HookBuilder } from "./HookBuilder";
+import { HookOrderedRecord, HookOrderedRecordEntry } from "../../../types/Hooks/main";
+import { MessageHandler } from "../../../types/Message/main";
 
 export class MessageThatCanBeReceivedBuilder<
     Context,

@@ -1,9 +1,13 @@
+import { ZodObject, ZodRawShape } from "zod";
+import { HookOrderedRecordEntry, ServerHooks } from "../Hooks/main";
+import { MessageItCanReceive, MessagesEntries, MessageThatCanBeSent } from "../Message/main";
 
 export type ChannelConfig<
   Messages extends MessagesEntries<unknown, unknown>,
   Hooks extends ServerHooks<
-    OrderedRecord<[], HookOrderedRecordEntry>,
-    OrderedRecord<[], HookOrderedRecordEntry>, string
+      HookOrderedRecordEntry,
+      HookOrderedRecordEntry,
+      string
     >
   > = {
   messagesItCanReceive: {
