@@ -1,7 +1,8 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { z, ZodObject, type ZodRawShape } from "zod";
 import { BetterArray, entries, GetSet, ifNotNone, keyofonlystringkeys, map, Optionable, panic, Port, VCallback } from "@custom-express/better-standard-library"
-import { ChannelConfig, GlobalHooks, GlobalOnlyHooks, Handler, MessagesEntries, ServerHooks, TypedMessage } from "../types";
+import { ChannelConfig, GlobalHooks, GlobalOnlyHooks, Handler, Hook, MessagesEntries, ServerHooks, TypedMessage } from "../types";
+import { HookBuilder } from "./utilites/builders/HookBuilder";
 
 
 // ---------
@@ -46,7 +47,7 @@ export class CustomWebSocketRouter<
   }
   protected context: Context = {} as Context; // make private later
   protected readonly channels: Channels;
-  protected hooks: Optionable<GlobalHooks>;
+  public hooks: Optionable<GlobalHooks>;
 
   constructor(endpoints: Channels, context?: Context) {
     this.channels = endpoints ?? ({} as Channels);
@@ -312,4 +313,5 @@ export class CustomWebSocketRouter<
     
   } // adds a new hook 
 }
+
 

@@ -118,7 +118,7 @@ const initialElements = [
   { key: "apple" as const, value: 10 },
   { key: "banana" as const, value: 20 },
 ] as const;
-const ggg = new OrderedRecord(initialElements);
+const ggg = new OrderedRecordBase(initialElements);
 // Create an OrderedRecord instance
 const fruits = ggg
   .add({
@@ -132,7 +132,7 @@ const fruits = ggg
 
 type j = (typeof fruits)["elements"]["value"]["3"];
 
-fruits.toNormalObject.apple.value; // shpuld be of type 1-
+fruits.toNormalObject.apple.value; // shpuld be of type 10
 fruits.toNormalObject.koiki.value; // should be of type 6
 
 fruits.elements.value[3]; // should be of {6, "koiki"}
@@ -154,7 +154,7 @@ export class OrderedRecord
   > {
   
   public get lastElement(): V[V["length"]] {
-    return this.elements.value[0]
+    return this.elements.value[this.elements.value.length - 1]
   }
   
   
@@ -164,4 +164,5 @@ export class OrderedRecord
 
 
 
-const g = new  OrderedRecord([{key: "jiji", handler: () => {g: ""}}]).lastElement
+const g = new  OrderedRecord([{key: "jiji", handler: () => {g: ""}}] as const)
+

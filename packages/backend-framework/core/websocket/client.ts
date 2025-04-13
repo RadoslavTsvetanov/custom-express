@@ -1,4 +1,5 @@
 import { ifNotNone, Optionable, OrderedRecord } from "@custom-express/better-standard-library";
+import { ZodObject, ZodRawShape } from "zod";
 
 const hooks = ["before", "after"] as const;
 type MakeHookType<T extends string> = `${T}Message`;
