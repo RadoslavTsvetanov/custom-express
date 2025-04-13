@@ -29,10 +29,10 @@ export class HookOrderedRecord<
 
   {
     const g = hooks.elements.value[1]
-    should be const g: {
-    readonly key: "first";
-    readonly execute: () => void;
-}
+//     should be const g: {
+//     readonly key: "first";
+//     readonly execute: () => void;
+// }
 
   }
 

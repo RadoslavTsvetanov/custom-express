@@ -1,4 +1,6 @@
+import { AfterfixKeysOfRecord, OrderedRecord } from "@custom-express/better-standard-library";
 import { ZodObject, ZodRawShape } from "zod";
+import { HookOrderedRecordEntry, ServerHooks } from "../Hooks/main";
 
 export interface TypedMessage<ChannelNames extends string, Payload> {
   channel: ChannelNames;

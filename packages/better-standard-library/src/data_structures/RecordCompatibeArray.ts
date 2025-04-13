@@ -1,6 +1,7 @@
 import type { TrueMap } from "../errors-as-values/mapThatIsLikeInRust";
 import type { Mapable } from "../errors-as-values/src/rust-like-pattern/mapable";
 import { Optionable } from "../errors-as-values/src/rust-like-pattern/option";
+import type { Last } from "../metaprogramming/tuple/getLast";
 import { GetSet } from "./getSetClass";
 
 type WithKey<T> = {key: string} & T
@@ -162,7 +163,7 @@ export class OrderedRecord
     Schema 
   > {
 
-  public get lastElement(): V[V["length"]] {
+  public get lastElement(): Last<[V]> {
     return this.elements.value[this.elements.value.length - 1]
   }
 
