@@ -5,6 +5,59 @@ Writing more with less
 
 ## Documentation 
 
+#### Handlers
+
+Just like the standard ws lib we expose events you can listen for and everytime this event happens we run your `handler`
+
+
+We expose the following handlers
+
+##### onConnection
+
+runs whever a connection is established 
+ 
+- you can hook on it with beforeConnection which is executed before the handler you define, again this is a hook you wont need probably but is very good for writing plugins and/or authentication of connections (yeah if you dont want to manually define repetitve funcs you can use a gaurd here )
+
+
+Example 
+
+```ts
+...// your app code
+.onConnection({
+    before: {
+      guards: [
+        {
+          schema: {},
+          () => {} // handler if validation fails, by default it sends a message to the socket and closes the connection, so it left without a value the default will be apllied 
+        }
+      ]
+    }
+  })
+```
+
+you can also supply after hooks will be passed whenever 
+
+##### onClose
+
+runs whenver a connection is closed (recieves matedata both from the close and the data which was passed onConnection for this socket)
+
+
+##### Message handler
+here it is discussed only the handler for hooks defining in handler look at `Hooks` section 
+
+so a handler is a function which rans when a certain message is recieced that agrees to the schema defined for the websockets
+
+You can define a validator for your handler and this is essesntially a guard or a match which runs when a message is handled (so it runs before any local hook - excalidraw diagram for more details)
+
+(application code inisight -> techniclly a message handler is just a hook too)
+
+
+*Note*: in a message handler you need to define a `parse`, a parse is a before handle guard hook that is ensured to run right before the handler so that the type of the message is the one you define in the parse  
+
+##### onRecievedMessage
+
+in reality there is not a real handler with this name but you can use a `beforeHandle` hook so that you run something before any new message which transofrms the message 
+
 #### Hooks 
 
 Note that hooks can be global or local, local hooks behave in the same way but they apply only to one handler and are declared inside the handler and serve as a way of defining clearer steps in a handler (note that like in global each new hook gets the context that the one before it left so the first beforeSend could change what the next beforeSend will have acces to) for example this is cool when we want to loggically seperate the auth step and we will have something like this (see the below example )
@@ -126,9 +179,58 @@ definition.add({
 
 ##### Listener
 
+
 ###### onError 
 
 runs whenever an exception is thrown in a beforeHandler, handler or afterHandler 
+
+the context which the global onError recieves is both the original Error and the mapped result (this is the same behaviour as every other local to global e.g. every global counterpart of the local one recieves the context that the first handler of the chain got and the result of the last mapped one )
+
+To perform linear regression on the given data and make predictions, we can use a simple code implementation in Python. The approach involves calculating the linear regression parameters (slope and intercept) from the data using formulae and then using these parameters to make predictions.
+
+Here's a function that accomplishes this:
+
+```python
+def linear_regression(relation, input_column, output_column, input_value):
+    # Calculate the averages of input and output columns
+    n = len(relation)
+    sum_x = sum(item[input_column] for item in relation)
+    sum_y = sum(item[output_column] for item in relation)
+    avg_x = sum_x / n
+    avg_y = sum_y / n
+
+    # Calculate the slope (m) and intercept (b) for the line y = mx + b
+    sum_xy = sum(item[input_column] * item[output_column] for item in relation)
+    sum_xx = sum(item[input_column] ** 2 for item in relation)
+
+    # Using the formula: slope (m) = Σ((x - x̄)(y - ȳ)) / Σ((x - x̄)²)
+    slope = (sum_xy - n * avg_x * avg_y) / (sum_xx - n * avg_x ** 2)
+
+    # Using the formula: intercept (b) = ȳ - m * x̄
+    intercept = avg_y - slope * avg_x
+
+    # Calculate the predicted value using the line equation: y = mx + b
+    prediction = slope * input_value + intercept
+    
+    return prediction
+
+# Example usage
+relation = [
+    {"x": 1, "y": 2},
+    {"x": 2, "y": 4},
+    {"x": 3, "y": 6}
+]
+input_column = "x"
+output_column = "y"
+input_value = 4
+
+predicted_value = linear_regression(relation, input_column, output_column, input_value)
+print(f"Predicted value for {output_column} when {input_column} is {input_value}: {predicted_value}")
+```
+
+This code computes the slope and intercept of the line of best fit for the provided data, and then it uses these to predict the `output_column` value corresponding to the given `input_value`.
+
+Remember to adjust your environment to run the code by installing any required libraries if using a more advanced version, or make necessary adjustments if integrating into a larger system.
 
 ###### beforeHandle
 
@@ -275,9 +377,21 @@ without this you would have needed to do either do the logic in the two routes s
 ##### Using subrouters for conditional hooks
 
 if you apply hooks to a prefixed app or to a certain channel definer they will become local instead if explicitely overriden 
-```ts
 
-```
+##### ordered vs unordered hooks 
+
+###### Unordered
+
+the result of the first is not pssed to the second so you dont have to comply with the result expected by a hook or the modification of the context passed instead all of them recieve the first context of the step. These are good for things which should get the primordial (find a better word next time) context and dont need to moidfy it so they shouldnt need to compily with other hooks before and after them (for example a request kogger is preferably to be here)
+
+###### Ordered
+
+the result of the first is pssed as the result to the second so this allows for some complex typesafe pipelies 
+
+
+###### 5pecyfying place
+
+by default hooks are `ordered` unless explicitely passing a flag
 
 ### Utils  
 
@@ -621,6 +735,45 @@ req.body.hhhh // if not there will resolve to undefined and nullable will throw 
 
 To see example usage and some advanced usage (for example how to use guard so that we ensure all messages from a certain channel return a common subset of properties in a type safe way) go to the guthub page and search for the examples folder (TODO: add github link to the examples)
 
+
+### Ensuring we always return as a response from a sender
+
+this is how it will work in an http server too
+
+```ts
+app.beforeSend({
+  position: 0 // we ensure it is the first after send handler so that we ovverride the type, since the return type of  a send should comply with the ctx type of the first beforeSend, this will also work with after send its just that it the validation here will happen as we are passing the arguements for send instead of getting a runtime error when we try to send, for the http client however it does matter to be before since afterSend will modify the response it recieves,
+  handler: guard({
+      schema: z.object(z.any()),
+      // handler is left empty so if it does not match it will close the connectiom
+  })
+})
+```
+
+### Ensuring we only recieve json messages 
+
+```ts
+app.beforeHandle(guard({
+sc
+}))
+```
+
+### having access to all connections in every handler 
+
+```ts
+app
+.store({
+  connections: new Connections()
+})
+.beforeHandle({
+  key: "add_connection",
+  handler: ({ctx: {ws}, store: {connections}}) => {
+     connections.add(ws)
+  }
+})
+
+```
+
 ## Commonly asked questions 
 
 
@@ -724,3 +877,55 @@ package.json (for both the frontedn and the backend)
 /backeend
 - index.ts
 ```
+
+
+
+# Lifecycle
+(TODO: insert picture of the excalidraw diagram)
+
+## Best practices
+
+### use `as const`
+
+using as const to make the ts compiler help you more 
+
+
+Look at this example 
+
+```ts
+
+function hihi(v: string) { 
+    if (v.length == 3) {
+        return "g" 
+    } else {
+        return "j"
+    }
+}
+
+const gg = new HookBuilder()
+  .add({
+    key: "koko",
+    execute: (v) => {
+      return {
+        hi: "",
+      };
+    },
+  })
+  .add({
+    key: "lolo",
+    execute: (v) => {
+      return {
+        ...v,
+        koki: hihi("so"),
+      } as const; // to ensure no modification and better type inference e,g, it shortnes the scope as much as possible 
+    },
+  })
+  .add({
+    key: "koki",
+    execute: (v) => {}, // here the return type of v is /parameter) v: {readonly koki: "g" | "j";readonly hi: string;} without it whough it is v: {koki: string;hi: string;}
+  });
+```
+
+
+
+
