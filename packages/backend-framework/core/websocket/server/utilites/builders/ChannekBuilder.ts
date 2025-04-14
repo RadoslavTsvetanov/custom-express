@@ -2,46 +2,63 @@ import { z, ZodObject, ZodRawShape, ZodRecord } from "zod";
 import { UnknownRecord } from "@custom-express/better-standard-library/src/types/unknwonString";
 import { OrderedRecord } from "@custom-express/better-standard-library";
 import { HookBuilder } from "./HookBuilder";
-import {MessageItCanReceive, MessageThatCanBeSent} from "../../../types/Message/main";
+import { MessageItCanReceive, MessageThatCanBeSent } from "../../../types/Message/main";
 import { MessageThatCanBeReceivedBuilder } from "./MessageBuilder";
-import {HookOrderedRecord, HookOrderedRecordEntry} from "../../../types/Hooks/main";
+import { HookOrderedRecord, HookOrderedRecordEntry } from "../../../types/Hooks/main";
 
 export class ChannelBuilder<
     MessagesItCanSend extends Record<string, ZodObject<ZodRawShape>>,
-    MessagesItCanReceive extends Record<string, MessageItCanReceive<unknown, unknown>>,
+    MessagesItCanReceive extends Record<string, MessageItCanReceive<unknown, ZodObject<ZodRawShape>>>,
     Elements extends HookOrderedRecordEntry[],
     Hooks extends HookOrderedRecord<Elements>
-    > {
+> {
 
     public _hooks: Hooks;
     public _messagesItCanSend: MessagesItCanSend
     public _messagesItCanReceive: MessagesItCanReceive
-
+    // ! Reccomended to use the builders instead of passing them since types are not correctly infered so yeah use the builder for now and dont pass anuthing directly in the constructor 
     constructor(hooks: Hooks, messagesItCanSend: MessagesItCanSend, messagesItCanReceive: MessagesItCanReceive) {
-        
+
     }
 
-    createHooks(): HookBuilder<Hooks>{}
-
-    createHookBuilder() {
-        new HookBuilder<Hooks>()
+    createHookBuilder(): HookBuilder<Hooks> {
+        return new HookBuilder<Hooks>()
     }
-    
-    hook(hook: OrderedRecord): ChannelBuilder<MessagesItCanSend,MessagesItCanReceive, {}>{}
+
+    hook<
+        NewElements extends HookOrderedRecordEntry[],
+        NewHooks extends HookOrderedRecord<NewElements>
+    >(
+        hook: NewHooks
+    ): ChannelBuilder<
+        MessagesItCanSend,
+        MessagesItCanReceive,
+        [...Elements, ...NewElements],
+        HookOrderedRecord<[...Elements, ...NewElements]>
+    > {
+        return new ChannelBuilder(
+            new HookBuilder<[...Elements, ...NewElements]>([
+                ...this._hooks.elements.value,
+                ...hook.elements.value,
+            ] as const).build(),
+            this._messagesItCanSend,
+            this._messagesItCanReceive
+        );
+    }
 
     addSender<Name extends string, Schema extends ZodObject<ZodRawShape>>(
-        config: {name: Name, schema: MessageThatCanBeSent<Schema>}
+        config: { name: Name, schema: MessageThatCanBeSent<Schema> }
     ): Name extends MessagesItCanSend
         ? never
         : ChannelBuilder<
-            MessagesItCanSend & Record<Name, typeof config>,
-            MessagesItCanReceive ,
+            MessagesItCanSend & Record<Name, Schema>,
+            MessagesItCanReceive,
             Elements,
             Hooks
         > {
         return new ChannelBuilder(
             this._hooks,
-            { ...this._messagesItCanSend, [config.name]: config.schema },
+            { ...this._messagesItCanSend, [config.name]: config.schema  },
             this._messagesItCanReceive
         )
     }
@@ -50,20 +67,20 @@ export class ChannelBuilder<
     addReceiver<
         Name extends string,
         Schema extends ZodObject<ZodRawShape>
-        >(
-            config: { name: Name } & MessageItCanReceive<unknown, Schema>
-        
+    >(
+        config: { name: Name } & MessageItCanReceive<unknown, Schema>
+
     ): ChannelBuilder<
 
         MessagesItCanSend,
         (
             MessagesItCanReceive
-                &
+            &
             Record<Name, Omit<typeof config, "name">>
         ),
         Elements,
         Hooks
-        > {
+    > {
         return new ChannelBuilder(
             this._hooks,
             this._messagesItCanSend,
@@ -75,72 +92,73 @@ export class ChannelBuilder<
 
 
 {
-const exampleChannel = new ChannelBuilder(
-    new HookBuilder([])
-        .add({ key: "kokiiiio", execute: v => { return "" } })
-        .add({ key: "p", execute: v => { } }).build(),
-    {
-        jiji: z.object({
-            hi: z.string()
-        }),
-        lplp: z.object({
-            h9i: z.object({
-                koko: z.string()
+    const exampleChannel = new ChannelBuilder(
+        new HookBuilder([])
+            .add({ key: "kokiiiio", execute: v => { return "" } })
+            .add({ key: "p", execute: v => { } }).build(),
+        {
+            jiji: z.object({
+                hi: z.string()
+            }),
+            lplp: z.object({
+                h9i: z.object({
+                    koko: z.string()
+                })
             })
-        })
-    },
-    {
-        kokoko: new MessageThatCanBeReceivedBuilder(
-            HookBuilder
-                .new()
-                .add({ key: "koko", execute: v => "" })
-                .build(),
+        },
+        {
+            kokoko: MessageThatCanBeReceivedBuilder.new(
+                HookBuilder
+                    .new()
+                    .add({ key: "koko", execute: v => "" } as const)
+                    .build(),
+                undefined, //TODO make it so that you do not have to setup undefined explicitely
                 v => {
-                // v should be of type string
+                    // v should be of type string
                 }
             )
-            .build() 
-    } as const
-)
-.addReceiver({
-        name: "h" as const,
-        config: {
-            hooks: HookBuilder
-                .new()
-                .add({ key: "jido", execute: v => 3 })
-                .add({ key: "jiido", execute: v => { return { jibri: "", chili: "" } as const } } as const)
-                .add({key: "keko", execute: v => {}} as const)
-                .build(),
-            handler: v => {},
-        },
-        parse: z.object({
-            s: z.string()
-        })
-} as const)
-    .addReceiver({
-        name: "jiko",
-        config: {
-            hooks: HookBuilder
-                .new()
-                .add({ key: "lolo", execute: v => { } }),
+                .build()
+        } as const
+    )
+        .addReceiver({
+            name: "h" as const,
+            config: {
+                hooks: HookBuilder
+                    .new()
+                    .add({ key: "jido", execute: v => 3 })
+                    .add({ key: "jiido", execute: v => { return { jibri: "", chili: "" } as const } } as const)
+                    .add({ key: "keko", execute: v => { } } as const)
+                    .build(),
+                handler: v => { },
+            },
+            parse: z.object({
+                s: z.string()
+            })
+        } as const)
+        .addReceiver({
+            name: "jiko",
+            config: {
+                hooks: HookBuilder
+                    .new()
+                    .add({ key: "lolo", execute: v => { } }),
                 handler: v => ""
-        },
-        parse: z.object({
-            hi: z.string()
+            },
+            parse: z.object({
+                hi: z.string()
+            })
+        } as const)
+        .addSender({
+            name: "kook",
+            schema: z.object({
+
+            })
         })
-} as const)
-.addSender({
-    name: "kook",
-    schema: z.object({
-
-    })
-})
 
 
-exampleChannel.createHookBuilder() // provides infered
+    exampleChannel.createHookBuilder() // provides infered
     {
-        const {jiji, lplp} = exampleChannel._messagesItCanSend
-        
+        const { jiji, lplp } = exampleChannel._messagesItCanSend
+
         // should have keys jiji, lplp
     }
 
@@ -148,7 +166,7 @@ exampleChannel.createHookBuilder() // provides infered
     {
 
         const g = exampleChannel._messagesItCanReceive
-        g.h 
+        g.h
         g.kokoko
         // both should be defined
 
@@ -192,11 +210,11 @@ exampleChannel.createHookBuilder() // provides infered
                 .build(),
             z.object({
                 jo: z.string()
-            }), 
+            }), //TODO: make it so that it works with undefined so that it passes the return type of the last hook 
             v => {
                 // v should be of type string
             }
-        )    .build()
+        ).build()
     } as const;
 
     initialReceivers.kokoko.parse
@@ -258,5 +276,6 @@ exampleChannel.createHookBuilder() // provides infered
     {
         const { kokoko, h, jiko } = completeChannel._messagesItCanReceive;
         // All three receivers are available
+        kokoko
     }
 }

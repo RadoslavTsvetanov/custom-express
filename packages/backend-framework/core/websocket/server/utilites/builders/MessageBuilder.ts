@@ -5,13 +5,16 @@ import { MessageHandler, MessageItCanReceive, MessageThatCanBeSent } from "../..
 import { z, ZodObject, ZodRawShape, ZodUnknown } from "zod";
 
 export class MessageThatCanBeReceivedBuilder<
-    Context,
     BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,
     MsgHandler extends MessageHandler<ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]>,unknown,BeforeHooks>
 >{
     public _message: MsgHandler
     public _hooks: BeforeHooks
     public parser: Optionable<ZodObject<ZodRawShape>>
+
+
+    // the `new` mthod is prefered since it correctly get the parse type without needing to explicitely pass as const 
+
     constructor(hooks: BeforeHooks, parser: ZodObject<ZodRawShape> | undefined, handler: /*TODO: make this work so that the code is cleaner IfNotUndefined<z.infer<typeof parser>,MsgHandler["handler"]> */typeof parser extends undefined ? MsgHandler["handler"] : (v: z.infer<typeof parser>) => unknown ) {
         this.parser = new Optionable(parser)
         this._hooks = hooks;
@@ -21,11 +24,21 @@ export class MessageThatCanBeReceivedBuilder<
         // }
     }
 
+
+    gg({ name = "", jiji }: {name: string, jiji:string }) {
+        
+    }
+
     static new<
         Parser extends ZodObject<ZodRawShape>,
         BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,    
         MsgHandler extends MessageHandler<ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]>,unknown,BeforeHooks>
-        >(hooks: BeforeHooks, parser: Parser | undefined, handler: /*TODO: make this work so that the code is cleaner IfNotUndefined<z.infer<typeof parser>,MsgHandler["handler"]> */typeof parser extends undefined ? MsgHandler["handler"] : (v: z.infer<typeof parser>) => unknown): MessageThatCanBeReceivedBuilder<{}, BeforeHooks, MsgHandler>{}
+        >(
+            hooks: BeforeHooks,
+            parser: Parser | undefined,
+            handler: /*TODO: make this work so that the code is cleaner IfNotUndefined<z.infer<typeof parser>,MsgHandler["handler"]> */typeof parser extends undefined ? MsgHandler["handler"] : (v: z.infer<typeof parser>) => unknown): MessageThatCanBeReceivedBuilder<{}, BeforeHooks, MsgHandler>{
+            return new MessageThatCanBeReceivedBuilder(hooks, parser, handler)
+        }
 
 
     addHooks<Hooks extends HookOrderedRecord<HookOrderedRecordEntry[]>>(){}
@@ -34,10 +47,13 @@ export class MessageThatCanBeReceivedBuilder<
     }
 
 
-    build(): MessageItCanReceive<BeforeHooks, typeof this.parser.messageWhenYouCntUnpack> {
+    build(): MessageItCanReceive<BeforeHooks, typeof this.parser.optionValue> {
         return {
-            hooks: this._hooks,
-            handler: this._message
+            config: {
+                handler: this._message.handler,
+                hooks: this._hooks
+            },
+            parse: this.parser.unpack()
         }
     }
 
