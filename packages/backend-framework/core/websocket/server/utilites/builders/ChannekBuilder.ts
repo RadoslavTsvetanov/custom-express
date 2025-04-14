@@ -23,6 +23,10 @@ export class ChannelBuilder<
 
     createHooks(): HookBuilder<Hooks>{}
 
+    createHookBuilder() {
+        new HookBuilder<Hooks>()
+    }
+    
     hook(hook: OrderedRecord): ChannelBuilder<MessagesItCanSend,MessagesItCanReceive, {}>{}
 
     addSender<Name extends string, Schema extends ZodObject<ZodRawShape>>(
@@ -73,7 +77,7 @@ export class ChannelBuilder<
 {
 const exampleChannel = new ChannelBuilder(
     new HookBuilder([])
-        .add({ key: "koko", execute: v => { return "" } })
+        .add({ key: "kokiiiio", execute: v => { return "" } })
         .add({ key: "p", execute: v => { } }).build(),
     {
         jiji: z.object({
@@ -86,7 +90,7 @@ const exampleChannel = new ChannelBuilder(
         })
     },
     {
-        koko: new MessageThatCanBeReceivedBuilder(
+        kokoko: new MessageThatCanBeReceivedBuilder(
             HookBuilder
                 .new()
                 .add({ key: "koko", execute: v => "" })
@@ -95,28 +99,45 @@ const exampleChannel = new ChannelBuilder(
                 // v should be of type string
                 }
             )
-            .build()
-    }
+            .build() 
+    } as const
 )
 .addReceiver({
         name: "h" as const,
         config: {
             hooks: HookBuilder
                 .new()
-                .add({ key: "jido", execute: v => { } })
+                .add({ key: "jido", execute: v => 3 })
+                .add({ key: "jiido", execute: v => { return { jibri: "", chili: "" } as const } } as const)
+                .add({key: "keko", execute: v => {}} as const)
                 .build(),
             handler: v => {},
         },
         parse: z.object({
             s: z.string()
         })
-    } as const)
+} as const)
+    .addReceiver({
+        name: "jiko",
+        config: {
+            hooks: HookBuilder
+                .new()
+                .add({ key: "lolo", execute: v => { } }),
+                handler: v => ""
+        },
+        parse: z.object({
+            hi: z.string()
+        })
+} as const)
 .addSender({
     name: "kook",
     schema: z.object({
 
     })
 })
+
+
+exampleChannel.createHookBuilder() // provides infered
     {
         const {jiji, lplp} = exampleChannel._messagesItCanSend
         
@@ -128,7 +149,7 @@ const exampleChannel = new ChannelBuilder(
 
         const g = exampleChannel._messagesItCanReceive
         g.h 
-        g.koko
+        g.kokoko
         // both should be defined
 
     }
@@ -143,3 +164,99 @@ const exampleChannel = new ChannelBuilder(
 
 }
 
+{
+    // Initial hooks
+    const initialHooks = HookBuilder.new()
+        .add({ key: "kokiiiio", execute: v => "" })
+        .add({ key: "p", execute: v => { } })
+        .build();
+
+    // Initial messages it can send
+    const initialSenders = {
+        jiji: z.object({
+            hi: z.string()
+        }),
+        lplp: z.object({
+            h9i: z.object({
+                koko: z.string()
+            })
+        })
+    };
+
+    // Initial receivers
+    const initialReceivers = {
+        kokoko: MessageThatCanBeReceivedBuilder.new(
+            HookBuilder
+                .new()
+                .add({ key: "koko", execute: v => "" })
+                .build(),
+            z.object({
+                jo: z.string()
+            }), 
+            v => {
+                // v should be of type string
+            }
+        )    .build()
+    } as const;
+
+    initialReceivers.kokoko.parse
+
+    // Create the initial channel
+    const baseChannel = new ChannelBuilder(
+        initialHooks,
+        initialSenders,
+        initialReceivers
+    );
+
+    // Add additional receivers
+    const channelWithReceivers = baseChannel
+        .addReceiver({
+            name: "h" as const,
+            config: {
+                hooks: HookBuilder.new()
+                    .add({ key: "jido", execute: v => 3 })
+                    .add({
+                        key: "jiido",
+                        execute: v => ({ jibri: "", chili: "" } as const)
+                    })
+                    .add({ key: "keko", execute: v => { } })
+                    .build(),
+                handler: v => { }
+            },
+            parse: z.object({
+                s: z.string()
+            })
+        } as const)
+        .addReceiver({
+            name: "jiko",
+            config: {
+                hooks: HookBuilder.new()
+                    .add({ key: "lolo", execute: v => { } })
+                    .build(),
+                handler: v => ""
+            },
+            parse: z.object({
+                hi: z.string()
+            })
+        });
+
+    // Add a sender
+    const completeChannel = channelWithReceivers.addSender({
+        name: "kook",
+        schema: z.object({})
+    });
+
+    // --- Introspection Blocks ---
+
+    // Block: Messages it can send
+    {
+        const { jiji, lplp, kook } = completeChannel._messagesItCanSend;
+        // jiji, lplp, and kook are all zod schemas
+    }
+
+    // Block: Messages it can receive
+    {
+        const { kokoko, h, jiko } = completeChannel._messagesItCanReceive;
+        // All three receivers are available
+    }
+}

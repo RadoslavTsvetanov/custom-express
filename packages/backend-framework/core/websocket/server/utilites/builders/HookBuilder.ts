@@ -18,13 +18,21 @@ export class HookBuilder<
     );
   }
 
-  add<Return, HookName extends string>(handler: {
-    key: HookName;
+  add<
+    Return,
+    HookName extends string
+  >(handler: {
+    key: HookName
     execute: Handler<
       WithDefault<{}, ReturnType<Last<Elements>["execute"]>>,
       Return
     >;
-  }): HookBuilder<[...Elements, typeof handler]> {
+  }):
+    // HookName extends Elements[number]["key"]
+    // ? never
+    /* : */
+    // TODO: fix this  
+    HookBuilder<[...Elements, typeof handler]> {
     return new HookBuilder(this._elements.add(handler))
   }
 

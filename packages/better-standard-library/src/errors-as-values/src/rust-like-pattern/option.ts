@@ -64,6 +64,10 @@ export class Optionable<T> extends CustomUnpackable<T> implements Tick<CustomUnp
     this.messageWhenYouCntUnpack = statics.messageForWhenOptionIsNone 
   }
 
+  public get optionValue(): T {
+    return 
+  }
+
   is_none(): boolean {
     return this.value === null || this.value === undefined;
   }
