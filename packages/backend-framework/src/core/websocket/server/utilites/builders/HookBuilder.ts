@@ -18,21 +18,13 @@ export class HookBuilder<
     );
   }
 
-  add<
-    Return,
-    HookName extends string
-  >(handler: {
-    key: HookName
+  add<Return, HookName extends string>(handler: {
+    key: HookName;
     execute: Handler<
       WithDefault<{}, ReturnType<Last<Elements>["execute"]>>,
       Return
     >;
-  }):
-    // HookName extends Elements[number]["key"]
-    // ? never
-    /* : */
-    // TODO: fix this  
-    HookBuilder<[...Elements, typeof handler]> {
+  }): HookBuilder<[...Elements, typeof handler]> {
     return new HookBuilder(this._elements.add(handler))
   }
 
@@ -99,18 +91,10 @@ function hihi(v: string) {
             lolo: ""
           }
         } as const
-      }
-    } as const)
-    .build()
+    }} as const)
   
 
   {
-    const g = h.elements.value[0]
-//     should be (property) 0: {
-//     key: "koko";
-//     execute: Handler<{}, {
-//         readonly hi: "";
-//     }>;
-// }
+    const g = h._elements.elements.value[0]
   }
 }

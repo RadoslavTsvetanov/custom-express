@@ -125,10 +125,20 @@ switch to your project manager software and switch to the most importnat and sta
 also dont forget to mention the refactor part 
 </directions>
 
+<script>
+also i need to make a full erfactor of the codebase since in hurry for the fest i couldnt make everything i wanted 
+</script>
+
+
 <action>
 switch to your types folder
 </action>
 
 <script>
 also another thing that is very very important is to find a person who understands typescript more than me to help me refactor this abomination since adding a new type here gets exponentially harder and harder and i have no idea how to manage this. And why i am emphasizing on this? - well unlike most projects you see on the fest or hacktues where the ideas are left in the trash bin after the event and the fufture plans slide is therre just because it should be i really believe this is a thing that will actually be used and willl continue maintaining it 
+</script>
+
+
+<script>
+    and in the grande term i have the following things 
 </script>

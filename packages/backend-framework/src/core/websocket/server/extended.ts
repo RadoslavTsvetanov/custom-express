@@ -1,4 +1,4 @@
-import { IPipeable } from './../../../../better-standard-library/src/errors-as-values/src/rust-like-pattern/pipe';
+import { IPipeable } from '@custom-express/better-standard-library/src/errors-as-values/src/rust-like-pattern/pipe';
 import { IMapable, ISimpleMapable } from "@custom-express/better-standard-library/src/errors-as-values/src/rust-like-pattern/mapable";
 import { CustomWebSocketRouter } from "./core";
 import { ChannelConfig, Hook, HookOrderedRecord, ServerHooks } from '../types';

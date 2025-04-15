@@ -22,22 +22,11 @@ function runOrderedHooks<T>(
 }
 
 export class CustomWebSocketRouter<
-  ChannelNames extends string,
   Channels extends Record<
-    ChannelNames,
+    string,
     ChannelConfig<infer T, infer U>
   >,
-  Context extends Record<ContextKeys, unknown>,
-  ContextKeys extends string,
-  BeforeHandle extends Hook<TypedMessage<unknown, unknown>>,
-  Hooks extends ServerHooks<BeforeHandle, unknown>
-  LastHookReturnType extends Record<string, unknown> = {
-    headers: { [x: string]: Optionable<string> };
-  },
-  LastHook extends (v: unknown) => LastHookReturnType = (v: {
-    headers: { [x: string]: Optionable<string> };
-  }) => LastHookReturnType,
-  BaseRequest = {}
+  Context extends Record<string, unknown>,
 > {
   public readonly prefix: GetSet<Optionable<string>>
 

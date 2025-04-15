@@ -15,7 +15,13 @@ export class MessageThatCanBeReceivedBuilder<
 
     // the `new` mthod is prefered since it correctly get the parse type without needing to explicitely pass as const 
 
-    constructor(hooks: BeforeHooks, parser: ZodObject<ZodRawShape> | undefined, handler: /*TODO: make this work so that the code is cleaner IfNotUndefined<z.infer<typeof parser>,MsgHandler["handler"]> */typeof parser extends undefined ? MsgHandler["handler"] : (v: z.infer<typeof parser>) => unknown ) {
+    constructor(
+        hooks: BeforeHooks,
+        parser: ZodObject<ZodRawShape> | undefined,
+        handler:  typeof parser extends z.ZodType<infer U>
+            ? (v: U) => unknown
+            : MsgHandler["handler"]
+) {
         this.parser = new Optionable(parser)
         this._hooks = hooks;
         // this._message = {
@@ -32,12 +38,16 @@ export class MessageThatCanBeReceivedBuilder<
     static new<
         Parser extends ZodObject<ZodRawShape>,
         BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,    
-        MsgHandler extends MessageHandler<ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]>,unknown,BeforeHooks>
+        MsgHandler extends MessageHandler<
+                ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]>,
+                unknown,
+                BeforeHooks
+            >
         >(
             hooks: BeforeHooks,
             parser: Parser | undefined,
-            handler: /*TODO: make this work so that the code is cleaner IfNotUndefined<z.infer<typeof parser>,MsgHandler["handler"]> */typeof parser extends undefined ? MsgHandler["handler"] : (v: z.infer<typeof parser>) => unknown): MessageThatCanBeReceivedBuilder<{}, BeforeHooks, MsgHandler>{
-            return new MessageThatCanBeReceivedBuilder(hooks, parser, handler)
+            handler: typeof parser extends z.ZodType<infer U> ? (v: U) => unknown : MsgHandler["handler"]) {
+                return new MessageThatCanBeReceivedBuilder(hooks, parser, handler)
         }
 
 
@@ -62,7 +72,7 @@ export class MessageThatCanBeReceivedBuilder<
 
 const hooks = HookBuilder
     .new() // using new is the reccomended way since it is a cleaner although 
-    .add({ key: "ok", execute: v => "" } as const)
+    .add({ key: "ok", execute: v => "" as const} as const)
     .add({ key: "hohoh", execute: v => { return {"hi": ""} as const } } as const)
     .build()
 
@@ -71,16 +81,15 @@ const hooks = HookBuilder
 }
 
 {
-const newMsg = new MessageThatCanBeReceivedBuilder(
+const newMsg = MessageThatCanBeReceivedBuilder.new(
     hooks,
-    undefined,
+    z.object({}),
     v => {
         v // shoud be of type  
 //  {
 //     readonly hi: "";
 //  }
         return {
-            ...v,
             koko: ""
         }
     }
