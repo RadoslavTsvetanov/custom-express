@@ -1,0 +1,13 @@
+{
+  "name": "@custom-express/better-standard-library",
+  "version": "1.0.0",
+  "type": "module",
+  "module": "index.ts",
+  "dependencies": {
+    "bun-types": "latest",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

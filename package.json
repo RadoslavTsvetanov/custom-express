@@ -1,0 +1,14 @@
+{
+  "name": "custom-express",
+  "version": "1.0.0",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run index.ts"
+  },
+  "workspaces": ["packages/**/*"],
+  "dependencies": {
+    "zod": "^3.24.2"
+  }
+}

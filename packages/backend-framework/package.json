@@ -1,0 +1,14 @@
+{
+  "name": "@custom-express/framewoard",
+  "version": "1.0.0",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types":"latest",
+    "@types/bun": "latest",
+    "@custom-express/better-standard-library": "1.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

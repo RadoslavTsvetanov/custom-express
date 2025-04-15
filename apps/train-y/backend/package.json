@@ -1,0 +1,13 @@
+{
+  "name": "@train-y/backend",
+  "version": "1.0.0",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@custom-express/framework":"1.0.0" 
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
