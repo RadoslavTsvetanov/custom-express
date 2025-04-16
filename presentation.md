@@ -30,6 +30,7 @@
 
 ### The slide should be called Features and when you get to it say since i have formatted it pretty well in the docs and i dont think i can do it as good here with examples and etc... we will see it from the docs, then open nvim or the browser and go to essentials page in the docs 
 
+## Features
 
 ### Effects
 
@@ -76,7 +77,7 @@ much cleaner if you ask me
 
 
 
-## my own async api spec
+### my own async api spec
 
 ### tell how every language agnostic protocol needs a way to define its spec in a language agnostic way 
 
@@ -108,6 +109,15 @@ although this started as a purely websocket frameowrk i notcied a trend where i 
 TODO: find an open source project which relies heavily on websockets and show how cleaner it would be with your lib, if you cant find show train-y 
 
 TODO: showcase the reactive entites usage using a simple app and see how muxh easier it is 
+
+## How it works
+
+### New message lifecycle with hooks
+
+
+newMsg -> before parse hooks -(mapped result from the ordered hooks)-> parse to see if it according to the standard for messages -(parsed message)-> Before Handle hook (runs hooks) -(result from the ordered hooks)-> Before handler hooks -(mapped result from the ordered hooks)> -> validate -(result which matches the validate schema)-> handler -(mapped result from handler if any)> after handler hooks -(mapped result from after handler)-> after handle  
+
+
 
 ## Demo
 
