@@ -1,34 +1,25 @@
 import { WebSocketServer, WebSocket } from "ws";
-import { z, ZodObject, type ZodRawShape } from "zod";
+import { object, z, ZodObject, type ZodRawShape } from "zod";
 import { BetterArray, entries, GetSet, ifNotNone, keyofonlystringkeys, map, Optionable, panic, Port, VCallback, WebsocketUrl } from "@custom-express/better-standard-library"
 import { HookBuilder } from "../utilites/builders/HookBuilder";
-import { Hook, HookOrderedRecord, HookOrderedRecordEntry, ServerHooks } from "../../types/Hooks/main";
+import { GlobalHooks, Hook, HookOrderedRecord, HookOrderedRecordEntry, ServerHooks } from "../../types/Hooks/main";
 import { ChannelConfig } from "../../types/Channel/main";
 import { TypedMessage } from "../../types/Message/main";
 import { runHookHandler, runOrderedHooks } from "./helpers";
 import { WebsocketClient } from "../../client";
+import { UnknownRecord } from "@custom-express/better-standard-library/src/types/unknwonString";
 
 
 // ---------
 // This is the core class with only domain/bussiness logic e.g. without any utilities like map pipe etc... to see them go below to CustomWebsocketRouter where they are implemented i decided
 // --------
 export class CustomWebSocketRouter<
-  ChannelNames extends string,
   Channels extends Record<
-    ChannelNames,
-    ChannelConfig<infer T, infer U>
+    string,
+    ChannelConfig<infer T, infer U, infer K>
   >,
-  Context extends Record<ContextKeys, unknown>,
-  ContextKeys extends string,
-  BeforeHandle extends Hook<TypedMessage<unknown, unknown>>,
-  Hooks extends ServerHooks<BeforeHandle, unknown>,
-  LastHookReturnType extends Record<string, unknown> = {
-    headers: { [x: string]: Optionable<string> };
-  },
-  LastHook extends (v: unknown) => LastHookReturnType = (v: {
-    headers: { [x: string]: Optionable<string> };
-  }) => LastHookReturnType,
-  BaseRequest = {}
+  Context extends Record<string, unknown>,
+  // BeforeHandle extends Hook<TypedMessage<unknown, unknown>,UnknownRecord>,
 > {
   public readonly prefix: GetSet<Optionable<string>>
 
@@ -37,7 +28,7 @@ export class CustomWebSocketRouter<
     return this
   }
   protected context: Context = {} as Context; // make private later
-  protected readonly channels: Channels;
+  public readonly channels: Channels;
   public hooks: Optionable<GlobalHooks>;
 
   constructor(endpoints: Channels, context?: Context) {
@@ -45,9 +36,8 @@ export class CustomWebSocketRouter<
   }
 
   public plug<
-    NewChannelNames extends string,
     NewChannels extends Record<
-      NewChannelNames,
+      string,
       ChannelConfig<
         any,
         any,
@@ -57,11 +47,10 @@ export class CustomWebSocketRouter<
         }
       >
     >,
-    NewContext extends Record<ContextKeys, unknown>,
-    NewContextKeys extends string
+    NewContext extends Record<string, unknown>,
   >(
-    app: CustomWebSocketRouter<ChannelNames, Channels, Context, ContextKeys>
-  ): CustomWebSocketRouter<ChannelNames | NewChannelNames, Channels & NewChannels, Context & NewContext, ContextKeys & NewContextKeys> {
+    app: CustomWebSocketRouter<Channels, Context>
+  ): CustomWebSocketRouter<Channels & NewChannels, Context & NewContext> {
     // Merging logic can be added here if necessary
     // For example, copying handlers or other properties from `app` to this instance
 
@@ -106,10 +95,8 @@ export class CustomWebSocketRouter<
   store<T extends Record<string, unknown>>(
     object: T
   ): CustomWebSocketRouter<
-    ChannelNames,
     Channels,
-    Context & typeof object,
-    ContextKeys & keyof T
+    Context & {[Key in keyof T]: T[Key]}
   > {
     return new CustomWebSocketRouter(this.channels, {
       ...this.context,
@@ -118,10 +105,11 @@ export class CustomWebSocketRouter<
   }
 
 start(port: Port) {
-  new Map(Object.entries(this.channels)).forEach((channelHandlers) => {
-    new Optionable(channelHandlers)
-      .unpack("handlers not defined")
-      .map((handlers) => {
+  const h = this.channels
+
+  Object.entries(this.channels).forEach(([channelName,channelConfig]) => {
+    new Optionable(channelConfig)
+      .ifCanBeUnpacked(handlers => {
         const wss = new WebSocketServer({ port: port.value });
 
         wss.on("connection", (ws, req) => {
@@ -143,7 +131,7 @@ start(port: Port) {
 
               ifNotNone: async (parsedMessage) => {
                 try {
-                  this.hooks.ifCanBeUnpacked(({ beforeHandle }) => {
+                  this.hooks.ifCanBeUnpacked(({beforeHandle}) => {
                     beforeHandle.map((hook) => {
                       runHookHandler(hook, { ws, message: parsedMessage });
                     });
@@ -164,11 +152,11 @@ start(port: Port) {
                         ifNone: () =>
                           console.log(`Channel ${channelName} does not accept message type ${parsedMessage.message}`),
 
-                        ifNotNone: ({ config, parse }) => {
-                          config.map(({ handler, hooks: { beforeHandler, afterHandler } }) => {
+                        ifNotNone: ({ config,  parse: parser  }) => {
+                          map( config,({ handler, hooks: { beforeHandler, afterHandler } }) => {
                             runHookHandler(beforeHandler, { ws, message: parsedMessage });
 
-                            const result = handler(parse({ ws, message: parsedMessage }));
+                            const result = handler(parser.parse({ ws, message: parsedMessage }));
 
                             runHookHandler(afterHandler, { ws, message: result });
 
@@ -239,5 +227,3 @@ start(port: Port) {
   }
 
 }
-
-

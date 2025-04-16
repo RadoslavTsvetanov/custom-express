@@ -1,16 +1,22 @@
 import { z, ZodObject, ZodRawShape, ZodRecord } from "zod";
 import { UnknownRecord } from "@custom-express/better-standard-library/src/types/unknwonString";
-import { OrderedRecord } from "@custom-express/better-standard-library";
+import { OrderedRecord, TrueMap } from "@custom-express/better-standard-library";
 import { HookBuilder } from "./HookBuilder";
-import { MessageItCanReceive, MessageThatCanBeSent } from "../../../types/Message/main";
+import { MessageItCanReceive, MessageThatCanBeSent, TypedMessage } from "../../../types/Message/main";
 import { MessageThatCanBeReceivedBuilder } from "./MessageBuilder";
-import { HookOrderedRecord, HookOrderedRecordEntry } from "../../../types/Hooks/main";
+import { Hook, HookOrderedRecord, HookOrderedRecordBase, HookOrderedRecordEntry, ServerHooks } from "../../../types/Hooks/main";
+import { ChannelConfig } from "../../../types/Channel/main";
 
 export class ChannelBuilder<
     MessagesItCanSend extends Record<string, ZodObject<ZodRawShape>>,
-    MessagesItCanReceive extends Record<string, MessageItCanReceive<unknown, unknown>>,
-    Elements extends HookOrderedRecordEntry[],
-    Hooks extends HookOrderedRecord<Elements>
+    MessagesItCanReceive extends Record<
+        string,
+        MessageItCanReceive<HookOrderedRecord<HookOrderedRecordEntry[]>, ZodObject<ZodRawShape>>
+    >,
+    Hooks extends ServerHooks<
+        Hook<TypedMessage<string, unknown>, HookOrderedRecordBase>,
+        Hook<TypedMessage<string, unknown>, HookOrderedRecordBase>
+    >
 > {
 
     public _hooks: Hooks;
@@ -19,13 +25,15 @@ export class ChannelBuilder<
 
     public getMessagesItCanSend: {
         [Message in keyof MessagesItCanSend]: z.infer<MessagesItCanSend[Message]>
-    } 
+    }
 
     constructor(hooks: Hooks, messagesItCanSend: MessagesItCanSend, messagesItCanReceive: MessagesItCanReceive) {
 
     }
 
-    createHooks(): HookBuilder<Hooks> { }
+    createHookBuilder<Type extends "afterHandle" /* replace with the actual types */>(t: Type): HookBuilder<Hooks[Type]["ordered"]> {
+        return
+    }
 
     hook(hook: OrderedRecord): ChannelBuilder<MessagesItCanSend, MessagesItCanReceive, {}> { }
 
@@ -36,7 +44,6 @@ export class ChannelBuilder<
         : ChannelBuilder<
             MessagesItCanSend & Record<Name, Schema>,
             MessagesItCanReceive,
-            Elements,
             Hooks
         > {
         return new ChannelBuilder(
@@ -49,12 +56,15 @@ export class ChannelBuilder<
 
     addReceiver<
         Name extends string,
-        Schema extends ZodObject<ZodRawShape>
+        Schema extends ZodObject<ZodRawShape>,
+        Other extends MessageItCanReceive<HookOrderedRecordBase, Schema>
     >
         (
-            config: { name: Name } & MessageItCanReceive<unknown, Schema>
+            config: { name: Name } & Other
+        ): Name extends keyof MessagesItCanReceive
 
-        ): ChannelBuilder<
+        ? never 
+        : ChannelBuilder<
 
             MessagesItCanSend,
             (
@@ -62,14 +72,22 @@ export class ChannelBuilder<
                 &
                 Record<Name, Omit<typeof config, "name">>
             ),
-            Elements,
             Hooks
-        > {
+        >{
         return new ChannelBuilder(
             this._hooks,
             this._messagesItCanSend,
             { ...this._messagesItCanReceive, [config.name]: { ...config } }
         )
+    }
+
+
+    build(): ChannelConfig<
+        MessagesItCanSend,
+        MessagesItCanReceive,
+        Hooks
+    > {
+        return
     }
 }
 
@@ -77,10 +95,24 @@ export class ChannelBuilder<
 
 {
     const exampleChannel = new ChannelBuilder(
-        HookBuilder
-            .new()
-            .add({ key: "koko", execute: v => { return "" } })
-            .add({ key: "p", execute: v => { } }).build(),
+        {
+            beforeHandle: {
+                ordered: HookBuilder
+                .new()
+                    .add({ key: "koko", execute: v => { return "" } })
+                    .add({ key: "p", execute: v => { } })
+                    .build(),
+                independent: [],
+            },
+            afterHandle: {
+                ordered: HookBuilder 
+                    .new()
+                    .add({key: "", execute: v => {}})
+                    .build(),
+                independent: []
+            },
+            onError: v => {2},
+        },
         {
             jiji: z.object({
                 hi: z.string()

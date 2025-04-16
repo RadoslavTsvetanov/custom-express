@@ -1,21 +1,25 @@
 import { ZodObject, ZodRawShape } from "zod";
-import { HookOrderedRecordEntry, ServerHooks } from "../Hooks/main";
+import { Hook, HookOrderedRecord, HookOrderedRecordEntry, ServerHooks } from "../Hooks/main";
 import { MessageItCanReceive, MessagesEntries, MessageThatCanBeSent } from "../Message/main";
+import { UnknownRecord } from "@custom-express/better-standard-library/src/types/unknwonString";
 
 export type ChannelConfig<
-  Messages extends MessagesEntries<unknown, unknown>,
+  MessagesItCanSend extends Record<string, MessageThatCanBeSent<ZodObject<ZodRawShape>>>,
+  MessagesItCanReceive extends Record<
+    string,
+    MessageItCanReceive<
+      HookOrderedRecord<HookOrderedRecordEntry[]>,
+      ZodObject<ZodRawShape>
+    >
+  >,
   Hooks extends ServerHooks<
-      HookOrderedRecordEntry,
-      HookOrderedRecordEntry,
+      Hook<unknown, UnknownRecord>,
+      Hook<unknown, UnknownRecord>,
       string
     >
   > = {
-  messagesItCanReceive: {
-      [Message in keyof Messages["messagesItCanReceive"]]: MessageItCanReceive<unknown, unknown>
-  },
-    messagesItCanSend: {
-      [Message in keyof Messages["messagesItCanSend"]]: MessageThatCanBeSent<ZodObject<ZodRawShape>> 
-    }
-    
+  messagesItCanReceive: MessagesItCanReceive,
+    messagesItCanSend: MessagesItCanSend,
+    hooks: Hooks
 };
 

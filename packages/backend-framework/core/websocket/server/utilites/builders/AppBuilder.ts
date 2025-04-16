@@ -1,4 +1,4 @@
-import { Extended } from "../../extended";
+import { Extended } from "../../app/extended";
 
 export class BuilderEnhanced<
     ChannelNames extends string,

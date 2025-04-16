@@ -1,11 +1,11 @@
-import { IPipeable } from './../../../../better-standard-library/src/errors-as-values/src/rust-like-pattern/pipe';
+import { IPipeable } from '@custom-express/better-standard-library/src/errors-as-values/src/rust-like-pattern/pipe';
 import { IMapable, ISimpleMapable } from "@custom-express/better-standard-library/src/errors-as-values/src/rust-like-pattern/mapable";
-import { CustomWebSocketRouter } from "./app";
-import { ChannelConfig, Hook, HookOrderedRecord, ServerHooks } from '../types';
+import { CustomWebSocketRouter } from ".";
 import { z, ZodObject, ZodRawShape } from 'zod';
 import { First, map, Optionable, OrderedRecord, TrueMap } from '@custom-express/better-standard-library';
-import { HookBuilder } from './utilites/builders/HookBuilder';
-import { ChannelBuilder } from './utilites/builders/ChannekBuilder';
+import { HookBuilder } from '../utilites/builders/HookBuilder';
+import { ChannelBuilder } from '../utilites/builders/ChannekBuilder';
+import { ChannelConfig } from '../../types/Channel/main';
 
 export class Extended<
   ChannelNames extends string,
@@ -15,7 +15,7 @@ export class Extended<
   >,
   Context extends Record<ContextKeys, unknown>,
   ContextKeys extends string,
-  Hooks extends ServerHooks
+  Hooks extends ServerHooks,
   LastHookReturnType extends Record<string, unknown> = {
     headers: { [x: string]: Optionable<string> };
   },
