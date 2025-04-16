@@ -109,6 +109,10 @@ TODO: find an open source project which relies heavily on websockets and show ho
 
 TODO: showcase the reactive entites usage using a simple app and see how muxh easier it is 
 
+## Demo
+
+Fork the elysia playground and make it your won to showzase some features that do not work right now 
+
 ## Whats next ?
 
 <script_to_tell>
@@ -137,7 +141,6 @@ switch to your types folder
 <script>
 also another thing that is very very important is to find a person who understands typescript more than me to help me refactor this abomination since adding a new type here gets exponentially harder and harder and i have no idea how to manage this. And why i am emphasizing on this? - well unlike most projects you see on the fest or hacktues where the ideas are left in the trash bin after the event and the fufture plans slide is therre just because it should be i really believe this is a thing that will actually be used and willl continue maintaining it 
 </script>
-
 
 <script>
     and in the grande term i have the following things 

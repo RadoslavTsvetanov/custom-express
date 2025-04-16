@@ -1,6 +1,6 @@
-import { ITrueMap, OrderedRecord } from "@custom-express/better-standard-library";
+import { ITrueMap, OrderedRecord, OrderedRecordBase } from "@custom-express/better-standard-library";
 import { WithKey } from "../main";
-import { Handler } from "../Message/main";
+import { Handler, TypedMessage } from "../Message/main";
 import {IncomingMessage} from "http"
 import { UnknownRecord } from "@custom-express/better-standard-library/src/types/unknwonString";
 
@@ -38,26 +38,29 @@ export class HookOrderedRecord<
 
 }
 
+export type BaseHookBundle = Hook<unknown, HookOrderedRecordBase>
 
 
 
-
-export interface Hook<EnteringContext, Mappers extends UnknownRecord> extends ITrueMap<Hook<EnteringContext>>
+export interface Hook<EnteringContext, Mappers extends HookOrderedRecordBase> extends ITrueMap<Hook<EnteringContext, Mappers>>
 {
-  ordered: HookOrderedRecord<unknown, unknown>
+  ordered: Mappers
   independent: IndependentHandler<EnteringContext>[];// For running independent handlers (e.g. logging, side effects)
 
 };
 
-export type GlobalOnlyHooks = {
-  onClose: Hook<{code: number, reason: string}>
-  onConnection: Hook<IncomingMessage>;
+export type GlobalOnlyHooks<
+  OnCloseHooks extends HookOrderedRecordBase,
+  OnConnectionHooke extends HookOrderedRecordBase
+> = {
+  onClose: Hook<{code: number, reason: string},OnCloseHooks>
+  onConnection: Hook<IncomingMessage, OnConnectionHooke>;
 };
 
 
 export type ServerHooks<
-  BeforeHandle extends Hook<TypedMessage<unknown, unknown>>,
-  AfterHandle extends Hook<TypedMessage<unknown, unknown>>,
+  BeforeHandle extends Hook<TypedMessage<string, unknown>, HookOrderedRecordBase>,
+  AfterHandle extends Hook<TypedMessage<string, unknown>, HookOrderedRecordBase>,
   Errors extends string = string
 > = {
   beforeHandle:  BeforeHandle 
@@ -66,7 +69,15 @@ export type ServerHooks<
 };
 
 
-export type GlobalHooks = GlobalOnlyHooks & ServerHooks;
+export type GlobalHooks =
+  GlobalOnlyHooks<
+    HookOrderedRecordBase,
+    HookOrderedRecordBase
+  >
+  & ServerHooks<
+    BaseHookBundle,
+    BaseHookBundle
+  >
 
 
 type HookHandler<
@@ -79,3 +90,4 @@ type HookHandler<
 
 type IndependentHandler<MessageType> = HookHandler<Promise<void>, MessageType>;
 
+export type HookOrderedRecordBase = HookOrderedRecord<HookOrderedRecordEntry[]>
