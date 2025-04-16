@@ -1,4 +1,3 @@
-import { SpecRoutePathEndpointEntry } from './../types/openapi/main';
 export * from "./src/panic"
 export * from "./src/data_structures/RecordCompatibeArray"
 export * from "./src/data_structures/array"
@@ -18,3 +17,4 @@ export * from "./src/metaprogramming/prefix"
 export * from "./src/metaprogramming/afterfix"
 export * from "./src/metaprogramming/tuple/getFirst"
 export * from "./src/metaprogramming/tuple/getLast"
+export * from "./src/metaprogramming/IfNotUndefinedWithDefault.ts"

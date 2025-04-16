@@ -91,18 +91,10 @@ function hihi(v: string) {
             lolo: ""
           }
         } as const
-      }
-    } as const)
-    .build()
+    }} as const)
   
 
   {
-    const g = h.elements.value[0]
-//     should be (property) 0: {
-//     key: "koko";
-//     execute: Handler<{}, {
-//         readonly hi: "";
-//     }>;
-// }
+    const g = h._elements.elements.value[0]
   }
 }
