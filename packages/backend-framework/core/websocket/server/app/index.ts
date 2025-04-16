@@ -2,12 +2,14 @@ import { WebSocketServer, WebSocket } from "ws";
 import { object, z, ZodObject, type ZodRawShape } from "zod";
 import { BetterArray, entries, GetSet, ifNotNone, keyofonlystringkeys, map, Optionable, panic, Port, VCallback, WebsocketUrl } from "@custom-express/better-standard-library"
 import { HookBuilder } from "../utilites/builders/HookBuilder";
-import { GlobalHooks, Hook, HookOrderedRecord, HookOrderedRecordEntry, ServerHooks } from "../../types/Hooks/main";
+import { BaseHookBundle, GlobalHooks, Hook, HookOrderedRecord, HookOrderedRecordEntry, ServerHooks } from "../../types/Hooks/main";
 import { ChannelConfig } from "../../types/Channel/main";
-import { TypedMessage } from "../../types/Message/main";
+import { MessageItCanReceive, MessageThatCanBeSent, TypedMessage } from "../../types/Message/main";
 import { runHookHandler, runOrderedHooks } from "./helpers";
 import { WebsocketClient } from "../../client";
 import { UnknownRecord } from "@custom-express/better-standard-library/src/types/unknwonString";
+import { ChannelBuilder } from "../utilites/builders/ChannekBuilder";
+import { MessageThatCanBeReceivedBuilder } from "../utilites/builders/MessageBuilder";
 
 
 // ---------
@@ -19,7 +21,8 @@ export class CustomWebSocketRouter<
     ChannelConfig<infer T, infer U, infer K>
   >,
   Context extends Record<string, unknown>,
-  // BeforeHandle extends Hook<TypedMessage<unknown, unknown>,UnknownRecord>,
+  Hooks extends GlobalHooks
+// BeforeHandle extends Hook<TypedMessage<unknown, unknown>,UnknownRecord>,
 > {
   public readonly prefix: GetSet<Optionable<string>>
 
@@ -96,7 +99,7 @@ export class CustomWebSocketRouter<
     object: T
   ): CustomWebSocketRouter<
     Channels,
-    Context & {[Key in keyof T]: T[Key]}
+    Context & { [Key in keyof T]: T[Key] }
   > {
     return new CustomWebSocketRouter(this.channels, {
       ...this.context,
@@ -104,91 +107,91 @@ export class CustomWebSocketRouter<
     });
   }
 
-start(port: Port) {
-  const h = this.channels
+  start(port: Port) {
+    const h = this.channels
 
-  Object.entries(this.channels).forEach(([channelName,channelConfig]) => {
-    new Optionable(channelConfig)
-      .ifCanBeUnpacked(handlers => {
-        const wss = new WebSocketServer({ port: port.value });
+    Object.entries(this.channels).forEach(([channelName, channelConfig]) => {
+      new Optionable(channelConfig)
+        .ifCanBeUnpacked(handlers => {
+          const wss = new WebSocketServer({ port: port.value });
 
-        wss.on("connection", (ws, req) => {
-          this.hooks.ifCanBeUnpacked(({ onConnection }) => {
-            runHookHandler(onConnection, { ws, message: req });
-          });
+          wss.on("connection", (ws, req) => {
+            this.hooks.ifCanBeUnpacked(({ onConnection }) => {
+              runHookHandler(onConnection, { ws, message: req });
+            });
 
-          ws.on("message", async (message) => {
-            // TODO: Add a hook here to intercept message pre-parsing
+            ws.on("message", async (message) => {
+              // TODO: Add a hook here to intercept message pre-parsing
 
-            this.transformMsg(message.toString()).try({
-              ifNone: () => {
-                this.sendUnprocessableMessageType(ws, {
-                  channel: "unknown",
-                  handler: "onMessageReceived",
-                  msg: {},
-                });
-              },
-
-              ifNotNone: async (parsedMessage) => {
-                try {
-                  this.hooks.ifCanBeUnpacked(({beforeHandle}) => {
-                    beforeHandle.map((hook) => {
-                      runHookHandler(hook, { ws, message: parsedMessage });
-                    });
+              this.transformMsg(message.toString()).try({
+                ifNone: () => {
+                  this.sendUnprocessableMessageType(ws, {
+                    channel: "unknown",
+                    handler: "onMessageReceived",
+                    msg: {},
                   });
+                },
 
-                  new Optionable(
-                    BetterArray.new(Object.entries(this.channels))
-                      .filter(([channelName]) => channelName === parsedMessage.channel)
-                      .normalArray[0]
-                  ).try({
-                    ifNone: () =>
-                      console.log(`No open channel called ${parsedMessage.channel}`, parsedMessage),
+                ifNotNone: async (parsedMessage) => {
+                  try {
+                    this.hooks.ifCanBeUnpacked(({ beforeHandle }) => {
+                      map(beforeHandle, hook => {
+                        runHookHandler(hook, { ws, message: parsedMessage });
+                      });
+                    });
 
-                    ifNotNone: ([channelName, channelConfig]) => {
-                      new Optionable(
-                        channelConfig.messagesItCanReceive[parsedMessage.message]
-                      ).try({
-                        ifNone: () =>
-                          console.log(`Channel ${channelName} does not accept message type ${parsedMessage.message}`),
+                    new Optionable(
+                      BetterArray.new(Object.entries(this.channels))
+                        .filter(([channelName]) => channelName === parsedMessage.channel)
+                        .normalArray[0]
+                    ).try({
+                      ifNone: () =>
+                        console.log(`No open channel called ${parsedMessage.channel}`, parsedMessage),
 
-                        ifNotNone: ({ config,  parse: parser  }) => {
-                          map( config,({ handler, hooks: { beforeHandler, afterHandler } }) => {
-                            runHookHandler(beforeHandler, { ws, message: parsedMessage });
+                      ifNotNone: ([channelName, channelConfig]) => {
+                        new Optionable(
+                          channelConfig.messagesItCanReceive[parsedMessage.message]
+                        ).try({
+                          ifNone: () =>
+                            console.log(`Channel ${channelName} does not accept message type ${parsedMessage.message}`),
 
-                            const result = handler(parser.parse({ ws, message: parsedMessage }));
+                          ifNotNone: ({ config, parse: parser }) => {
+                            map(config, ({ handler, hooks: { beforeHandler, afterHandler } }) => {
+                              runHookHandler(beforeHandler, { ws, message: parsedMessage });
 
-                            runHookHandler(afterHandler, { ws, message: result });
+                              const result = handler(parser.parse({ ws, message: parsedMessage }));
 
-                            this.hooks.ifCanBeUnpacked(({ afterHandle }) => {
-                              afterHandle.map((hook) => {
-                                runHookHandler(hook, { ws, msg: result });
+                              runHookHandler(afterHandler, { ws, message: result });
+
+                              this.hooks.ifCanBeUnpacked(({ afterHandle }) => {
+                                map(afterHandle, hook => {
+                                  runHookHandler(hook, { ws, msg: result });
+                                });
                               });
                             });
-                          });
-                        },
-                      });
-                    },
-                  });
-                } catch (err) {
-                  this.hooks.ifCanBeUnpacked(({ onError }) => onError(err));
-                }
-              },
+                          },
+                        });
+                      },
+                    });
+                  } catch (err) {
+                    this.hooks.ifCanBeUnpacked(({ onError }) => onError(err));
+                  }
+                },
+              });
             });
-          });
 
-          ws.on("close", (code, reason) => {
-            this.hooks.ifCanBeUnpacked(({ onClose }) => {
-              runHookHandler(onClose, {
-                ws,
-                message: { code, reason: reason.toString() },
+            ws.on("close", (code, reason) => {
+              this.hooks.ifCanBeUnpacked(({ onClose }) => {
+                runHookHandler(onClose, {
+                  ws,
+                  message: { code, reason: reason.toString() },
+                });
               });
             });
           });
         });
-      });
-  });
-}
+    });
+  }
 
 
   getCLientBuilder(url: WebsocketUrl) {
@@ -199,31 +202,68 @@ start(port: Port) {
   // usefull for adding big batches of context for example e,g, a big store which you have reused previously, for example all of services for interacting with a auth provider which you are reusing
 
   addChannel<
+    Config extends {name: readonly string }, // try putting the  below generic here for a bit more cleannes
     NewName extends string,
-    MessagesItCanSend extends string,
-  MessagesItCanReceive extends string>(config: {
-    name: NewName;
-  }
-    &
-    ChannelConfig<
-      MessagesEntries<MessagesItCanSend,MessagesItCanReceive>,
-      ServerHooks
+    NewChannel extends ChannelConfig<
+      Record<string, MessageThatCanBeSent<ZodObject<ZodRawShape>>>,
+      Record<
+        string,
+        MessageItCanReceive<
+          HookOrderedRecord<HookOrderedRecordEntry[]>,
+          ZodObject<ZodRawShape>
+        >
+      >,
+      Partial<ServerHooks<
+        BaseHookBundle,
+        BaseHookBundle,
+        string
+      >>
     >
-
-  ): NewName extends ChannelNames
+  >
+    (name: NewName, config: NewChannel ): NewName extends keyof Channels
     ? never
     : CustomWebSocketRouter<
-      
-  > {
+      Channels & Record<NewName, NewChannel>,
+      Context,
+      Hooks
+    > {
     Object.entries(this.channels).forEach(([channelName, value]) => {
-      if (channelName === config.name) {
+      if (channelName === name) {
         panic(`Channel ${channelName} is already defined`)
       }
     })
-
-    return new CustomWebSocketRouter<ChannelNames | NewName, Channels & typeof config.handlers, Context, ContextKeys>({
-      ...
-    })
+    return new CustomWebSocketRouter(
+        {
+          ...this.channels,
+          [name as NewName]: {...config}
+      },
+      this.context
+      ) 
   }
 
+}
+
+
+{
+  const g = new CustomWebSocketRouter({}).addChannel(
+    "channel-1",
+    {
+      "hooks": {
+        beforeHandle: { ordered: HookBuilder.new().add({ key: "lolo", execute: v => { return { hi: "" } as const } } as const).build(), independent: [] }
+      },
+      messagesItCanReceive: {
+        puki: new MessageThatCanBeReceivedBuilder(
+          HookBuilder.new().add({key: "ojjoi", execute: v => {return {ko: ""}}}).build(),
+          v => {}
+        ).build()
+      },
+      messagesItCanSend: {}
+    }
+  )
+    
+    
+  const h = g.channels["channel-1"].hooks.beforeHandle.ordered.elements.value[0]
+  {
+    const h = g.channels["channel-1"].messagesItCanReceive.puki.config.hooks.
+  }
 }

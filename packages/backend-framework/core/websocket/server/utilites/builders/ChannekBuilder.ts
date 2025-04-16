@@ -87,7 +87,7 @@ export class ChannelBuilder<
         MessagesItCanReceive,
         Hooks
     > {
-        return
+        return 
     }
 }
 
@@ -140,10 +140,17 @@ export class ChannelBuilder<
         .addReceiver({
             name: "h" as const,
             config: {
-                hooks: HookBuilder
-                    .new()
-                    .add({ key: "jido", execute: v => { } })
-                    .build(),
+                hooks: {
+                    "afterHandler": {
+                        ordered: HookBuilder.new().add({key: "", execute: v => {}}).build(),
+                        independent: []
+                    },
+                    "beforeHandler": {
+                        ordered: HookBuilder.new().add({key: "", execute: v => {}}).build(),
+                        independent: []
+                    },
+                    "onErrorr": v => {}
+                },
                 handler: v => { },
             },
             parse: z.object({
@@ -153,7 +160,7 @@ export class ChannelBuilder<
         .addSender({
             name: "kook",
             schema: z.object({
-
+                jiji: z.string()
             })
         })
     {

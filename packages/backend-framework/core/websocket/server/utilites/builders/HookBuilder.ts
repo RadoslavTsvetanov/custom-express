@@ -28,8 +28,8 @@ export class HookBuilder<
     return new HookBuilder(this._elements.add(handler))
   }
 
-  static new() {
-    return new HookBuilder([] as const)
+  static new(): HookBuilder<[]> {// e.g. empty 
+    return new HookBuilder([]  as const)
   }
 
     build() {

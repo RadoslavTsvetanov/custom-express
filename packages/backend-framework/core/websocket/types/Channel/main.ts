@@ -1,5 +1,5 @@
 import { ZodObject, ZodRawShape } from "zod";
-import { Hook, HookOrderedRecord, HookOrderedRecordEntry, ServerHooks } from "../Hooks/main";
+import { BaseHookBundle, Hook, HookOrderedRecord, HookOrderedRecordEntry, ServerHooks } from "../Hooks/main";
 import { MessageItCanReceive, MessagesEntries, MessageThatCanBeSent } from "../Message/main";
 import { UnknownRecord } from "@custom-express/better-standard-library/src/types/unknwonString";
 
@@ -12,11 +12,11 @@ export type ChannelConfig<
       ZodObject<ZodRawShape>
     >
   >,
-  Hooks extends ServerHooks<
-      Hook<unknown, UnknownRecord>,
-      Hook<unknown, UnknownRecord>,
+  Hooks extends Partial<ServerHooks<
+      BaseHookBundle,
+      BaseHookBundle,
       string
-    >
+    >>
   > = {
   messagesItCanReceive: MessagesItCanReceive,
     messagesItCanSend: MessagesItCanSend,

@@ -14,7 +14,11 @@ type FirstArgument<T extends (...args: any[]) => any> =
 
 export class MessageThatCanBeReceivedBuilder<
     BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,
-    MsgHandler extends MessageHandler<ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]>,unknown,BeforeHooks>
+    MsgHandler extends MessageHandler<
+        ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]>,
+        unknown,
+        BeforeHooks
+    >
 >{
     public _message: MsgHandler
     public _hooks: BeforeHooks

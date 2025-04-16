@@ -42,7 +42,7 @@ export type BaseHookBundle = Hook<unknown, HookOrderedRecordBase>
 
 
 
-export interface Hook<EnteringContext, Mappers extends HookOrderedRecordBase> extends ITrueMap<Hook<EnteringContext, Mappers>>
+export interface Hook<EnteringContext, Mappers extends HookOrderedRecordBase> /* extends  ITrueMap<Hook<EnteringContext, Mappers>> */
 {
   ordered: Mappers
   independent: IndependentHandler<EnteringContext>[];// For running independent handlers (e.g. logging, side effects)
