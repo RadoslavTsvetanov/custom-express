@@ -1,8 +1,16 @@
-import { ifNotNone, Last, OrderedRecord } from "@custom-express/better-standard-library";
+import { First, ifNotNone, Last, OrderedRecord } from "@custom-express/better-standard-library";
 import { HookBuilder } from "./HookBuilder";
 import { HookOrderedRecord, HookOrderedRecordEntry } from "../../../types/Hooks/main";
 import { MessageHandler, MessageItCanReceive, MessageThatCanBeSent } from "../../../types/Message/main";
 import { z, ZodObject, ZodRawShape } from "zod";
+import { ChannelBuilder } from "./ChannekBuilder";
+
+
+
+type FirstArgument<T extends (...args: any[]) => any> =
+  T extends (arg1: infer A, ...args: any[]) => any ? A : never;
+
+
 
 export class MessageThatCanBeReceivedBuilder<
     BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,
@@ -32,9 +40,21 @@ export class MessageThatCanBeReceivedBuilder<
                 return new MessageThatCanBeReceivedBuilder(newHooks,handler)
         }
 
-    addHooks<Hooks extends HookOrderedRecord<HookOrderedRecordEntry[]>>(){}
+    addHooks<Hooks extends HookOrderedRecord<HookOrderedRecordEntry[]>>():
+        ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]> extends FirstArgument<First<Hooks["elements"]["value"]>["execute"]>
+        ? MessageThatCanBeReceivedBuilder<
+            HookOrderedRecord<[
+                ...BeforeHooks["elements"]["value"],
+                ...Hooks["elements"]["value"]
+            ]>,
+            MsgHandler
+        > 
+        : never
+    {
+        return 
+        }
     createHookBuilder(): HookBuilder<BeforeHooks["elements"]["value"]>{ // this is so that we cant pass a hook with a name that already exists 
-        return new HookBuilder()
+        return new HookBuilder<BeforeHooks["elements"]["value"]>(this._hooks.elements.value)
     }
 
 

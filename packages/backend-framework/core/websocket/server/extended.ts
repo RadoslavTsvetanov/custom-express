@@ -1,6 +1,6 @@
 import { IPipeable } from './../../../../better-standard-library/src/errors-as-values/src/rust-like-pattern/pipe';
 import { IMapable, ISimpleMapable } from "@custom-express/better-standard-library/src/errors-as-values/src/rust-like-pattern/mapable";
-import { CustomWebSocketRouter } from "./core";
+import { CustomWebSocketRouter } from "./app";
 import { ChannelConfig, Hook, HookOrderedRecord, ServerHooks } from '../types';
 import { z, ZodObject, ZodRawShape } from 'zod';
 import { First, map, Optionable, OrderedRecord, TrueMap } from '@custom-express/better-standard-library';
@@ -96,50 +96,3 @@ export class Extended<
 type FirstArg<T extends (...args: any[]) => any> = T extends (arg1: infer A, ...args: any[]) => any ? A : never;
 
 
-export class BuilderEnhanced<
-    ChannelNames extends string,
-    Channels extends Record<
-        ChannelNames,
-        ChannelConfig<infer T>
-    >,
-    Context extends Record<ContextKeys, unknown>,
-    ContextKeys extends string,
-    BeforeHooks extends OrderedRecord<>,
-    LastHookReturnType extends Record<string, unknown> = {
-        headers: { [x: string]: Optionable<string> };
-    },
-    LastHook extends (v: unknown) => LastHookReturnType = (v: {
-        headers: { [x: string]: Optionable<string> };
-    }) => LastHookReturnType,
-    BaseRequest = {}
-> extends Extended<
-
-    ChannelNames,
-    Channels , 
-    Context  ,
-    ContextKeys ,
-    BeforeHooks,
-    LastHookReturnType 
-,
-LastHook ,
-    BaseRequest 
->{
-  constructor() {
-    super()
-  }
-  createHookBuilder(type: "before"): HookBuilder<>{ // so that we can pass the approppriate existing context inestead iod you needing to pass it on your own
-    return new HookBuilder(this.hooks[type])
-  }
-
-  createChannelBuilder<NewChannelName extends string>(channelName: NewChannelName): NewChannelName extends ChannelNames ? never : ChannelBuilder<>{}
-
-function hook<
-  HookType extends "beforeHandle",
-  NewHooks extends HookOrderedRecord<[{ key: string; execute: (ctx: string /* get the return type of the last hook */) => unknown }, ...any[]]>
->(
-  hooks: NewHooks
-): FirstArg<NewHooks["elements"]["value"][0]["execute"]> {
-
-}
-
-}
