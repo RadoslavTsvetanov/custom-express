@@ -11,7 +11,10 @@ export class ChannelBuilder<
     MessagesItCanSend extends Record<string, ZodObject<ZodRawShape>>,
     MessagesItCanReceive extends Record<
         string,
-        MessageItCanReceive<HookOrderedRecord<HookOrderedRecordEntry[]>, ZodObject<ZodRawShape>>
+        MessageItCanReceive<HookOrderedRecord<
+            HookOrderedRecordEntry[]>,
+            ZodObject<ZodRawShape>
+        >
     >,
     Hooks extends ServerHooks<
         Hook<TypedMessage<string, unknown>, HookOrderedRecordBase>,
@@ -89,102 +92,4 @@ export class ChannelBuilder<
     > {
         return 
     }
-}
-
-
-
-{
-    const exampleChannel = new ChannelBuilder(
-        {
-            beforeHandle: {
-                ordered: HookBuilder
-                .new()
-                    .add({ key: "koko", execute: v => { return "" } })
-                    .add({ key: "p", execute: v => { } })
-                    .build(),
-                independent: [],
-            },
-            afterHandle: {
-                ordered: HookBuilder 
-                    .new()
-                    .add({key: "", execute: v => {}})
-                    .build(),
-                independent: []
-            },
-            onError: v => {2},
-        },
-        {
-            jiji: z.object({
-                hi: z.string()
-            }),
-            lplp: z.object({
-                h9i: z.object({
-                    koko: z.string()
-                })
-            })
-        },
-        {
-            koko: new MessageThatCanBeReceivedBuilder(
-                HookBuilder
-                    .new()
-                    .add({ key: "koko", execute: v => "" })
-                    .build(),
-                v => {
-                    // v should be of type string
-                }
-            )
-                .build()
-        }
-    )
-        // end of constructor
-        .addReceiver({
-            name: "h" as const,
-            config: {
-                hooks: {
-                    "afterHandler": {
-                        ordered: HookBuilder.new().add({key: "", execute: v => {}}).build(),
-                        independent: []
-                    },
-                    "beforeHandler": {
-                        ordered: HookBuilder.new().add({key: "", execute: v => {}}).build(),
-                        independent: []
-                    },
-                    "onErrorr": v => {}
-                },
-                handler: v => { },
-            },
-            parse: z.object({
-                s: z.string()
-            })
-        } as const)
-        .addSender({
-            name: "kook",
-            schema: z.object({
-                jiji: z.string()
-            })
-        })
-    {
-        const { jiji, lplp } = exampleChannel._messagesItCanSend
-
-        // should have keys jiji, lplp
-    }
-
-
-    {
-
-        const g = exampleChannel._messagesItCanReceive
-        g.h
-        g.koko
-        // both should be defined
-
-    }
-
-    {
-        const g = exampleChannel.getMessagesItCanSend
-        g.jiji
-        g.kook
-        g.lplp
-        // both should be defined and the value should be the respective zod schema 
-    }
-
 }

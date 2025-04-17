@@ -771,7 +771,6 @@ app
      connections.add(ws)
   }
 })
-
 ```
 
 ## Commonly asked questions 
@@ -893,7 +892,6 @@ using as const to make the ts compiler help you more
 Look at this example 
 
 ```ts
-
 function hihi(v: string) { 
     if (v.length == 3) {
         return "g" 
@@ -925,7 +923,3 @@ const gg = new HookBuilder()
     execute: (v) => {}, // here the return type of v is /parameter) v: {readonly koki: "g" | "j";readonly hi: string;} without it whough it is v: {koki: string;hi: string;}
   });
 ```
-
-
-
-

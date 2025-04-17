@@ -25,7 +25,7 @@ export class HookBuilder<
       Return
     >;
   }): HookBuilder<[...Elements, typeof handler]> {
-    return new HookBuilder(this._elements.add(handler))
+    return new HookBuilder([...this._elements.elements.value, handler])
   }
 
   static new(): HookBuilder<[]> {// e.g. empty 
@@ -37,72 +37,6 @@ export class HookBuilder<
   }
 }
 
-function hihi(v: string) { 
-    if (v.length == 3) {
-        return "g" 
-    } else {
-        return "j"
-    }
-}
 
 // Note when making a hook builder for the inference and type retaining to work you must provide an arg in the cinstrcutor if you are gonna use it directly as in this example although a simple `([] as const)` will work as good 
 
-{
-  const gg = new HookBuilder([{ key: "g", execute: async g => "" }] as const)
-    .add({
-      key: "koko",
-      execute: (v) => {
-        return {
-          hi: "",
-        } as const // yeah add as const whnenver you can for type inference we will figure it out eventually how to minimize the need for adding as const 
-      },
-    } as const)
-    .add({
-      key: "lolo",
-      execute: (v) => {
-        return {
-          ...v,
-          koki: hihi("so"),
-        }   // to ensure no modification and better type inference e,g, it shortnes the scope as much as possible 
-      },
-    } as const)
-    .add({
-      key: "koki",
-      execute: (v) => { },
-    } as const).build().elements.value[1]
-    // should be const gg: {
-    // key: "koko";
-    // execute: Handler<Promise<string>, {
-    //     readonly hi: "";
-    // }>;
-// }
-}
-
-
-{
-  const h = HookBuilder.new()
-    .add({ key: "koko", execute: v => { return { hi: "" } as const } } as const)
-    .add({
-      key: "jiji", execute: v => {
-        v.hi // should be intellisensed as string
-        
-        return {
-          koko: {
-            lolo: ""
-          }
-        } as const
-      }
-    } as const)
-    .build()
-  
-
-  {
-    const g = h.elements.value[0]
-//     should be (property) 0: {
-//     key: "koko";
-//     execute: Handler<{}, {
-//         readonly hi: "";
-//     }>;
-// }
-  }
-}
