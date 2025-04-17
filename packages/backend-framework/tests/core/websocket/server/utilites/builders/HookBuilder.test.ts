@@ -7,8 +7,6 @@ function hihi(v: string) {
   return v.length == 3 ? "g" : "j";
 }
 
-// === Type + Runtime tests ===
-
 // 🧪 TYPE TEST: Inference chain check
 const hooks = new HookBuilder([{ key: "g", execute: async g => "" }] as const)
   .add({

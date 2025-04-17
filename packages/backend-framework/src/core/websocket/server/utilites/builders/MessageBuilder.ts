@@ -1,6 +1,6 @@
 import { First, ifNotNone, Last, OrderedRecord } from "@custom-express/better-standard-library";
 import { HookBuilder } from "./HookBuilder";
-import { BaseHookBundle, HookOrderedRecord, HookOrderedRecordEntry, HookTypes, MessageHooks } from "../../../types/Hooks/main";
+import { BaseHookBundle, BaseMessageHooks, HookOrderedRecord, HookOrderedRecordEntry, HookTypes, MessageHooks } from "../../../types/Hooks/main";
 import { MessageHandler, MessageItCanReceive, MessageThatCanBeSent } from "../../../types/Message/main";
 import { z, ZodObject, ZodRawShape } from "zod";
 import { ChannelBuilder } from "./ChannekBuilder";
@@ -13,12 +13,8 @@ type FirstArgument<T extends (...args: any[]) => any> =
 
 
 export class MessageThatCanBeReceivedBuilder<
-    Hooks extends MessageHooks<
-        BaseHookBundle,
-        BaseHookBundle
-    >,
+    Hooks extends BaseMessageHooks,
     MsgHandler extends MessageHandler<
-        ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]>,
         unknown,
         Hooks
     >
@@ -37,7 +33,6 @@ export class MessageThatCanBeReceivedBuilder<
         BaseHookBundle
     >,    
         MsgHandler extends MessageHandler<
-                ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]>,
                 unknown,
                 Hooks
             >
@@ -67,10 +62,9 @@ export class MessageThatCanBeReceivedBuilder<
     }
 
 
-    build(): MessageItCanReceive<BeforeHooks,ZodObject<ZodRawShape>> {
+    build(): MessageItCanReceive<Hooks, ReturnType<MsgHandler["handler"]>> {
         return {
-            config:{"hooks":this._hooks, "handler": this._message.handler}, 
-            "parse": z.object({}),
+            config:{"hooks":this._hooks,"handler": this._message.handler}, 
         }
     }
 
@@ -112,5 +106,3 @@ const newMsg = new MessageThatCanBeReceivedBuilder(
     }
 )
 }
-
-

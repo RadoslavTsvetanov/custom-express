@@ -2,7 +2,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { object, z, ZodObject, type ZodRawShape } from "zod";
 import { BetterArray, entries, GetSet, ifNotNone, keyofonlystringkeys, map, Optionable, panic, Port, VCallback, WebsocketUrl } from "@custom-express/better-standard-library"
 import { HookBuilder } from "../utilites/builders/HookBuilder";
-import { BaseHookBundle, GlobalHooks, Hook, HookOrderedRecord, HookOrderedRecordEntry, ServerHooks } from "../../types/Hooks/main";
+import { BaseHookBundle, BaseMessageHooks, GlobalHooks, Hook, HookOrderedRecord, HookOrderedRecordEntry, MessageHooks, ServerHooks } from "../../types/Hooks/main";
 import { ChannelConfig } from "../../types/Channel/main";
 import { MessageItCanReceive, MessageThatCanBeSent, TypedMessage } from "../../types/Message/main";
 import { runHookHandler, runOrderedHooks } from "./helpers";
@@ -18,7 +18,11 @@ import { MessageThatCanBeReceivedBuilder } from "../utilites/builders/MessageBui
 export class CustomWebSocketRouter<
   Channels extends Record<
     string,
-    ChannelConfig<infer T, infer U, infer K>
+    ChannelConfig<
+      Record<string, ZodObject<ZodRawShape>>,
+      Record<string, MessageItCanReceive<MessageHooks<BaseHookBundle, BaseHookBundle>,unknown>>,
+      Partial<ServerHooks<BaseHookBundle, BaseHookBundle>>
+      >
   >,
   Context extends Record<string, unknown>,
   Hooks extends GlobalHooks
@@ -209,8 +213,8 @@ export class CustomWebSocketRouter<
       Record<
         string,
         MessageItCanReceive<
-          HookOrderedRecord<HookOrderedRecordEntry[]>,
-          ZodObject<ZodRawShape>
+          BaseMessageHooks,
+          unknown
         >
       >,
       Partial<ServerHooks<

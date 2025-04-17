@@ -8,52 +8,64 @@ import { expectType } from "tsd";
 
 
 
-
-// RUNTIME TEST SETUP
-const router = new CustomWebSocketRouter({}).addChannel("channel-1", {
-  hooks: {
-    beforeHandle: {
-      ordered: HookBuilder.new()
+const pukiMessage = new MessageThatCanBeReceivedBuilder(
+  {
+    afterHandler: {
+      ordered: HookBuilder
+        .new()
         .add({
-          key: "lolo",
-          execute: (v) => ({ hi: "" } as const),
+          key: "ojjoi" as const,
+          execute: (v) => ({ ko: "" }),
         })
         .build(),
       independent: [],
-    },
+    } as const,
+    beforeHandler: {
+      ordered: HookBuilder.new()
+        .add({
+          key: "iooi" as const,
+          execute: (v) => ({ lolo: "" } as const),
+        } as const)
+        .build(),
+      independent: [],
+    } as const,
+    onErrorr: (v) => "",
   },
-  messagesItCanReceive: {
-    puki: new MessageThatCanBeReceivedBuilder(
-      {
-        afterHandler: {
-          ordered: HookBuilder.new()
-            .add({
-              key: "ojjoi",
-              execute: (v) => ({ ko: "" }),
-            })
-            .build(),
-          independent: [],
-        },
-        beforeHandler: {
-          ordered: HookBuilder.new()
-            .add({
-              key: "iooi" as const,
-              execute: (v) => ({ lolo: "" } as const),
-            } as const)
-            .build(),
-          independent: [],
-        },
-        onErrorr: (v) => "",
+  (v) => { }
+).build()
+
+// build does not work 
+
+
+pukiMessage.config.hooks.beforeHandler.ordered.elements.value[0]
+
+
+// RUNTIME TEST SETUP
+const router = new CustomWebSocketRouter({})
+  .addChannel("channel-1", {
+    hooks: {
+      beforeHandle: {
+        ordered: HookBuilder.new()
+          .add({
+            key: "lolo",
+            execute: (v) => ({ hi: "" } as const),
+          })
+          .build(),
+        independent: [],
       },
-      (v) => {}
-    ).build(),
-  },
-  messagesItCanSend: {
-    puki: z.object({
-      puki: z.string(),
-    }),
-  },
-});
+    },
+    messagesItCanReceive: {
+      // puki: {
+      //   pukiMessage
+      // },
+      puki: pukiMessage
+    } as const,
+    messagesItCanSend: {
+      puki: z.object({
+        puki: z.string(),
+      }),
+    },
+  });
 
 
 const channel1 = router.channels["channel-1"]
@@ -79,7 +91,7 @@ expectType<{ puki?: string }>(
 );
 
 expectType<"iooi">(
-  channel1["messagesItCanReceive"]["puki"]["config"]["hooks"]["beforeHandler"]["ordered"]["elements"]["value"][0]["key"]
+  channel1.messagesItCanReceive.puki.config.hooks.beforeHandler.ordered.elements.value[0].key
 );
 
 // Uncomment to see a failing type test:

@@ -93,7 +93,6 @@ export class Extended<
 
 }
 
-type FirstArg<T extends (...args: any[]) => any> = T extends (arg1: infer A, ...args: any[]) => any ? A : never;
 
 
 

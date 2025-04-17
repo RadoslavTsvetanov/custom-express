@@ -105,3 +105,8 @@ export type HookTypes = {
   MessageOnlyHooks: keyof MessageHooks<BaseHookBundle, BaseHookBundle>,
   ServerHooks: keyof GlobalHooks
 }
+
+
+
+
+export type BaseMessageHooks = MessageHooks<BaseHookBundle, BaseHookBundle>

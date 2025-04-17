@@ -12,6 +12,7 @@ export type AfterfixKeysOfRecord<
 
 
 
+export type FirstArg<T extends (...args: any[]) => any> = T extends (arg1: infer A, ...args: any[]) => any ? A : never;
 
 type j = AfterfixKeysOfRecord<{koko: string}, "j">
 

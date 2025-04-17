@@ -3,6 +3,7 @@ import { expect, test } from "bun:test";
 import { expectType } from "tsd";
 import { HookBuilder } from "../../../../../../src/core/websocket/server/utilites/builders/HookBuilder";
 import { MessageThatCanBeReceivedBuilder } from "../../../../../../src/core/websocket/server/utilites/builders/MessageBuilder";
+import { Handler } from "../../../../../../src/core/websocket/types/Message/main";
 
 // ✅ Shared builder setup
 const hooks = HookBuilder.new().add({
@@ -33,6 +34,17 @@ const msg = new MessageThatCanBeReceivedBuilder(
     };
   }
 );
+
+
+expectType<
+    {
+    key: "hi";
+    execute: Handler<{}, {
+        readonly hi: "";
+    }>;
+}
+    >(msg._hooks.beforeHandler.ordered.elements.value[0])
+
 
 // ✅ Runtime check (Bun test)
 test("msg should be an object", () => {
