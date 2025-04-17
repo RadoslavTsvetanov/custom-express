@@ -1,6 +1,6 @@
 import { IPipeable } from '@custom-express/better-standard-library/src/errors-as-values/src/rust-like-pattern/pipe';
 import { IMapable, ISimpleMapable } from "@custom-express/better-standard-library/src/errors-as-values/src/rust-like-pattern/mapable";
-import { CustomWebSocketRouter } from ".";
+import { CustomWebSocketRouter } from "./index";
 import { z, ZodObject, ZodRawShape } from 'zod';
 import { First, map, Optionable, OrderedRecord, TrueMap } from '@custom-express/better-standard-library';
 import { HookBuilder } from '../utilites/builders/HookBuilder';

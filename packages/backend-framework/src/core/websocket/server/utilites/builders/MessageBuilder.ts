@@ -1,6 +1,6 @@
 import { First, ifNotNone, Last, OrderedRecord } from "@custom-express/better-standard-library";
 import { HookBuilder } from "./HookBuilder";
-import { HookOrderedRecord, HookOrderedRecordEntry } from "../../../types/Hooks/main";
+import { BaseHookBundle, HookOrderedRecord, HookOrderedRecordEntry, HookTypes, MessageHooks } from "../../../types/Hooks/main";
 import { MessageHandler, MessageItCanReceive, MessageThatCanBeSent } from "../../../types/Message/main";
 import { z, ZodObject, ZodRawShape } from "zod";
 import { ChannelBuilder } from "./ChannekBuilder";
@@ -13,43 +13,48 @@ type FirstArgument<T extends (...args: any[]) => any> =
 
 
 export class MessageThatCanBeReceivedBuilder<
-    BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,
+    Hooks extends MessageHooks<
+        BaseHookBundle,
+        BaseHookBundle
+    >,
     MsgHandler extends MessageHandler<
-        ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]>,
+        ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]>,
         unknown,
-        BeforeHooks
+        Hooks
     >
 >{
     public _message: MsgHandler
-    public _hooks: BeforeHooks
-    public __l:  Last<BeforeHooks["elements"]["value"]>
-    constructor(hooks: BeforeHooks ,handler: MsgHandler["handler"]) {
+    public _hooks: Hooks
+    constructor(hooks: Hooks, handler: MsgHandler["handler"]) {
         
     }
 
 
     static new<
         Parser extends ZodObject<ZodRawShape>,
-        BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,    
+        Hooks extends  MessageHooks<
+        BaseHookBundle,
+        BaseHookBundle
+    >,    
         MsgHandler extends MessageHandler<
-                ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]>,
+                ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]>,
                 unknown,
-                BeforeHooks
+                Hooks
             >
         >(
-            hooks: BeforeHooks,
+            hooks: Hooks,
             parser: Parser | undefined, // if not undefined parser will just be a guard hook that is added to the hooks 
             handler: typeof parser extends z.ZodType<infer U> ? (v: U) => unknown : MsgHandler["handler"]) {
                 const newHooks = parser == undefined ? hooks : new HookBuilder(hooks.elements.value).build()
                 return new MessageThatCanBeReceivedBuilder(newHooks,handler)
         }
 
-    addHooks<Hooks extends HookOrderedRecord<HookOrderedRecordEntry[]>>():
-        ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]> extends FirstArgument<First<Hooks["elements"]["value"]>["execute"]>
+    addHooks<NewHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>>(type: "beforeHandler"):
+        ReturnType<Last<Hooks[typeof type]["ordered"]["elements"]["value"]>["execute"]> extends FirstArgument<First<NewHooks["elements"]["value"]>["execute"]>
         ? MessageThatCanBeReceivedBuilder<
             HookOrderedRecord<[
-                ...BeforeHooks["elements"]["value"],
-                ...Hooks["elements"]["value"]
+                ...Hooks["elements"]["value"],
+                ...NewHooks["elements"]["value"]
             ]>,
             MsgHandler
         > 
@@ -57,8 +62,8 @@ export class MessageThatCanBeReceivedBuilder<
     {
         return 
         }
-    createHookBuilder(): HookBuilder<BeforeHooks["elements"]["value"]>{ // this is so that we cant pass a hook with a name that already exists 
-        return new HookBuilder<BeforeHooks["elements"]["value"]>(this._hooks.elements.value)
+    createHookBuilder(type: "beforeHandler" /* HookTypes["MessageOnlyHooks"] TODO: fix this sinceit fails cuz onError is not hook type but regualr callback*/): HookBuilder<Hooks[typeof type]["ordered"]["elements"]["value"]>{ // this is so that we cant pass a hook with a name that already exists 
+        return new HookBuilder<Hooks[typeof type]["ordered"]["elements"]["value"]>(this._hooks[type].ordered.elements.value)
     }
 
 
@@ -84,7 +89,17 @@ const hooks = HookBuilder
 
 {
 const newMsg = new MessageThatCanBeReceivedBuilder(
-    hooks,
+    {
+        "beforeHandler": {
+            ordered: hooks,
+            independent: []
+        },
+        "afterHandler": {
+            ordered: hooks,
+            independent: []
+        },
+        "onErrorr": v => "" as const 
+    },
     v => {
         v // shoud be of type  
 //  {

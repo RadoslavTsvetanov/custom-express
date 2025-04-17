@@ -1,4 +1,4 @@
-import { ITrueMap, OrderedRecord, OrderedRecordBase } from "@custom-express/better-standard-library";
+import { AfterfixKeysOfRecord, ITrueMap, OrderedRecord, OrderedRecordBase } from "@custom-express/better-standard-library";
 import { WithKey } from "../main";
 import { Handler, TypedMessage } from "../Message/main";
 import {IncomingMessage} from "http"
@@ -79,6 +79,15 @@ export type GlobalHooks =
     BaseHookBundle
   >
 
+export type MessageHooks<
+  Before extends BaseHookBundle,
+    After extends BaseHookBundle 
+  > = AfterfixKeysOfRecord<ServerHooks<
+  Before,
+  After
+    >, "r">
+
+
 
 type HookHandler<
   ReturnType,
@@ -91,3 +100,8 @@ type HookHandler<
 type IndependentHandler<MessageType> = HookHandler<Promise<void>, MessageType>;
 
 export type HookOrderedRecordBase = HookOrderedRecord<HookOrderedRecordEntry[]>
+
+export type HookTypes = {
+  MessageOnlyHooks: keyof MessageHooks<BaseHookBundle, BaseHookBundle>,
+  ServerHooks: keyof GlobalHooks
+}

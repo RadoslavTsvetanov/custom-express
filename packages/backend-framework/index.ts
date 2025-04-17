@@ -1,2 +1,2 @@
-export { HookOrderedRecord } from "./core/websocket/types";
-export { Extended as WebsocketRouter } from "./core/websocket/server/app/extended";
+export { HookOrderedRecord } from "./src/core/websocket/types";
+export { Extended as WebsocketRouter } from "./src/core/websocket/server/app/extended";

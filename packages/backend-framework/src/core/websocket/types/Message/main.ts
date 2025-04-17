@@ -1,6 +1,6 @@
 import { AfterfixKeysOfRecord, OrderedRecord } from "@custom-express/better-standard-library";
 import { ZodObject, ZodRawShape } from "zod";
-import { BaseHookBundle, Hook, HookOrderedRecord, HookOrderedRecordBase, HookOrderedRecordEntry, ServerHooks } from "../Hooks/main";
+import { BaseHookBundle, Hook, HookOrderedRecord, HookOrderedRecordBase, HookOrderedRecordEntry, MessageHooks, ServerHooks } from "../Hooks/main";
 
 export interface TypedMessage<ChannelNames extends string, Payload> {
   channel: ChannelNames;
@@ -9,15 +9,6 @@ export interface TypedMessage<ChannelNames extends string, Payload> {
 }
 
 export type Handler<Context, ReturnType> = (context: Context) => ReturnType;
-
-
-type MessageHooks<
-  Before extends BaseHookBundle,
-    After extends BaseHookBundle 
-  > = AfterfixKeysOfRecord<ServerHooks<
-  Before,
-  After
-    >, "r">
 
 export interface MessageHandler<
   ContextType, // this is for passing the type hich the last beforeHAnle returns for dev purposes it is a seperate type however in future releases remove it to remove redundnadncy 

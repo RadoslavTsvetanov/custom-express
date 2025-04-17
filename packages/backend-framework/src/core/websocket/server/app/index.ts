@@ -202,7 +202,7 @@ export class CustomWebSocketRouter<
   // usefull for adding big batches of context for example e,g, a big store which you have reused previously, for example all of services for interacting with a auth provider which you are reusing
 
   addChannel<
-    Config extends {name: readonly string }, // try putting the  below generic here for a bit more cleannes
+    // Config extends { name:  string }, // try putting the  below generic here for a bit more cleannes
     NewName extends string,
     NewChannel extends ChannelConfig<
       Record<string, MessageThatCanBeSent<ZodObject<ZodRawShape>>>,
@@ -220,7 +220,7 @@ export class CustomWebSocketRouter<
       >>
     >
   >
-    (name: NewName, config: NewChannel ): NewName extends keyof Channels
+    (name: NewName, config: NewChannel): NewName extends keyof Channels
     ? never
     : CustomWebSocketRouter<
       Channels & Record<NewName, NewChannel>,
@@ -233,12 +233,12 @@ export class CustomWebSocketRouter<
       }
     })
     return new CustomWebSocketRouter(
-        {
-          ...this.channels,
-          [name as NewName]: {...config}
+      {
+        ...this.channels,
+        [name as NewName]: { ...config }
       },
       this.context
-      ) 
+    )
   }
 
 }
@@ -248,22 +248,51 @@ export class CustomWebSocketRouter<
   const g = new CustomWebSocketRouter({}).addChannel(
     "channel-1",
     {
-      "hooks": {
-        beforeHandle: { ordered: HookBuilder.new().add({ key: "lolo", execute: v => { return { hi: "" } as const } } as const).build(), independent: [] }
+      hooks: {
+        beforeHandle: {
+          ordered: HookBuilder.new().add({ key: "lolo", execute: v => { return { hi: "" } as const } } as const).build(),
+          independent: []
+        }
       },
       messagesItCanReceive: {
         puki: new MessageThatCanBeReceivedBuilder(
-          HookBuilder.new().add({key: "ojjoi", execute: v => {return {ko: ""}}}).build(),
-          v => {}
+          {
+            afterHandler: {
+              ordered: HookBuilder
+                .new()
+                .add({ key: "ojjoi", execute: v => { return { ko: "" } } })
+                .build(),
+              independent: []
+            },
+            "beforeHandler": {
+              ordered: HookBuilder
+                .new()
+                .add({ key: "iooi", execute: v => { return { lolo: "" } as const } } as const)
+                .build(),
+              independent: []
+            } as const,
+            onErrorr: v => ""
+          },
+          v => { }
         ).build()
       },
-      messagesItCanSend: {}
+      messagesItCanSend: {
+        puki: z.object({
+          puki: z.string()
+        })
+      }
     }
   )
-    
-    
+
+
   const h = g.channels["channel-1"].hooks.beforeHandle.ordered.elements.value[0]
   {
-    const h = g.channels["channel-1"].messagesItCanReceive.puki.config.hooks.
+    const h = g.channels["channel-1"].messagesItCanReceive.puki.config.hooks.beforeHandler.ordered.elements.value
+  }
+  {
+    const h = g.channels["channel-1"].messagesItCanSend.puki.parse({})
+  }
+  {
+
   }
 }
