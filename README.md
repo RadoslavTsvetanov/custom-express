@@ -923,3 +923,7 @@ const gg = new HookBuilder()
     execute: (v) => {}, // here the return type of v is /parameter) v: {readonly koki: "g" | "j";readonly hi: string;} without it whough it is v: {koki: string;hi: string;}
   });
 ```
+
+
+# Built ins 
+by default every websocket server also can send error messags and so you can define on the client handler for that but the point is that it is built in just use the `ws.sendError()` for typsafety 😃 since it will only allow you to send errors you have defined 

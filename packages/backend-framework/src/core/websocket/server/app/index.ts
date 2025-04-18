@@ -36,7 +36,7 @@ export class CustomWebSocketRouter<
   }
   protected context: Context = {} as Context; // make private later
   public readonly channels: Channels;
-  public hooks: Optionable<GlobalHooks>;
+  public hooks: Optionable<GlobalHooks> = new Optionable(null);
 
   constructor(endpoints: Channels, context?: Context) {
     this.channels = endpoints ?? ({} as Channels);
@@ -120,13 +120,14 @@ export class CustomWebSocketRouter<
           const wss = new WebSocketServer({ port: port.value });
 
           wss.on("connection", (ws, req) => {
+
             this.hooks.ifCanBeUnpacked(({ onConnection }) => {
               runHookHandler(onConnection, { ws, message: req });
             });
-
+            
             ws.on("message", async (message) => {
               // TODO: Add a hook here to intercept message pre-parsing
-
+              console.log("mgfg",message, )
               this.transformMsg(message.toString()).try({
                 ifNone: () => {
                   this.sendUnprocessableMessageType(ws, {
@@ -143,11 +144,12 @@ export class CustomWebSocketRouter<
                         runHookHandler(hook, { ws, message: parsedMessage });
                       });
                     });
-
                     new Optionable(
-                      BetterArray.new(Object.entries(this.channels))
+                      BetterArray
+                        .new(Object.entries(this.channels))
+                        .tick(v => console.log("ooo"))
                         .filter(([channelName]) => channelName === parsedMessage.channel)
-                        .normalArray[0]
+                        .at(0)
                     ).try({
                       ifNone: () =>
                         console.log(`No open channel called ${parsedMessage.channel}`, parsedMessage),
@@ -159,25 +161,29 @@ export class CustomWebSocketRouter<
                           ifNone: () =>
                             console.log(`Channel ${channelName} does not accept message type ${parsedMessage.message}`),
 
-                          ifNotNone: ({ config, parse: parser }) => {
+                          ifNotNone: ({ config }) => {
                             map(config, ({ handler, hooks: { beforeHandler, afterHandler } }) => {
-                              runHookHandler(beforeHandler, { ws, message: parsedMessage });
-
-                              const result = handler(parser.parse({ ws, message: parsedMessage }));
-
-                              runHookHandler(afterHandler, { ws, message: result });
+                              map(runHookHandler(beforeHandler, { ws, message: parsedMessage }), result => {
+                                console.log("passing received", parsedMessage)
+                                map(handler(result), result => {
+                                  
+                                map(runHookHandler(afterHandler, { ws, message: result }), result => {
 
                               this.hooks.ifCanBeUnpacked(({ afterHandle }) => {
-                                map(afterHandle, hook => {
-                                  runHookHandler(hook, { ws, msg: result });
-                                });
-                              });
+                                    map(afterHandle, hook => {
+                                      runHookHandler(hook, { ws, msg: result });
+                                    });
+                                  });
+                                })
+                                })
+                              })
                             });
                           },
                         });
                       },
                     });
                   } catch (err) {
+                    console.log(err)
                     this.hooks.ifCanBeUnpacked(({ onError }) => onError(err));
                   }
                 },
@@ -199,7 +205,7 @@ export class CustomWebSocketRouter<
 
 
   getCLientBuilder(url: WebsocketUrl) {
-    return new WebsocketClient<ChannelNames, Channels, {}>(url, this.channels);
+    return new WebsocketClient<Channels,{}>(url, this.channels);
   }
 
   // it hahves like elysia plugins
@@ -247,56 +253,56 @@ export class CustomWebSocketRouter<
 
 }
 
+// move to tests
+// {
+//   const g = new CustomWebSocketRouter({}).addChannel(
+//     "channel-1",
+//     {
+//       hooks: {
+//         beforeHandle: {
+//           ordered: HookBuilder.new().add({ key: "lolo", execute: v => { return { hi: "" } as const } } as const).build(),
+//           independent: []
+//         }
+//       },
+//       messagesItCanReceive: {
+//         puki: new MessageThatCanBeReceivedBuilder(
+//           {
+//             afterHandler: {
+//               ordered: HookBuilder
+//                 .new()
+//                 .add({ key: "ojjoi", execute: v => { return { ko: "" } } })
+//                 .build(),
+//               independent: []
+//             },
+//             "beforeHandler": {
+//               ordered: HookBuilder
+//                 .new()
+//                 .add({ key: "iooi", execute: v => { return { lolo: "" } as const } } as const)
+//                 .build(),
+//               independent: []
+//             } as const,
+//             onErrorr: v => ""
+//           },
+//           v => { }
+//         ).build()
+//       },
+//       messagesItCanSend: {
+//         puki: z.object({
+//           puki: z.string()
+//         })
+//       }
+//     }
+//   )
 
-{
-  const g = new CustomWebSocketRouter({}).addChannel(
-    "channel-1",
-    {
-      hooks: {
-        beforeHandle: {
-          ordered: HookBuilder.new().add({ key: "lolo", execute: v => { return { hi: "" } as const } } as const).build(),
-          independent: []
-        }
-      },
-      messagesItCanReceive: {
-        puki: new MessageThatCanBeReceivedBuilder(
-          {
-            afterHandler: {
-              ordered: HookBuilder
-                .new()
-                .add({ key: "ojjoi", execute: v => { return { ko: "" } } })
-                .build(),
-              independent: []
-            },
-            "beforeHandler": {
-              ordered: HookBuilder
-                .new()
-                .add({ key: "iooi", execute: v => { return { lolo: "" } as const } } as const)
-                .build(),
-              independent: []
-            } as const,
-            onErrorr: v => ""
-          },
-          v => { }
-        ).build()
-      },
-      messagesItCanSend: {
-        puki: z.object({
-          puki: z.string()
-        })
-      }
-    }
-  )
 
+//   const h = g.channels["channel-1"].hooks.beforeHandle.ordered.elements.value[0]
+//   {
+//     const h = g.channels["channel-1"].messagesItCanReceive.puki.config.hooks.beforeHandler.ordered.elements.value
+//   }
+//   {
+//     const h = g.channels["channel-1"].messagesItCanSend.puki.parse({})
+//   }
+//   {
 
-  const h = g.channels["channel-1"].hooks.beforeHandle.ordered.elements.value[0]
-  {
-    const h = g.channels["channel-1"].messagesItCanReceive.puki.config.hooks.beforeHandler.ordered.elements.value
-  }
-  {
-    const h = g.channels["channel-1"].messagesItCanSend.puki.parse({})
-  }
-  {
-
-  }
-}
+//   }
+// }

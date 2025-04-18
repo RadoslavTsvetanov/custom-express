@@ -21,3 +21,6 @@ type j = AfterfixKeysOfRecord<{koko: string}, "j">
 // type j = {
 //     kokoj: string;
 // }
+
+
+export type NeverWithDefault<T, Default> = T extends never ? Default : T

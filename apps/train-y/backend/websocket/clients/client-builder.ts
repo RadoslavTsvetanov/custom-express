@@ -1,5 +1,4 @@
-import { Port } from "../../../../../src/types/networking/port";
-import { WebsocketUrl } from "../../../../../src/types/networking/urls/websocket";
+import { Port, WebsocketUrl } from "@custom-express/better-standard-library";
 import { defintion } from "../definition";
 
 export const builder = defintion.getCLientBuilder(

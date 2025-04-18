@@ -1,4 +1,4 @@
-import { First, ifNotNone, Last, OrderedRecord } from "@custom-express/better-standard-library";
+import { First, ifNotNone, Last, OrderedRecord, FirstArg } from "@custom-express/better-standard-library";
 import { HookBuilder } from "./HookBuilder";
 import { BaseHookBundle, BaseMessageHooks, HookOrderedRecord, HookOrderedRecordEntry, HookTypes, MessageHooks } from "../../../types/Hooks/main";
 import { MessageHandler, MessageItCanReceive, MessageThatCanBeSent } from "../../../types/Message/main";
@@ -7,11 +7,7 @@ import { ChannelBuilder } from "./ChannekBuilder";
 
 
 
-type FirstArgument<T extends (...args: any[]) => any> =
-  T extends (arg1: infer A, ...args: any[]) => any ? A : never;
-
-
-
+//TODO: refactor since there is a lot of redundant things here
 export class MessageThatCanBeReceivedBuilder<
     Hooks extends BaseMessageHooks,
     MsgHandler extends MessageHandler<
@@ -21,8 +17,12 @@ export class MessageThatCanBeReceivedBuilder<
 >{
     public _message: MsgHandler
     public _hooks: Hooks
-    constructor(hooks: Hooks, handler: MsgHandler["handler"]) {
-        
+    constructor(hooks: Hooks, handler: (v: ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]>) => unknown) {
+        this._hooks = hooks
+        this._message = {
+            "hooks": this._hooks,
+            "handler": handler
+        }
     }
 
 
@@ -45,7 +45,7 @@ export class MessageThatCanBeReceivedBuilder<
         }
 
     addHooks<NewHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>>(type: "beforeHandler"):
-        ReturnType<Last<Hooks[typeof type]["ordered"]["elements"]["value"]>["execute"]> extends FirstArgument<First<NewHooks["elements"]["value"]>["execute"]>
+        ReturnType<Last<Hooks[typeof type]["ordered"]["elements"]["value"]>["execute"]> extends FirstArg<First<NewHooks["elements"]["value"]>["execute"]>
         ? MessageThatCanBeReceivedBuilder<
             HookOrderedRecord<[
                 ...Hooks["elements"]["value"],

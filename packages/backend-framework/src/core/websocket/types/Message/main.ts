@@ -1,4 +1,4 @@
-import { AfterfixKeysOfRecord, Last, OrderedRecord } from "@custom-express/better-standard-library";
+import { AfterfixKeysOfRecord, Last, NeverWithDefault, OrderedRecord } from "@custom-express/better-standard-library";
 import { ZodObject, ZodRawShape } from "zod";
 import { BaseHookBundle, Hook, HookOrderedRecord, HookOrderedRecordBase, HookOrderedRecordEntry, MessageHooks, ServerHooks } from "../Hooks/main";
 
@@ -18,7 +18,13 @@ export interface MessageHandler<
     >
 >   /* extends ITrueMap<MessageHandler<ContextType, ReturnType, unknown>> */ {
   hooks: Hooks
-  handler: Handler<ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]> ,HandlerReturnType>; // if nothing is return from a handler its simpley that after hooks wont be ran  
+  handler: Handler<
+    NeverWithDefault<
+      ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]>,
+    { default: string }
+    >,
+      HandlerReturnType
+  >; // if nothing is return from a handler its simpley that after hooks wont be ran
 };
 
 export type MessagesEntries<MessagesItCanSend extends string, MessagesItCanReceive extends string> = {

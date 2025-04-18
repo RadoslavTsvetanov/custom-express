@@ -1,5 +1,9 @@
-import { ifNotNone, Optionable, OrderedRecord } from "@custom-express/better-standard-library";
-import { ZodObject, ZodRawShape } from "zod";
+import { FirstArg, ifNotNone, Optionable, OrderedRecord, panic, VCallback, WebsocketUrl } from "@custom-express/better-standard-library";
+import { z, ZodObject, ZodRawShape, ZodSchema } from "zod";
+import { ChannelConfig } from "./types/Channel/main";
+import { MessageItCanReceive } from "./types/Message/main";
+import { BaseHookBundle, MessageHooks, ServerHooks } from "./types/Hooks/main";
+import { logger } from "@custom-express/better-standard-library/src/errors-as-values/src/utils/console";
 
 const hooks = ["before", "after"] as const;
 type MakeHookType<T extends string> = `${T}Message`;
@@ -30,12 +34,12 @@ class WebsocketListener<
 > {
   private handlers;
   private url: string;
-  private endpoints;
+  private channels;
   public hooks: Hooks;
   constructor(messageHandlers, url: WebsocketUrl, endpoints) {
     this.handlers = messageHandlers;
     this.url = url.value;
-    this.endpoints = endpoints;
+    this.channels = endpoints;
   }
 
   use(wsListener: WebsocketListener);
@@ -121,7 +125,7 @@ class WebsocketListener<
         if (
           unsafe ||
           (unsafe === undefined &&
-            this.endpoints[channel].messagesItCanReceive[message].unsafe ===
+            this.channels[channel].messagesItCanReceive[message].unsafe ===
               false)
         ) {
           await handler(payload);
@@ -137,28 +141,26 @@ class WebsocketListener<
 // we make this class so that when you define a listener it does not start automaticcaly but when you tell it to
 
 export class WebsocketClient<
-  ChannelNames extends string,
-  E extends Record<
-    ChannelNames,
+  Channels extends Record<
+    string,
     ChannelConfig<
-      any,
-      any,
-      {
-        validate: ZodObject<ZodRawShape>;
-        validateResponse: ZodObject<ZodRawShape>;
-      }
-    >
+      Record<string, ZodObject<ZodRawShape>>,
+      Record<string, MessageItCanReceive<MessageHooks<BaseHookBundle, BaseHookBundle>,unknown>>,
+      Partial<ServerHooks<BaseHookBundle, BaseHookBundle>>
+      >
   >,
-  Context extends Record<string, unknown>
+  Context extends Record<string, unknown>,
+  // TODO add hooks here 
+  Errors extends Record<string, ZodObject<ZodRawShape>> & {unprocessableMessage: {error: string}}
 > {
   private url: WebsocketUrl;
   public ws: WebSocket;
-  private endpoints: E;
+  private channels: Channels;
   private context: Context;
 
-  constructor(url: WebsocketUrl, endpoints: E, context?: Context) {
+  constructor(url: WebsocketUrl, endpoints: Channels, context?: Context) {
     this.url = url;
-    this.endpoints = endpoints;
+    this.channels = endpoints;
     this.context = new Optionable(context).unpack_with_default({} as Context);
     console.log("ooo", JSON.stringify(this.url.valueOf()));
     this.ws = new WebSocket(this.url.value);
@@ -171,39 +173,47 @@ export class WebsocketClient<
   }
 
   setupListeners<Exhaustive extends true | false>( // it is true | false instead of boolean since if it is true or false we can pass them as type values while if it is as a bool it will be apssed as a value not type so we cant check which one was passed, Made it as a simple builder
-    messageReceivers: Exhaustive extends true
+    messageReceivers: (Exhaustive extends true
       ? {
-          [Channel in keyof E]: {
-            [Message in keyof E[Channel]["messagesItCanSend"]]: {
+          [Channel in keyof Channels]: {
+            [Message in keyof Channels[Channel]["messagesItCanSend"]]: {
               handler: (
-                d: z.infer<E[Channel]["messagesItCanSend"][Message]>
+                d: z.infer<Channels[Channel]["messagesItCanSend"][Message]>
               ) => Promise<void>;
               unsafe?: boolean;
             };
           };
         }
       : {
-          [Channel in keyof E]?: {
-            [Message in keyof E[Channel]["messagesItCanSend"]]?: {
+          [Channel in keyof Channels]?: {
+            [Message in keyof Channels[Channel]["messagesItCanSend"]]?: {
               handler: (
-                d: z.infer<E[Channel]["messagesItCanSend"][Message]>
+                d: z.infer<Channels[Channel]["messagesItCanSend"][Message]>
               ) => Promise<void>;
               unsafe?: boolean;
             };
           };
-        }
+      })
+      &
+    {
+      onError: {
+        [Error in keyof Errors]: VCallback<Errors[Error]>
+      }
+    }
   ) {
     this.ws.onmessage = async (event) => {
       try {
         const data = JSON.parse(event.data.toString());
         const { channel, message, payload } = data as {
-          channel: keyof E;
-          message: keyof E[keyof E]["messagesItCanSend"];
+          channel: keyof Channels;
+          message: keyof Channels[keyof Channels]["messagesItCanSend"];
           payload: unknown;
         };
-
+        if (channel === "unknown") {
+          messageReceivers.onError.unprocessableMessage(payload)
+        }
         const channelAcceptedMessages = new Optionable<{
-          [Message in E[typeof channel]["messagesItCanSend"]]: E[typeof channel]["messagesItCanReceive"][Message];
+          [Message in keyof Channels[typeof channel]["messagesItCanSend"]]: Channels[typeof channel]["messagesItCanReceive"][Message];
         }>(messageReceivers[channel]);
 
         channelAcceptedMessages.try({
@@ -227,7 +237,7 @@ export class WebsocketClient<
             const receiver = channelAcceptedMessages[message];
 
             try {
-              this.endpoints[channel].messagesItCanSend[message].parse(payload);
+              this.channels[channel].messagesItCanSend[message].parse(payload);
               await receiver.handler(payload);
             } catch (e) {
               if (receiver.unsafe) {
@@ -249,10 +259,10 @@ export class WebsocketClient<
   }
 
   getReusableListener(messageReceivers: {
-    [Channel in keyof E]: {
-      [Message in keyof E[Channel]["messagesItCanSend"]]: {
+    [Channel in keyof Channels]: {
+      [Message in keyof Channels[Channel]["messagesItCanSend"]]: {
         handler: (
-          d: z.infer<E[Channel]["messagesItCanSend"][Message]>
+          d: z.infer<Channels[Channel]["messagesItCanSend"][Message]>
         ) => Promise<void>;
         unsafe?: boolean;
       };
@@ -262,31 +272,30 @@ export class WebsocketClient<
   }
 
   generateClient(): {
-    [Channel in keyof E]: {
-      [Message in keyof E[Channel]["messagesItCanReceive"]]: (
-        d: z.infer<E[Channel]["messagesItCanReceive"][Message]>
+    [Channel in keyof Channels]: {
+      [Message in keyof Channels[Channel]["messagesItCanReceive"]]: (
+        data: FirstArg<Channels[Channel]["messagesItCanReceive"][Message]["config"]["handler"]> 
       ) => void;
     };
   } {
     const client: any = {};
-    Object.entries(this.endpoints).forEach(([channelName, channelConfig]) => {
+    Object.entries(this.channels).forEach(([channelName, channelConfig]) => {
       client[channelName] = {};
 
       Object.entries(channelConfig.messagesItCanReceive).forEach(
         ([messageName, schema]) => {
+          
           client[channelName][messageName] = async (
-            data: z.infer<typeof schema>
+            data:  FirstArg<Channels[keyof Channels]["messagesItCanReceive"][keyof Channels[keyof Channels]["messagesItCanReceive"]]["config"]["handler"]>
           ) => {
             try {
               const newws = new WebSocket(this.url.value); // horrible performance if possible make it all thingd from this class to reuse one connection so that one clientInsyance is one connection
               newws.onopen = () => {
-                schema.parse(data);
                 newws.send(
                   JSON.stringify({
                     channel: channelName,
                     message: messageName,
-                    payload: data,
-                    context: this.context, // Include context in messages
+                    payload: {...data, ...this.context},
                   })
                 );
               };
