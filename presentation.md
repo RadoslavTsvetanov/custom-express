@@ -30,6 +30,7 @@
 
 ### The slide should be called Features and when you get to it say since i have formatted it pretty well in the docs and i dont think i can do it as good here with examples and etc... we will see it from the docs, then open nvim or the browser and go to essentials page in the docs 
 
+## Features
 
 ### Effects
 
@@ -76,7 +77,7 @@ much cleaner if you ask me
 
 
 
-## my own async api spec
+### my own async api spec
 
 ### tell how every language agnostic protocol needs a way to define its spec in a language agnostic way 
 
@@ -109,6 +110,19 @@ TODO: find an open source project which relies heavily on websockets and show ho
 
 TODO: showcase the reactive entites usage using a simple app and see how muxh easier it is 
 
+## How it works
+
+### New message lifecycle with hooks
+
+
+newMsg -> before parse hooks -(mapped result from the ordered hooks)-> parse to see if it according to the standard for messages -(parsed message)-> Before Handle hook (runs hooks) -(result from the ordered hooks)-> Before handler hooks -(mapped result from the ordered hooks)> -> validate -(result which matches the validate schema)-> handler -(mapped result from handler if any)> after handler hooks -(mapped result from after handler)-> after handle  
+
+
+
+## Demo
+
+Fork the elysia playground and make it your won to showzase some features that do not work right now 
+
 ## Whats next ?
 
 <script_to_tell>
@@ -137,7 +151,6 @@ switch to your types folder
 <script>
 also another thing that is very very important is to find a person who understands typescript more than me to help me refactor this abomination since adding a new type here gets exponentially harder and harder and i have no idea how to manage this. And why i am emphasizing on this? - well unlike most projects you see on the fest or hacktues where the ideas are left in the trash bin after the event and the fufture plans slide is therre just because it should be i really believe this is a thing that will actually be used and willl continue maintaining it 
 </script>
-
 
 <script>
     and in the grande term i have the following things 

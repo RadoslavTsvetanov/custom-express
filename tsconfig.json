@@ -13,10 +13,14 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": false, // for prod make it true 
     "noEmit": true,
-
     // Best practices
+    "noUncheckedIndexedAccess": true, // based setting 
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "allowUnreachableCode": false,
     "strict": true,
-    "skipLibCheck": true,
+    "noImplicitAny": true,
+   "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
 
     // Some stricter flags (disabled by default)

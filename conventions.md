@@ -89,3 +89,7 @@ const newMsg = new MessageThatCanBeReceivedBuilder(
 
 
 ```
+
+
+# Debug logging 
+For your and any other contributer sanity if you are gonna be using console.log for debugging please use logger.debug, it behaves one to one like consol.log but it tells pther peole that this is meant for debug purposes 

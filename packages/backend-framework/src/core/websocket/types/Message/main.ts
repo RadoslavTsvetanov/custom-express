@@ -1,6 +1,6 @@
-import { AfterfixKeysOfRecord, OrderedRecord } from "@custom-express/better-standard-library";
+import { AfterfixKeysOfRecord, Last, NeverWithDefault, OrderedRecord } from "@custom-express/better-standard-library";
 import { ZodObject, ZodRawShape } from "zod";
-import { HookOrderedRecordEntry, ServerHooks } from "../Hooks/main";
+import { BaseHookBundle, Hook, HookOrderedRecord, HookOrderedRecordBase, HookOrderedRecordEntry, MessageHooks, ServerHooks } from "../Hooks/main";
 
 export interface TypedMessage<ChannelNames extends string, Payload> {
   channel: ChannelNames;
@@ -10,17 +10,21 @@ export interface TypedMessage<ChannelNames extends string, Payload> {
 
 export type Handler<Context, ReturnType> = (context: Context) => ReturnType;
 
-
 export interface MessageHandler<
-  ContextType, // this is for passing the type hich the last beforeHAnle returns for dev purposes it is a seperate type however in future releases remove it to remove redundnadncy 
-  ReturnType,
-  Hooks extends AfterfixKeysOfRecord<ServerHooks<
-    OrderedRecord<[], HookOrderedRecordEntry>,
-    OrderedRecord<[], HookOrderedRecordEntry>, string
-    >, "r">
+  HandlerReturnType,
+  Hooks extends MessageHooks< 
+    Hook<unknown,HookOrderedRecordBase>,
+    Hook<unknown,HookOrderedRecordBase>
+    >
 >   /* extends ITrueMap<MessageHandler<ContextType, ReturnType, unknown>> */ {
   hooks: Hooks
-  handler: Handler</* Hooks["beforeHandler"]["ordered"]["lastElement"] */ ContextType ,ReturnType>; // if nothing is return from a handler its simpley that after hooks wont be ran  
+  handler: Handler<
+    NeverWithDefault<
+      ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]>,
+    { default: string }
+    >,
+      HandlerReturnType
+  >; // if nothing is return from a handler its simpley that after hooks wont be ran
 };
 
 export type MessagesEntries<MessagesItCanSend extends string, MessagesItCanReceive extends string> = {
@@ -30,8 +34,10 @@ export type MessagesEntries<MessagesItCanSend extends string, MessagesItCanRecei
 
 export type MessageThatCanBeSent<Schema extends ZodObject<ZodRawShape>> = Schema
 
-export type MessageItCanReceive<Hooks, Schema extends ZodObject<ZodRawShape>> = {
-  config: MessageHandler<unknown, unknown, Hooks>,
-  parse: Schema
+export type MessageItCanReceive<
+    Hooks extends MessageHooks<BaseHookBundle, BaseHookBundle>,
+    ReturnType
+  > = {
+  config: MessageHandler<ReturnType, Hooks>,
 }
 

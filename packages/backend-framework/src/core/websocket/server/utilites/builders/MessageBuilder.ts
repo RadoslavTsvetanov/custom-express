@@ -1,69 +1,70 @@
-import { IfNotUndefined, Last, Optionable, OrderedRecord } from "@custom-express/better-standard-library";
+import { First, ifNotNone, Last, OrderedRecord, FirstArg } from "@custom-express/better-standard-library";
 import { HookBuilder } from "./HookBuilder";
-import { HookOrderedRecord, HookOrderedRecordEntry } from "../../../types/Hooks/main";
+import { BaseHookBundle, BaseMessageHooks, HookOrderedRecord, HookOrderedRecordEntry, HookTypes, MessageHooks } from "../../../types/Hooks/main";
 import { MessageHandler, MessageItCanReceive, MessageThatCanBeSent } from "../../../types/Message/main";
-import { z, ZodObject, ZodRawShape, ZodUnknown } from "zod";
+import { z, ZodObject, ZodRawShape } from "zod";
+import { ChannelBuilder } from "./ChannekBuilder";
 
+
+
+//TODO: refactor since there is a lot of redundant things here
 export class MessageThatCanBeReceivedBuilder<
-    BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,
-    MsgHandler extends MessageHandler<ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]>,unknown,BeforeHooks>
+    Hooks extends BaseMessageHooks,
+    MsgHandler extends MessageHandler<
+        unknown,
+        Hooks
+    >
 >{
     public _message: MsgHandler
-    public _hooks: BeforeHooks
-    public parser: Optionable<ZodObject<ZodRawShape>>
-
-
-    // the `new` mthod is prefered since it correctly get the parse type without needing to explicitely pass as const 
-
-    constructor(
-        hooks: BeforeHooks,
-        parser: ZodObject<ZodRawShape> | undefined,
-        handler:  typeof parser extends z.ZodType<infer U>
-            ? (v: U) => unknown
-            : MsgHandler["handler"]
-) {
-        this.parser = new Optionable(parser)
-        this._hooks = hooks;
-        // this._message = {
-        //     handler,
-        //     hooks: 
-        // }
+    public _hooks: Hooks
+    constructor(hooks: Hooks, handler: (v: ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]>) => unknown) {
+        this._hooks = hooks
+        this._message = {
+            "hooks": this._hooks,
+            "handler": handler
+        }
     }
 
-
-    gg({ name = "", jiji }: {name: string, jiji:string }) {
-        
-    }
 
     static new<
         Parser extends ZodObject<ZodRawShape>,
-        BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,    
+        Hooks extends  MessageHooks<
+        BaseHookBundle,
+        BaseHookBundle
+    >,    
         MsgHandler extends MessageHandler<
-                ReturnType<Last<BeforeHooks["elements"]["value"]>["execute"]>,
                 unknown,
-                BeforeHooks
+                Hooks
             >
         >(
-            hooks: BeforeHooks,
-            parser: Parser | undefined,
+            hooks: Hooks,
+            parser: Parser | undefined, // if not undefined parser will just be a guard hook that is added to the hooks 
             handler: typeof parser extends z.ZodType<infer U> ? (v: U) => unknown : MsgHandler["handler"]) {
-                return new MessageThatCanBeReceivedBuilder(hooks, parser, handler)
+                const newHooks = parser == undefined ? hooks : new HookBuilder(hooks.elements.value).build()
+                return new MessageThatCanBeReceivedBuilder(newHooks,handler)
         }
 
-
-    addHooks<Hooks extends HookOrderedRecord<HookOrderedRecordEntry[]>>(){}
-    createHookBuilder(): HookBuilder<BeforeHooks["elements"]["value"]>{ // this is so that we cant pass a hook with a name that already exists 
-        return new HookBuilder()
+    addHooks<NewHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>>(type: "beforeHandler"):
+        ReturnType<Last<Hooks[typeof type]["ordered"]["elements"]["value"]>["execute"]> extends FirstArg<First<NewHooks["elements"]["value"]>["execute"]>
+        ? MessageThatCanBeReceivedBuilder<
+            HookOrderedRecord<[
+                ...Hooks["elements"]["value"],
+                ...NewHooks["elements"]["value"]
+            ]>,
+            MsgHandler
+        > 
+        : never
+    {
+        return 
+        }
+    createHookBuilder(type: "beforeHandler" /* HookTypes["MessageOnlyHooks"] TODO: fix this sinceit fails cuz onError is not hook type but regualr callback*/): HookBuilder<Hooks[typeof type]["ordered"]["elements"]["value"]>{ // this is so that we cant pass a hook with a name that already exists 
+        return new HookBuilder<Hooks[typeof type]["ordered"]["elements"]["value"]>(this._hooks[type].ordered.elements.value)
     }
 
 
-    build(): MessageItCanReceive<BeforeHooks, typeof this.parser.optionValue> {
+    build(): MessageItCanReceive<Hooks, ReturnType<MsgHandler["handler"]>> {
         return {
-            config: {
-                handler: this._message.handler,
-                hooks: this._hooks
-            },
-            parse: this.parser.unpack()
+            config:{"hooks":this._hooks,"handler": this._message.handler}, 
         }
     }
 
@@ -72,7 +73,7 @@ export class MessageThatCanBeReceivedBuilder<
 
 const hooks = HookBuilder
     .new() // using new is the reccomended way since it is a cleaner although 
-    .add({ key: "ok", execute: v => "" as const} as const)
+    .add({ key: "ok", execute: v => "" } as const)
     .add({ key: "hohoh", execute: v => { return {"hi": ""} as const } } as const)
     .build()
 
@@ -81,19 +82,27 @@ const hooks = HookBuilder
 }
 
 {
-const newMsg = MessageThatCanBeReceivedBuilder.new(
-    hooks,
-    z.object({}),
+const newMsg = new MessageThatCanBeReceivedBuilder(
+    {
+        "beforeHandler": {
+            ordered: hooks,
+            independent: []
+        },
+        "afterHandler": {
+            ordered: hooks,
+            independent: []
+        },
+        "onErrorr": v => "" as const 
+    },
     v => {
         v // shoud be of type  
 //  {
 //     readonly hi: "";
 //  }
         return {
+            ...v,
             koko: ""
         }
     }
 )
 }
-
-

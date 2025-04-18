@@ -771,7 +771,6 @@ app
      connections.add(ws)
   }
 })
-
 ```
 
 ## Commonly asked questions 
@@ -893,7 +892,6 @@ using as const to make the ts compiler help you more
 Look at this example 
 
 ```ts
-
 function hihi(v: string) { 
     if (v.length == 3) {
         return "g" 
@@ -927,5 +925,5 @@ const gg = new HookBuilder()
 ```
 
 
-
-
+# Built ins 
+by default every websocket server also can send error messags and so you can define on the client handler for that but the point is that it is built in just use the `ws.sendError()` for typsafety 😃 since it will only allow you to send errors you have defined 

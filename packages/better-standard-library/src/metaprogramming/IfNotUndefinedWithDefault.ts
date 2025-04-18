@@ -10,5 +10,3 @@ type k = IfNotUndefined<undefined, {hi: string}>
 
 
 
-
-export type 

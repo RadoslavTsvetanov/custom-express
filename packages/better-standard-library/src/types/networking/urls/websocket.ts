@@ -1,4 +1,4 @@
-import { ContextSafeType } from "../../baseContextSafeTypet";
+import { ContextSafeType } from "../../../errors-as-values/baseContextSafeTypet";
 import type { Port } from "../port";
 
 export class WebsocketUrl extends ContextSafeType<string>{
