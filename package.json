@@ -9,6 +9,7 @@
   },
   "workspaces": ["packages/**/*"],
   "dependencies": {
+    "tsd": "^0.32.0",
     "zod": "^3.24.2"
   }
 }

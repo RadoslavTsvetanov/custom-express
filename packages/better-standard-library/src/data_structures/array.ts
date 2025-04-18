@@ -1,5 +1,5 @@
-import type { VCallback } from "../../types/voidcallback";
-import type { Tick } from "../better-returns/errors-as-values/src/rust-like-pattern/tick";
+import { Tick } from "../errors-as-values/src/rust-like-pattern/tick";
+import { VCallback } from "../types/voidcallback";
 
 export class BetterArray<V> implements Tick<V[]>{
     private data: V[]
@@ -21,6 +21,6 @@ export class BetterArray<V> implements Tick<V[]>{
     }
 
     static new<T>(data: T[]) {
-       return new BetterArray(data); 
+       return new BetterArray<T>(data); 
     }
 }
