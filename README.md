@@ -880,7 +880,10 @@ package.json (for both the frontedn and the backend)
 
 
 # Lifecycle
-(TODO: insert picture of the excalidraw diagram)
+
+
+![image](https://github.com/user-attachments/assets/68f6f2e9-3fa5-47f3-9973-ad9c1ec01752)
+
 
 ## Best practices
 
