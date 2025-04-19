@@ -6,19 +6,26 @@ type EnvRecord<T extends string> = Record<T, string>;
 type EnvEntry<T extends string> = {
   key: T;
   handler?: (envName: string) => string;
+  default?: string 
 };
 
-class EnvManager<T extends string> {
+export class EnvManager<T extends string> {
   private envValues: EnvRecord<T> = {} as EnvRecord<T>;
 
   constructor(entries: EnvEntry<T>[]) {
     for (const entry of entries) {
       const envValue = process.env[entry.key];
+      console.log(envValue)
       if (envValue !== undefined) {
         this.envValues[entry.key] = entry.handler
           ? entry.handler(envValue)
           : envValue;
       } else {
+        if (entry.default !== undefined && entry.default !== null) {
+          console.log("loaded default value for " + entry.key)
+          this.envValues[entry.key] = entry.default
+          return 
+        }
         throw new Error(`Environment variable ${entry.key} is not defined`);
       }
     }
@@ -42,38 +49,40 @@ class EnvManager<T extends string> {
   }
 }
 
-export const envManager = new EnvManager([
-  {
-    key: "S3_BUCKET_NAME",
-    handler(envName) {
-       return "bbb" 
-    },
-  },
-  {
-    key: "S3_ENDPOINT",
-  },
-  {
-    key: "AWS_REGION",
-  },
-  {
-    key: "AWS_SECRET_ACCESS_KEY",
-  },
-  {
-    key: "AWS_ACCESS_KEY_ID",
-  },
-  {
-    key: "BUCKET_NAME"
-  },
-  {
-    key: "KEYCLOAK_URL"
-  },
-  {
-    key: "KC_ADMIN_USERNAME"
-  },
-  {
-    key: "KC_ADMIN_PASSWORD"
-  },
-  {
-    key: "KC_CLIENT_ID"
-  }
-]);
+//example usage
+
+// export const envManager = new EnvManager([
+//   {
+//     key: "S3_BUCKET_NAME",
+//     handler(envName) {
+//        return "bbb" 
+//     },
+//   },
+//   {
+//     key: "S3_ENDPOINT",
+//   },
+//   {
+//     key: "AWS_REGION",
+//   },
+//   {
+//     key: "AWS_SECRET_ACCESS_KEY",
+//   },
+//   {
+//     key: "AWS_ACCESS_KEY_ID",
+//   },
+//   {
+//     key: "BUCKET_NAME"
+//   },
+//   {
+//     key: "KEYCLOAK_URL"
+//   },
+//   {
+//     key: "KC_ADMIN_USERNAME"
+//   },
+//   {
+//     key: "KC_ADMIN_PASSWORD"
+//   },
+//   {
+//     key: "KC_CLIENT_ID"
+//   }
+// ]);
