@@ -1,19 +1,23 @@
 import { TypeOf, ZodObject, ZodNumber, ZodTypeAny } from "zod";
-import { id } from "../../../types/id";
-import { VPromise } from "../../../types/Promises/vpromise";
-import { TimeStampData } from "../../../types/timstampData";
 import { ITrain } from "../interface";
-import { timeStampedDataShared } from "../../data/TimestampedData";
+import { TimeStampData } from "../../../../types/timstampData";
+import { id } from "../../../../types/id";
+import { VPromise } from "../../../../types/Promises/vpromise";
+import { IQueue } from "../../kafka/interface";
 
 export class TrainService implements ITrain {
-    constructor(){}
-    
-    getTimeData(id: id): Promise<TimeStampData<{ id: id; location: TypeOf<ZodObject<{ latitude: ZodNumber; longitude: ZodNumber; }, "strip", ZodTypeAny, { latitude?: number; longitude?: number; }, { latitude?: number; longitude?: number; }>>; }>[]> {
-        throw new Error("Method not implemented.");
+    private kafkaService: IQueue
+    private trinaRepo: 
+    constructor(kafkaService: IQueue) {
+        this.kafkaService = kafkaService
     }
 
-    async addData(id: id, data: TimeStampData<{ id: id; location: TypeOf<ZodObject<{ latitude: ZodNumber; longitude: ZodNumber; }, "strip", ZodTypeAny, { latitude?: number; longitude?: number; }, { latitude?: number; longitude?: number; }>>; }>): VPromise {
-        timeStampedDataShared.sendDataForConsumption(data)
+    getTimeData(id: id): Promise<TimeStampData<{ id: id; location: TypeOf<ZodObject<{ latitude: ZodNumber; longitude: ZodNumber; }, "strip", ZodTypeAny, { latitude?: number; longitude?: number; }, { latitude?: number; longitude?: number; }>>; }>[]> {
+        
+    }
+
+    async addData(id: id, data: TimeStampData<{ id: id; location: TypeOf<ZodObject<{ latitude: ZodNumber; longitude: ZodNumber; }, "strip", ZodTypeAny, { latitude?: number; longitude?: number; }, { latitude?: number; longitude?: number; }>>; }>) {
+        this.kafkaService.publishNewData(data)
     }
     
 }
