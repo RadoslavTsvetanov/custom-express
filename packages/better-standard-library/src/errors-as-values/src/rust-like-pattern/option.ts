@@ -1,4 +1,4 @@
-import type { VCallback } from "../../../../../types/voidcallback";
+import { VCallback } from "../../../types/voidcallback";
 import { logger } from "../utils/console";
 import { type ILeftRight, LeftRight } from "./leftRight";
 import type { Tick } from "./tick";

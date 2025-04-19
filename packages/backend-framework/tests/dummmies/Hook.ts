@@ -2,5 +2,10 @@ import { HookBuilder } from "../../src/core/websocket/server/utilites/builders/H
 
 export const hooks = HookBuilder.new().add({
   key: "hi",
-  execute: () => ({ hi: "" } as const),
+  execute: (v) => ({ hi: "" } as const),
 }).build();
+
+
+
+
+
