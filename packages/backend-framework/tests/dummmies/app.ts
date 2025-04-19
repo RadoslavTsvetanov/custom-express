@@ -6,7 +6,8 @@ import { CustomWebSocketRouter } from "../../src/core/websocket/server/app";
 export const router = new CustomWebSocketRouter({}).addChannel("channel-1", {
   hooks: {
     beforeHandle: {
-      ordered: HookBuilder.new()
+      ordered: HookBuilder
+        .new()
         .add({
           key: "lolo",
           execute: (v) => ({ hi: "" } as const),
@@ -16,9 +17,6 @@ export const router = new CustomWebSocketRouter({}).addChannel("channel-1", {
     },
   },
   messagesItCanReceive: {
-    // puki: {
-    //   pukiMessage
-    // },
     puki: pukiMessage,
   } as const,
   messagesItCanSend: {

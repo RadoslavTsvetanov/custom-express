@@ -45,5 +45,34 @@ export const pukiMessage = new MessageThatCanBeReceivedBuilder(
     } as const,
     onErrorr: v => "",
   },
-  (v) => { console.log("handling ", JSON.stringify(v))}
+  (v) => {console.log("ko") }
 ).build()
+
+
+
+export const newTrainData = new MessageThatCanBeReceivedBuilder(
+  {
+    afterHandler: {
+      ordered: HookBuilder
+        .new()
+        .add({
+          key: "ojjoi" as const,
+          execute: (v) => ({ ko: "" }),
+        })
+        .build(),
+      independent: [],
+    } as const,
+    beforeHandler: {
+      ordered: HookBuilder.new()
+        .add({
+          key: "iooi" as const,
+          execute: (v) => ({ lolo: "" } as const),
+        } as const)
+        .build(),
+      independent: [],
+    } as const,
+    onErrorr: v => "",
+  },
+  (v) => {console.log("ko") }
+).build()
+

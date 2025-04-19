@@ -19,7 +19,9 @@ export class GetSet<V> implements ISimpleMapable<V> {
   //     return new Mapable(this.v);
   // }
 
-  simpleMap: (func: (v: V) => V) => V;
+  simpleMap(func: (v: V) => V): V{
+    return func(this.v)
+  };
 
 
   get value(): V {
