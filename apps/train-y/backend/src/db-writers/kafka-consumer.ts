@@ -1,9 +1,9 @@
 import { Kafka } from 'kafkajs';
-import { TimestampedData, timeStampedDataShared } from '../services/data/TimestampedData';
+import { ENV } from '../../env';
 
 const kafka = new Kafka({
   clientId: 'kafka-consumer',
-  brokers: ['localhost:9092'], // Replace with your Kafka brokers
+  brokers: ENV.get("brokers"), 
 });
 
 const consumer = kafka.consumer({ groupId: 'data-consumer' });
