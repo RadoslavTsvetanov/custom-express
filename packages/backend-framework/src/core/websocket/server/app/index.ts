@@ -36,10 +36,11 @@ export class CustomWebSocketRouter<
   }
   protected context: Context = {} as Context; // make private later
   public readonly channels: Channels;
-  public hooks: Optionable<GlobalHooks> = new Optionable(null);
+  public hooks: Optionable<Partial<GlobalHooks>> = new Optionable(null);
 
-  constructor(endpoints: Channels, context?: Context) {
+  constructor(endpoints: Channels, context?: Context, hooks: typeof this.hooks = new Optionable(null)) {
     this.channels = endpoints ?? ({} as Channels);
+    this.hooks = hooks
   }
 
   public plug<

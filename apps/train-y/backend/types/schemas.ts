@@ -14,11 +14,11 @@ const baseSchemas = {
 
 
 export const mutationsSchemas = {
-    liveEntityData: {
+    liveEntityData: z.object({
         location: baseSchemas.location,
         id: baseSchemas.entityId,
         timestamp: baseSchemas.timestamp
-    }
+    })
 }
 
 
