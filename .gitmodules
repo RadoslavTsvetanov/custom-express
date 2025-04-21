@@ -1,0 +1,3 @@
+[submodule "apps/trainy"]
+	path = apps/trainy
+	url = https://github.com/RadoslavTsvetanov/Train-y
