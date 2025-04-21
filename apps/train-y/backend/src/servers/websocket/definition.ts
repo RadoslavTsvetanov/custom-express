@@ -1,6 +1,6 @@
 import { CustomWebSocketRouter, HookBuilder, MessageThatCanBeReceivedBuilder } from "@custom-express/framework";
 import { z } from "zod";
-import { Optionable } from '@custom-express/better-standard-library';
+import { Optionable, Port } from '@custom-express/better-standard-library';
 import { mutationsSchemas, schemas } from "../../types/schemas";
 import { ITimeSeriesService } from "../../modules/services/data/interface";
 import { WebSocket } from "bun";
@@ -40,3 +40,4 @@ export const defintion = new CustomWebSocketRouter({
 }))
     .addChannel("train", trainChannel)
     .addChannel("passenger", passengerChannel)
+    .start(new Port(4000))

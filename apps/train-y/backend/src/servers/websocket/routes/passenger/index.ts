@@ -14,10 +14,8 @@ export const channel = {
                 independent: [],
             },
         },
-        
         messagesItCanReceive: {
-            waitMessage 
-            
+            waitMessage
         } as const,
     messagesItCanSend: {
 

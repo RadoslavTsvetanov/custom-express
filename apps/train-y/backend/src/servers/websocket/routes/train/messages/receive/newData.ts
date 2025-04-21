@@ -32,6 +32,6 @@ export const newTrainData = new MessageThatCanBeReceivedBuilder(
         connections.forEach(c => c.ws.send(JSON.stringify(message)))
       })
 
-    services.t.addTimestampData(connections2.get(ws).toString(), v);
+    // services.t.addTimestampData(connections2.get(ws).toString(), v);
   }
 ).build();
