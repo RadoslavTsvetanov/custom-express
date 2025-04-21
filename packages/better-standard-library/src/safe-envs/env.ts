@@ -16,12 +16,11 @@ type EnvKeyTuple<E extends readonly EnvEntry[]> = {
 };
 
 export class EnvManager<T extends Record<string, unknown> = {}> {
-  private envValues: T;
+  private envValues: T
 
   constructor(envValues: T) {
     this.envValues = envValues;
 
-    // Assign env values to this instance directly
     for (const key in envValues) {
       // @ts-ignore
       this[key] = envValues[key];

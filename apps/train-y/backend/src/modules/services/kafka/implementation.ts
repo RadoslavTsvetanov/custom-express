@@ -9,6 +9,7 @@ console.log(ENV.get("brokers"))
 
 export class Queue implements IQueue {
     async publishNewData(data: Event){
+
         const kafka = new Kafka({
             clientId: ENV.get("clientId"),
             brokers: ENV.get("brokers"), // Replace with your Kafka broker(s)
@@ -25,7 +26,6 @@ export class Queue implements IQueue {
             topic: "newData",
             messages: [{ value: messageValue }],
         });
-
 
         await producer.disconnect();
     }

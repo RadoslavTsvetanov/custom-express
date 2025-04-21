@@ -72,18 +72,24 @@ export class Optionable<T> extends CustomUnpackable<T> implements Tick<CustomUnp
     return this.value === null || this.value === undefined;
   }
 
+  ifNone(v: () => void): void {
+    if (this.is_none()) {
+    v()
+    }
+  }
+
   tick(callback: VCallback<CustomUnpackable<T>>){
     callback(this)
     return this
   }
-  try(options: {
-    ifNotNone: (v: T) => void
-    ifNone: () => void
-  }): void {
+  try<IfNonNoneReturnType, IfNoneReturnType>(options: {
+    ifNotNone: (v: T) => IfNonNoneReturnType
+    ifNone: () => IfNoneReturnType 
+  }): IfNonNoneReturnType | IfNoneReturnType {
     if (this.is_none()) {
-      options.ifNone();
+      return options.ifNone();
     } else {
-      options.ifNotNone(this.value)
+      return options.ifNotNone(this.value)
     }
   }
 

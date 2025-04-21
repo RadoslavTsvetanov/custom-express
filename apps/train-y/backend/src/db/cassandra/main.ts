@@ -1,3 +1,4 @@
+import { WithDefault } from "@custom-express/better-standard-library";
 import expressCassandra from "express-cassandra";
 
 const cassandraOptions = {
@@ -24,5 +25,12 @@ const event = cassandraClient.loadSchema("event", {
   },
   key: ["start_timestamp"],
 });
-export type Event = typeof event;
+
+
+
+export type Event = WithDefault<typeof event, any, { //! redunandancy this needs refactor since there are two sources of thruth here
+  start_timestamp: Date,
+  end_timestamp: Date,
+  context: string 
+}>;
 export { event, cassandraClient };

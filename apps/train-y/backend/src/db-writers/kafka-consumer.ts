@@ -1,6 +1,5 @@
 import { Kafka } from 'kafkajs';
 import { ENV } from '../../env';
-import { timeStampedDataShared } from '../modules/services/data/TimestampedData';
 
 const kafka = new Kafka({
   clientId: ENV.get("clientId"),
@@ -27,7 +26,7 @@ async function run() {
         return;
       }
 
-      await timeStampedDataShared.create(content);
+      await .create(content);
     },
   });
 }

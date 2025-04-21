@@ -1,67 +1,42 @@
 import { CustomWebSocketRouter, HookBuilder, MessageThatCanBeReceivedBuilder } from "@custom-express/framework";
 import { z } from "zod";
 import { Optionable } from '@custom-express/better-standard-library';
-import { TrainService } from "../../modules/services/train/implementations/Prod";
+import { mutationsSchemas, schemas } from "../../types/schemas";
+import { ITimeSeriesService } from "../../modules/services/data/interface";
+import { WebSocket } from "bun";
+import { channel as trainChannel } from "./routes/train";
+import { channel as passengerChannel } from "./routes/passenger";
 
-type id = number
+type id = string
 
+type Entity = "passenger" | "train"
 
-const connections = new Map<id, WebSocket>()
-const connections2 = new Map<WebSocket, number>()
-
-const services = {
-    train: new TrainService
+type Connection = {
+    type: Entity,
+    ws: WebSocket
 }
+
+const connections = new Map<id, Connection>()
+const connections2 = new Map<Connection,id>()
+
+
+
+const services: {t: ITimeSeriesService } = {}
+
+function connectionType(v: unknown): Entity {
+    return
+} 
 
 export const defintion = new CustomWebSocketRouter({
     
 }, {}, new Optionable({
     onConnection: {
-        ordered: HookBuilder.new().add({
-            execute: v => {
-        connections.set(v,ws)
+        ordered: HookBuilder.new("onConnection").add({
+            execute: ({ws}) => {
+                const connection = {type: connectionType(ws.url),ws}     
+                connections.set(ws.url,connection )
+                connections2.set(connection, ws.url)
     }, key: ""}).build(), independent: []},
 }))
-    .addChannel("train", {
-        hooks: {
-            beforeHandle: {
-                ordered: HookBuilder
-                    .new()
-                    .add({
-                        key: "lolo",
-                        execute: (v) => ({ hi: "" } as const),
-                    })
-                    .build(),
-                independent: [],
-            },
-        },
-        messagesItCanReceive: {
-            newTrainData: new MessageThatCanBeReceivedBuilder({
-                beforeHandler: {
-                    ordered: HookBuilder.new()
-                        .add({
-                            key: "ff",
-                            execute: (v) => mutationsSchemas.liveEntityData.parse({}),
-                        })
-                        .build(),
-                      independent:[]
-                },
-                afterHandler: {
-                    ordered: HookBuilder.new().add({ key: "jiji", execute: v => 1 }).build(),
-                    independent: []
-                },
-                onErrorr: b => console.log
-            },
-              v => { 
-                // echo back to all connected clients
-                  services.train.addData(connections2.get(ws).toString(), v)
-                }
-            ).build(),
-        } as const,
-        messagesItCanSend: {
-            trainData: z.object({
-                line: schemas.line,
-            }),
-        },
-    });
-
+    .addChannel("train", trainChannel)
+    .addChannel("passenger", passengerChannel)

@@ -20,4 +20,3 @@ export * from "./src/metaprogramming/afterfix"
 export * from "./src/metaprogramming/tuple/getFirst"
 export * from "./src/metaprogramming/tuple/getLast"
 export * from "./src/metaprogramming/IfNotUndefinedWithDefault.ts"
-EnvManager
