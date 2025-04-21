@@ -1,79 +1,60 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-type EnvRecord<T extends string> = Record<T, string>;
-
-type EnvEntry<T extends string> = {
-  key: T;
-  handler?: (envName: string) => string;
+type EnvEntry<T = unknown> = {
+  key: string;
+  handler?: (envVal: string) => T;
+  default?: T;
 };
 
-class EnvManager<T extends string> {
-  private envValues: EnvRecord<T> = {} as EnvRecord<T>;
+type InferEnvValues<E extends readonly EnvEntry[]> = {
+  [K in keyof E]: E[K] extends EnvEntry<infer T> ? T : never;
+};
 
-  constructor(entries: EnvEntry<T>[]) {
+type EnvKeyTuple<E extends readonly EnvEntry[]> = {
+  [K in keyof E]: E[K] extends EnvEntry<any> ? E[K]["key"] : never;
+};
+
+export class EnvManager<T extends Record<string, unknown> = {}> {
+  private envValues: T
+
+  constructor(envValues: T) {
+    this.envValues = envValues;
+
+    for (const key in envValues) {
+      // @ts-ignore
+      this[key] = envValues[key];
+    }
+  }
+
+  static new<E extends readonly EnvEntry[]>(entries: E): EnvManager<
+    {
+      [K in E[number] as K["key"]]: K extends EnvEntry<infer V> ? V : string;
+    }
+  > {
+    const envValues: Record<string, unknown> = {};
+
     for (const entry of entries) {
-      const envValue = process.env[entry.key];
-      if (envValue !== undefined) {
-        this.envValues[entry.key] = entry.handler
-          ? entry.handler(envValue)
-          : envValue;
+      const raw = process.env[entry.key];
+
+      if (raw !== undefined) {
+        envValues[entry.key] = entry.handler ? entry.handler(raw) : raw;
+      } else if (entry.default !== undefined) {
+        envValues[entry.key] = entry.default;
       } else {
-        throw new Error(`Environment variable ${entry.key} is not defined`);
+        throw new Error(`Missing environment variable: ${entry.key}`);
       }
     }
 
-    Object.keys(this.envValues).forEach((key) => {
-      // @ts-ignore to allow dynamic key creation
-      this[key] = this.envValues[key];
-    });
+    return new EnvManager(envValues);
   }
 
-  get<K extends T>(key: K): string {
-    const value = this.envValues[key];
-    if (value !== undefined) {
-      return value;
-    }
-    throw new Error(`Environment variable ${key} was not found and/or custom handler returned undefined`);
+  get<K extends keyof T>(key: K): T[K] {
+    return this.envValues[key];
   }
 
-  getAll(): EnvRecord<T> {
+  getAll(): T {
     return this.envValues;
   }
 }
 
-export const envManager = new EnvManager([
-  {
-    key: "S3_BUCKET_NAME",
-    handler(envName) {
-       return "bbb" 
-    },
-  },
-  {
-    key: "S3_ENDPOINT",
-  },
-  {
-    key: "AWS_REGION",
-  },
-  {
-    key: "AWS_SECRET_ACCESS_KEY",
-  },
-  {
-    key: "AWS_ACCESS_KEY_ID",
-  },
-  {
-    key: "BUCKET_NAME"
-  },
-  {
-    key: "KEYCLOAK_URL"
-  },
-  {
-    key: "KC_ADMIN_USERNAME"
-  },
-  {
-    key: "KC_ADMIN_PASSWORD"
-  },
-  {
-    key: "KC_CLIENT_ID"
-  }
-]);

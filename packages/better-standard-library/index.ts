@@ -1,3 +1,5 @@
+import { EnvManager } from "./src/safe-envs/env.ts"
+
 export * from "./src/panic"
 export * from "./src/data_structures/RecordCompatibeArray"
 export * from "./src/data_structures/array"

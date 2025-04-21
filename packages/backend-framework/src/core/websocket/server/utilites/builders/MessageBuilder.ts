@@ -16,8 +16,8 @@ export class MessageThatCanBeReceivedBuilder<
     >
 >{
     public _message: MsgHandler
-    public _hooks: Hooks
-    constructor(hooks: Hooks, handler: (v: ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]>) => unknown) {
+    public _hooks: Partial<Hooks>
+    constructor(hooks: typeof this._hooks, handler: (v: ReturnType<Last<Hooks["beforeHandler"]["ordered"]["elements"]["value"]>["execute"]>) => unknown) {
         this._hooks = hooks
         this._message = {
             "hooks": this._hooks,
@@ -41,7 +41,9 @@ export class MessageThatCanBeReceivedBuilder<
             parser: Parser | undefined, // if not undefined parser will just be a guard hook that is added to the hooks 
             handler: typeof parser extends z.ZodType<infer U> ? (v: U) => unknown : MsgHandler["handler"]) {
                 const newHooks = parser == undefined ? hooks : new HookBuilder(hooks.elements.value).build()
-                return new MessageThatCanBeReceivedBuilder(newHooks,handler)
+        return new MessageThatCanBeReceivedBuilder({
+            
+                },handler)
         }
 
     addHooks<NewHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>>(type: "beforeHandler"):
