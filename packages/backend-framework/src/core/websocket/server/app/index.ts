@@ -115,10 +115,10 @@ export class CustomWebSocketRouter<
   start(port: Port) {
     const h = this.channels
 
+          const wss = new WebSocketServer({ port: port.value });
     Object.entries(this.channels).forEach(([channelName, channelConfig]) => {
       new Optionable(channelConfig)
         .ifCanBeUnpacked(handlers => {
-          const wss = new WebSocketServer({ port: port.value });
 
           wss.on("connection", (ws, req) => {
 
@@ -253,57 +253,3 @@ export class CustomWebSocketRouter<
   }
 
 }
-
-// move to tests
-// {
-//   const g = new CustomWebSocketRouter({}).addChannel(
-//     "channel-1",
-//     {
-//       hooks: {
-//         beforeHandle: {
-//           ordered: HookBuilder.new().add({ key: "lolo", execute: v => { return { hi: "" } as const } } as const).build(),
-//           independent: []
-//         }
-//       },
-//       messagesItCanReceive: {
-//         puki: new MessageThatCanBeReceivedBuilder(
-//           {
-//             afterHandler: {
-//               ordered: HookBuilder
-//                 .new()
-//                 .add({ key: "ojjoi", execute: v => { return { ko: "" } } })
-//                 .build(),
-//               independent: []
-//             },
-//             "beforeHandler": {
-//               ordered: HookBuilder
-//                 .new()
-//                 .add({ key: "iooi", execute: v => { return { lolo: "" } as const } } as const)
-//                 .build(),
-//               independent: []
-//             } as const,
-//             onErrorr: v => ""
-//           },
-//           v => { }
-//         ).build()
-//       },
-//       messagesItCanSend: {
-//         puki: z.object({
-//           puki: z.string()
-//         })
-//       }
-//     }
-//   )
-
-
-//   const h = g.channels["channel-1"].hooks.beforeHandle.ordered.elements.value[0]
-//   {
-//     const h = g.channels["channel-1"].messagesItCanReceive.puki.config.hooks.beforeHandler.ordered.elements.value
-//   }
-//   {
-//     const h = g.channels["channel-1"].messagesItCanSend.puki.parse({})
-//   }
-//   {
-
-//   }
-// }

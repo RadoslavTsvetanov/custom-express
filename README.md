@@ -300,9 +300,9 @@ since every hook needs to be given a unique id this opens the gate to overrding 
 For example 
 
 ```ts
-.guard("hiuhi", () => console.log(0))
-.guard("omnimaning it", () => {console.log(1)})
-.before("omnimaninn it " /* not it is typesafe so dont worry */, () => {
+.guard("1", () => console.log(0))
+.guard("2", () => {console.log(1)})
+.before("2" /* no it is typesafe so dont worry */, () => {
 console.log(2)})
 ```
 v
@@ -317,7 +317,7 @@ this is helpful if you use a middleware which applies some kind of hook and you 
 
 ```ts
 // lib code
-const ingMiddleware  = app.validate("jaking").validate("omnimaning")
+const ingMiddleware  = app.validate("8998").validate("8998")
 
 // your code
 
@@ -371,8 +371,6 @@ afterHandle(req, res) => {
 
 without this you would have needed to do either do the logic in the two routes seperately ir to wrap them both in a function.  Think of this like a middleware you can put after requests not before them
 
-#### Disclaimer i took a lot of inspiration from hono and elysia js for these hooks (btw take a look at them one more time to get more features)
-
 
 ##### Using subrouters for conditional hooks
 
@@ -416,6 +414,58 @@ we call it that since it is openapi but without the full path names but instead 
 
 it can be accessed by visting `{routerpath}/opeapi`
 
+for the websockes its still there but under async api
+
+```yml
+asyncapi: '2.6.0'
+info:
+  title: Notification Service
+  version: '1.0.0'
+  description: Sends notifications to users via a message broker.
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  production:
+    url: mqtt://broker.example.com
+    protocol: mqtt
+    description: Production MQTT broker
+
+channels:
+  user/notifications:
+    description: Channel for sending user notifications
+    publish:
+      summary: Send a notification
+      operationId: sendNotification
+      message:
+        contentType: application/json
+        name: UserNotification
+        payload:
+          type: object
+          properties:
+            userId:
+              type: string
+              format: uuid
+            message:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+          required: [userId, message, timestamp]
+
+components:
+  messages:
+    UserNotification:
+      name: UserNotification
+      title: Notification for user
+      payload:
+        $ref: '#/channels/user~1notifications/publish/message/payload'
+
+tags:
+  - name: messaging
+    description: All messaging-related operations
+```
 
 ### full openapi 
 
@@ -465,32 +515,15 @@ app.use(app2.getRouter())
 ```
 -------
 ```ts
-Key Concept
-We highly recommended you to read this page before start using Elysia.
-
-Although Elysia is a simple library, it has some key concepts that you need to understand to use it effectively.
-
-This page covers most important concepts of Elysia that you should to know.
-Everything is a component
-
-Every Elysia instance is a component.
-
-A component is a plugin that could plug into other instances.
-
-It could be a router, a store, a service, or anything else.
-
-import { Elysia
- } from 'elysia'
-
 const store
- = new Elysia
+ = new App 
 ()
 	.state
 ({ visitor
 : 0 })
 
 const router
- = new Elysia
+ = new App
 ()
 	.use
 (store
@@ -502,7 +535,7 @@ const router
 ++)
 
 const app
- = new Elysia
+ = new App 
 ()
 	.use
 (router
@@ -516,16 +549,11 @@ const app
 
 This force you to break down your application into small pieces, making it to add or remove features easily.
 
-Learn more about this in plugin.
-Scope
-
 By default, event/life-cycle in each instance is isolated from each other.
 
-import { Elysia
- } from 'elysia'
 
 const ip
- = new Elysia
+ = new App 
 ()
 	.derive
 (({ server
@@ -542,9 +570,7 @@ const ip
  }) => ip
 )
 
-const server
- = new Elysia
-()
+const server = new App()
 	.use
 (ip
 )
@@ -559,11 +585,9 @@ In this example, the ip property is only share in it's own instance but not in t
 
 To share the lifecycle, in our case, an ip property with server instance, we need to explicitly says it could be shared.
 
-import { Elysia
- } from 'elysia'
 
 const ip
- = new Elysia
+ = new App 
 ()
 	.derive
 (
@@ -585,7 +609,7 @@ const ip
 )
 
 const server
- = new Elysia
+ = new App 
 ()
 	.use
 (ip
@@ -614,11 +638,9 @@ This can cause a duplication of the same method being applied multiple times but
 
 To prevent lifecycle methods from being duplicated, we can add an unique identifier to the instance.
 
-import { Elysia
- } from 'elysia'
 
 const ip
- = new Elysia
+ = new app 
 ({ name
 : 'ip' })
 	.derive
@@ -641,7 +663,7 @@ const ip
 )
 
 const router1
- = new Elysia
+ = new app 
 ()
 	.use
 (ip
@@ -652,7 +674,7 @@ const router1
 )
 
 const router2
- = new Elysia
+ = new app
 ()
 	.use
 (ip
@@ -663,7 +685,7 @@ const router2
 )
 
 const server
- = new Elysia
+ = new app 
 ()
 	.use
 (router1
@@ -674,7 +696,6 @@ const server
 
 This will prevent the ip property from being call multiple time by applying deduplication using an unique name.
 
-Once name is provided, the instance will become a singleton. Allowing Elysia to apply plugin deduplication.
 
 Allowing us to reuse the same instance multiple time without performance penalty.
 
@@ -725,12 +746,6 @@ req.body.hhhh // if not there will resolve to undefined and nullable will throw 
 - a lightweight library
 - compatilbe with express
 
-# Things to steal feautures from 
-- encore js
-- elysia js
-- hono js
-- nest js
-
 ## examples
 
 To see example usage and some advanced usage (for example how to use guard so that we ensure all messages from a certain channel return a common subset of properties in a type safe way) go to the guthub page and search for the examples folder (TODO: add github link to the examples)
@@ -753,9 +768,7 @@ app.beforeSend({
 ### Ensuring we only recieve json messages 
 
 ```ts
-app.beforeHandle(guard({
-sc
-}))
+app.beforeHandle(guard(parse("json"))
 ```
 
 ### having access to all connections in every handler 

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Blazesockets </title>
+		<style>.markdown-body{--base-size-4:0.25rem;--base-size-8:0.5rem;--base-size-16:1rem;--base-size-24:1.5rem;--base-size-40:2.5rem;--base-text-weight-normal:400;--base-text-weight-medium:500;--base-text-weight-semibold:600;--fontStack-monospace:ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;--fgColor-accent:Highlight}@media (prefers-color-scheme:dark){.markdown-body,[data-theme=dark]{color-scheme:dark;--focus-outlineColor:#1f6feb;--fgColor-default:#f0f6fc;--fgColor-muted:#9198a1;--fgColor-accent:#4493f8;--fgColor-success:#3fb950;--fgColor-attention:#d29922;--fgColor-danger:#f85149;--fgColor-done:#ab7df8;--bgColor-default:#0d1117;--bgColor-muted:#151b23;--bgColor-neutral-muted:#656c7633;--bgColor-attention-muted:#bb800926;--borderColor-default:#3d444d;--borderColor-muted:#3d444db3;--borderColor-neutral-muted:#3d444db3;--borderColor-accent-emphasis:#1f6feb;--borderColor-success-emphasis:#238636;--borderColor-attention-emphasis:#9e6a03;--borderColor-danger-emphasis:#da3633;--borderColor-done-emphasis:#8957e5;--color-prettylights-syntax-comment:#9198a1;--color-prettylights-syntax-constant:#79c0ff;--color-prettylights-syntax-constant-other-reference-link:#a5d6ff;--color-prettylights-syntax-entity:#d2a8ff;--color-prettylights-syntax-storage-modifier-import:#f0f6fc;--color-prettylights-syntax-entity-tag:#7ee787;--color-prettylights-syntax-keyword:#ff7b72;--color-prettylights-syntax-string:#a5d6ff;--color-prettylights-syntax-variable:#ffa657;--color-prettylights-syntax-brackethighlighter-unmatched:#f85149;--color-prettylights-syntax-brackethighlighter-angle:#9198a1;--color-prettylights-syntax-invalid-illegal-text:#f0f6fc;--color-prettylights-syntax-invalid-illegal-bg:#8e1519;--color-prettylights-syntax-carriage-return-text:#f0f6fc;--color-prettylights-syntax-carriage-return-bg:#b62324;--color-prettylights-syntax-string-regexp:#7ee787;--color-prettylights-syntax-markup-list:#f2cc60;--color-prettylights-syntax-markup-heading:#1f6feb;--color-prettylights-syntax-markup-italic:#f0f6fc;--color-prettylights-syntax-markup-bold:#f0f6fc;--color-prettylights-syntax-markup-deleted-text:#ffdcd7;--color-prettylights-syntax-markup-deleted-bg:#67060c;--color-prettylights-syntax-markup-inserted-text:#aff5b4;--color-prettylights-syntax-markup-inserted-bg:#033a16;--color-prettylights-syntax-markup-changed-text:#ffdfb6;--color-prettylights-syntax-markup-changed-bg:#5a1e02;--color-prettylights-syntax-markup-ignored-text:#f0f6fc;--color-prettylights-syntax-markup-ignored-bg:#1158c7;--color-prettylights-syntax-meta-diff-range:#d2a8ff;--color-prettylights-syntax-sublimelinter-gutter-mark:#3d444d}}@media (prefers-color-scheme:light){.markdown-body,[data-theme=light]{color-scheme:light;--focus-outlineColor:#0969da;--fgColor-default:#1f2328;--fgColor-muted:#59636e;--fgColor-accent:#0969da;--fgColor-success:#1a7f37;--fgColor-attention:#9a6700;--fgColor-danger:#d1242f;--fgColor-done:#8250df;--bgColor-default:#ffffff;--bgColor-muted:#f6f8fa;--bgColor-neutral-muted:#818b981f;--bgColor-attention-muted:#fff8c5;--borderColor-default:#d1d9e0;--borderColor-muted:#d1d9e0b3;--borderColor-neutral-muted:#d1d9e0b3;--borderColor-accent-emphasis:#0969da;--borderColor-success-emphasis:#1a7f37;--borderColor-attention-emphasis:#9a6700;--borderColor-danger-emphasis:#cf222e;--borderColor-done-emphasis:#8250df;--color-prettylights-syntax-comment:#59636e;--color-prettylights-syntax-constant:#0550ae;--color-prettylights-syntax-constant-other-reference-link:#0a3069;--color-prettylights-syntax-entity:#6639ba;--color-prettylights-syntax-storage-modifier-import:#1f2328;--color-prettylights-syntax-entity-tag:#0550ae;--color-prettylights-syntax-keyword:#cf222e;--color-prettylights-syntax-string:#0a3069;--color-prettylights-syntax-variable:#953800;--color-prettylights-syntax-brackethighlighter-unmatched:#82071e;--color-prettylights-syntax-brackethighlighter-angle:#59636e;--color-prettylights-syntax-invalid-illegal-text:#f6f8fa;--color-prettylights-syntax-invalid-illegal-bg:#82071e;--color-prettylights-syntax-carriage-return-text:#f6f8fa;--color-prettylights-syntax-carriage-return-bg:#cf222e;--color-prettylights-syntax-string-regexp:#116329;--color-prettylights-syntax-markup-list:#3b2300;--color-prettylights-syntax-markup-heading:#0550ae;--color-prettylights-syntax-markup-italic:#1f2328;--color-prettylights-syntax-markup-bold:#1f2328;--color-prettylights-syntax-markup-deleted-text:#82071e;--color-prettylights-syntax-markup-deleted-bg:#ffebe9;--color-prettylights-syntax-markup-inserted-text:#116329;--color-prettylights-syntax-markup-inserted-bg:#dafbe1;--color-prettylights-syntax-markup-changed-text:#953800;--color-prettylights-syntax-markup-changed-bg:#ffd8b5;--color-prettylights-syntax-markup-ignored-text:#d1d9e0;--color-prettylights-syntax-markup-ignored-bg:#0550ae;--color-prettylights-syntax-meta-diff-range:#8250df;--color-prettylights-syntax-sublimelinter-gutter-mark:#818b98}}.markdown-body{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;margin:0;color:var(--fgColor-default);background-color:var(--bgColor-default);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";font-size:16px;line-height:1.5;word-wrap:break-word}.markdown-body .octicon{display:inline-block;fill:currentColor;vertical-align:text-bottom}.markdown-body h1:hover .anchor .octicon-link:before,.markdown-body h2:hover .anchor .octicon-link:before,.markdown-body h3:hover .anchor .octicon-link:before,.markdown-body h4:hover .anchor .octicon-link:before,.markdown-body h5:hover .anchor .octicon-link:before,.markdown-body h6:hover .anchor .octicon-link:before{width:16px;height:16px;content:' ';display:inline-block;background-color:currentColor;-webkit-mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>")}.markdown-body details,.markdown-body figcaption,.markdown-body figure{display:block}.markdown-body summary{display:list-item}.markdown-body [hidden]{display:none!important}.markdown-body a{background-color:transparent;color:var(--fgColor-accent);text-decoration:none}.markdown-body abbr[title]{border-bottom:none;-webkit-text-decoration:underline dotted;text-decoration:underline dotted}.markdown-body b,.markdown-body strong{font-weight:var(--base-text-weight-semibold,600)}.markdown-body dfn{font-style:italic}.markdown-body h1{margin:.67em 0;font-weight:var(--base-text-weight-semibold,600);padding-bottom:.3em;font-size:2em;border-bottom:1px solid var(--borderColor-muted)}.markdown-body mark{background-color:var(--bgColor-attention-muted);color:var(--fgColor-default)}.markdown-body small{font-size:90%}.markdown-body sub,.markdown-body sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}.markdown-body sub{bottom:-.25em}.markdown-body sup{top:-.5em}.markdown-body img{border-style:none;max-width:100%;box-sizing:content-box}.markdown-body code,.markdown-body kbd,.markdown-body pre,.markdown-body samp{font-family:monospace;font-size:1em}.markdown-body figure{margin:1em var(--base-size-40)}.markdown-body hr{box-sizing:content-box;overflow:hidden;background:0 0;border-bottom:1px solid var(--borderColor-muted);height:.25em;padding:0;margin:var(--base-size-24) 0;background-color:var(--borderColor-default);border:0}.markdown-body input{font:inherit;margin:0;overflow:visible;font-family:inherit;font-size:inherit;line-height:inherit}.markdown-body [type=button],.markdown-body [type=reset],.markdown-body [type=submit]{-webkit-appearance:button;appearance:button}.markdown-body [type=checkbox],.markdown-body [type=radio]{box-sizing:border-box;padding:0}.markdown-body [type=number]::-webkit-inner-spin-button,.markdown-body [type=number]::-webkit-outer-spin-button{height:auto}.markdown-body [type=search]::-webkit-search-cancel-button,.markdown-body [type=search]::-webkit-search-decoration{-webkit-appearance:none;appearance:none}.markdown-body ::-webkit-input-placeholder{color:inherit;opacity:.54}.markdown-body ::-webkit-file-upload-button{-webkit-appearance:button;appearance:button;font:inherit}.markdown-body a:hover{text-decoration:underline}.markdown-body ::placeholder{color:var(--fgColor-muted);opacity:1}.markdown-body hr::before{display:table;content:""}.markdown-body hr::after{display:table;clear:both;content:""}.markdown-body table{border-spacing:0;border-collapse:collapse;display:block;width:max-content;max-width:100%;overflow:auto;font-variant:tabular-nums}.markdown-body td,.markdown-body th{padding:0}.markdown-body details summary{cursor:pointer}.markdown-body [role=button]:focus,.markdown-body a:focus,.markdown-body input[type=checkbox]:focus,.markdown-body input[type=radio]:focus{outline:2px solid var(--focus-outlineColor);outline-offset:-2px;box-shadow:none}.markdown-body [role=button]:focus:not(:focus-visible),.markdown-body a:focus:not(:focus-visible),.markdown-body input[type=checkbox]:focus:not(:focus-visible),.markdown-body input[type=radio]:focus:not(:focus-visible){outline:solid 1px transparent}.markdown-body [role=button]:focus-visible,.markdown-body a:focus-visible,.markdown-body input[type=checkbox]:focus-visible,.markdown-body input[type=radio]:focus-visible{outline:2px solid var(--focus-outlineColor);outline-offset:-2px;box-shadow:none}.markdown-body a:not([class]):focus,.markdown-body a:not([class]):focus-visible,.markdown-body input[type=checkbox]:focus,.markdown-body input[type=checkbox]:focus-visible,.markdown-body input[type=radio]:focus,.markdown-body input[type=radio]:focus-visible{outline-offset:0}.markdown-body kbd{display:inline-block;padding:var(--base-size-4);font:11px var(--fontStack-monospace,ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace);line-height:10px;color:var(--fgColor-default);vertical-align:middle;background-color:var(--bgColor-muted);border:solid 1px var(--borderColor-neutral-muted);border-bottom-color:var(--borderColor-neutral-muted);border-radius:6px;box-shadow:inset 0 -1px 0 var(--borderColor-neutral-muted)}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{margin-top:var(--base-size-24);margin-bottom:var(--base-size-16);font-weight:var(--base-text-weight-semibold,600);line-height:1.25}.markdown-body h2{font-weight:var(--base-text-weight-semibold,600);padding-bottom:.3em;font-size:1.5em;border-bottom:1px solid var(--borderColor-muted)}.markdown-body h3{font-weight:var(--base-text-weight-semibold,600);font-size:1.25em}.markdown-body h4{font-weight:var(--base-text-weight-semibold,600);font-size:1em}.markdown-body h5{font-weight:var(--base-text-weight-semibold,600);font-size:.875em}.markdown-body h6{font-weight:var(--base-text-weight-semibold,600);font-size:.85em;color:var(--fgColor-muted)}.markdown-body p{margin-top:0;margin-bottom:10px}.markdown-body blockquote{margin:0;padding:0 1em;color:var(--fgColor-muted);border-left:.25em solid var(--borderColor-default)}.markdown-body ol,.markdown-body ul{margin-top:0;margin-bottom:0;padding-left:2em}.markdown-body ol ol,.markdown-body ul ol{list-style-type:lower-roman}.markdown-body ol ol ol,.markdown-body ol ul ol,.markdown-body ul ol ol,.markdown-body ul ul ol{list-style-type:lower-alpha}.markdown-body dd{margin-left:0}.markdown-body code,.markdown-body samp,.markdown-body tt{font-family:var(--fontStack-monospace,ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace);font-size:12px}.markdown-body pre{margin-top:0;margin-bottom:0;font-family:var(--fontStack-monospace,ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace);font-size:12px;word-wrap:normal}.markdown-body .octicon{display:inline-block;overflow:visible!important;vertical-align:text-bottom;fill:currentColor}.markdown-body input::-webkit-inner-spin-button,.markdown-body input::-webkit-outer-spin-button{margin:0;appearance:none}.markdown-body .mr-2{margin-right:var(--base-size-8,8px)!important}.markdown-body::before{display:table;content:""}.markdown-body::after{display:table;clear:both;content:""}.markdown-body>:first-child{margin-top:0!important}.markdown-body>:last-child{margin-bottom:0!important}.markdown-body a:not([href]){color:inherit;text-decoration:none}.markdown-body .absent{color:var(--fgColor-danger)}.markdown-body .anchor{float:left;padding-right:var(--base-size-4);margin-left:-20px;line-height:1}.markdown-body .anchor:focus{outline:0}.markdown-body blockquote,.markdown-body details,.markdown-body dl,.markdown-body ol,.markdown-body p,.markdown-body pre,.markdown-body table,.markdown-body ul{margin-top:0;margin-bottom:var(--base-size-16)}.markdown-body blockquote>:first-child{margin-top:0}.markdown-body blockquote>:last-child{margin-bottom:0}.markdown-body h1 .octicon-link,.markdown-body h2 .octicon-link,.markdown-body h3 .octicon-link,.markdown-body h4 .octicon-link,.markdown-body h5 .octicon-link,.markdown-body h6 .octicon-link{color:var(--fgColor-default);vertical-align:middle;visibility:hidden}.markdown-body h1:hover .anchor,.markdown-body h2:hover .anchor,.markdown-body h3:hover .anchor,.markdown-body h4:hover .anchor,.markdown-body h5:hover .anchor,.markdown-body h6:hover .anchor{text-decoration:none}.markdown-body h1:hover .anchor .octicon-link,.markdown-body h2:hover .anchor .octicon-link,.markdown-body h3:hover .anchor .octicon-link,.markdown-body h4:hover .anchor .octicon-link,.markdown-body h5:hover .anchor .octicon-link,.markdown-body h6:hover .anchor .octicon-link{visibility:visible}.markdown-body h1 code,.markdown-body h1 tt,.markdown-body h2 code,.markdown-body h2 tt,.markdown-body h3 code,.markdown-body h3 tt,.markdown-body h4 code,.markdown-body h4 tt,.markdown-body h5 code,.markdown-body h5 tt,.markdown-body h6 code,.markdown-body h6 tt{padding:0 .2em;font-size:inherit}.markdown-body summary h1,.markdown-body summary h2,.markdown-body summary h3,.markdown-body summary h4,.markdown-body summary h5,.markdown-body summary h6{display:inline-block}.markdown-body summary h1 .anchor,.markdown-body summary h2 .anchor,.markdown-body summary h3 .anchor,.markdown-body summary h4 .anchor,.markdown-body summary h5 .anchor,.markdown-body summary h6 .anchor{margin-left:-40px}.markdown-body summary h1,.markdown-body summary h2{padding-bottom:0;border-bottom:0}.markdown-body ol.no-list,.markdown-body ul.no-list{padding:0;list-style-type:none}.markdown-body ol[type="a s"]{list-style-type:lower-alpha}.markdown-body ol[type="A s"]{list-style-type:upper-alpha}.markdown-body ol[type="i s"]{list-style-type:lower-roman}.markdown-body ol[type="I s"]{list-style-type:upper-roman}.markdown-body ol[type="1"]{list-style-type:decimal}.markdown-body div>ol:not([type]){list-style-type:decimal}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:0;margin-bottom:0}.markdown-body li>p{margin-top:var(--base-size-16)}.markdown-body li+li{margin-top:.25em}.markdown-body dl{padding:0}.markdown-body dl dt{padding:0;margin-top:var(--base-size-16);font-size:1em;font-style:italic;font-weight:var(--base-text-weight-semibold,600)}.markdown-body dl dd{padding:0 var(--base-size-16);margin-bottom:var(--base-size-16)}.markdown-body table th{font-weight:var(--base-text-weight-semibold,600)}.markdown-body table td,.markdown-body table th{padding:6px 13px;border:1px solid var(--borderColor-default)}.markdown-body table td>:last-child{margin-bottom:0}.markdown-body table tr{background-color:var(--bgColor-default);border-top:1px solid var(--borderColor-muted)}.markdown-body table tr:nth-child(2n){background-color:var(--bgColor-muted)}.markdown-body table img{background-color:transparent}.markdown-body img[align=right]{padding-left:20px}.markdown-body img[align=left]{padding-right:20px}.markdown-body .emoji{max-width:none;vertical-align:text-top;background-color:transparent}.markdown-body span.frame{display:block;overflow:hidden}.markdown-body span.frame>span{display:block;float:left;width:auto;padding:7px;margin:13px 0 0;overflow:hidden;border:1px solid var(--borderColor-default)}.markdown-body span.frame span img{display:block;float:left}.markdown-body span.frame span span{display:block;padding:5px 0 0;clear:both;color:var(--fgColor-default)}.markdown-body span.align-center{display:block;overflow:hidden;clear:both}.markdown-body span.align-center>span{display:block;margin:13px auto 0;overflow:hidden;text-align:center}.markdown-body span.align-center span img{margin:0 auto;text-align:center}.markdown-body span.align-right{display:block;overflow:hidden;clear:both}.markdown-body span.align-right>span{display:block;margin:13px 0 0;overflow:hidden;text-align:right}.markdown-body span.align-right span img{margin:0;text-align:right}.markdown-body span.float-left{display:block;float:left;margin-right:13px;overflow:hidden}.markdown-body span.float-left span{margin:13px 0 0}.markdown-body span.float-right{display:block;float:right;margin-left:13px;overflow:hidden}.markdown-body span.float-right>span{display:block;margin:13px auto 0;overflow:hidden;text-align:right}.markdown-body code,.markdown-body tt{padding:.2em .4em;margin:0;font-size:85%;white-space:break-spaces;background-color:var(--bgColor-neutral-muted);border-radius:6px}.markdown-body code br,.markdown-body tt br{display:none}.markdown-body del code{text-decoration:inherit}.markdown-body samp{font-size:85%}.markdown-body pre code{font-size:100%}.markdown-body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}.markdown-body .highlight{margin-bottom:var(--base-size-16)}.markdown-body .highlight pre{margin-bottom:0;word-break:normal}.markdown-body .highlight pre,.markdown-body pre{padding:var(--base-size-16);overflow:auto;font-size:85%;line-height:1.45;color:var(--fgColor-default);background-color:var(--bgColor-muted);border-radius:6px}.markdown-body pre code,.markdown-body pre tt{display:inline;max-width:auto;padding:0;margin:0;overflow:visible;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}.markdown-body .csv-data td,.markdown-body .csv-data th{padding:5px;overflow:hidden;font-size:12px;line-height:1;text-align:left;white-space:nowrap}.markdown-body .csv-data .blob-num{padding:10px var(--base-size-8) 9px;text-align:right;background:var(--bgColor-default);border:0}.markdown-body .csv-data tr{border-top:0}.markdown-body .csv-data th{font-weight:var(--base-text-weight-semibold,600);background:var(--bgColor-muted);border-top:0}.markdown-body [data-footnote-ref]::before{content:"["}.markdown-body [data-footnote-ref]::after{content:"]"}.markdown-body .footnotes{font-size:12px;color:var(--fgColor-muted);border-top:1px solid var(--borderColor-default)}.markdown-body .footnotes ol{padding-left:var(--base-size-16)}.markdown-body .footnotes ol ul{display:inline-block;padding-left:var(--base-size-16);margin-top:var(--base-size-16)}.markdown-body .footnotes li{position:relative}.markdown-body .footnotes li:target::before{position:absolute;top:calc(var(--base-size-8)*-1);right:calc(var(--base-size-8)*-1);bottom:calc(var(--base-size-8)*-1);left:calc(var(--base-size-24)*-1);pointer-events:none;content:"";border:2px solid var(--borderColor-accent-emphasis);border-radius:6px}.markdown-body .footnotes li:target{color:var(--fgColor-default)}.markdown-body .footnotes .data-footnote-backref g-emoji{font-family:monospace}.markdown-body body:has(:modal){padding-right:var(--dialog-scrollgutter)!important}.markdown-body .pl-c{color:var(--color-prettylights-syntax-comment)}.markdown-body .pl-c1,.markdown-body .pl-s .pl-v{color:var(--color-prettylights-syntax-constant)}.markdown-body .pl-e,.markdown-body .pl-en{color:var(--color-prettylights-syntax-entity)}.markdown-body .pl-s .pl-s1,.markdown-body .pl-smi{color:var(--color-prettylights-syntax-storage-modifier-import)}.markdown-body .pl-ent{color:var(--color-prettylights-syntax-entity-tag)}.markdown-body .pl-k{color:var(--color-prettylights-syntax-keyword)}.markdown-body .pl-pds,.markdown-body .pl-s,.markdown-body .pl-s .pl-pse .pl-s1,.markdown-body .pl-sr,.markdown-body .pl-sr .pl-cce,.markdown-body .pl-sr .pl-sra,.markdown-body .pl-sr .pl-sre{color:var(--color-prettylights-syntax-string)}.markdown-body .pl-smw,.markdown-body .pl-v{color:var(--color-prettylights-syntax-variable)}.markdown-body .pl-bu{color:var(--color-prettylights-syntax-brackethighlighter-unmatched)}.markdown-body .pl-ii{color:var(--color-prettylights-syntax-invalid-illegal-text);background-color:var(--color-prettylights-syntax-invalid-illegal-bg)}.markdown-body .pl-c2{color:var(--color-prettylights-syntax-carriage-return-text);background-color:var(--color-prettylights-syntax-carriage-return-bg)}.markdown-body .pl-sr .pl-cce{font-weight:700;color:var(--color-prettylights-syntax-string-regexp)}.markdown-body .pl-ml{color:var(--color-prettylights-syntax-markup-list)}.markdown-body .pl-mh,.markdown-body .pl-mh .pl-en,.markdown-body .pl-ms{font-weight:700;color:var(--color-prettylights-syntax-markup-heading)}.markdown-body .pl-mi{font-style:italic;color:var(--color-prettylights-syntax-markup-italic)}.markdown-body .pl-mb{font-weight:700;color:var(--color-prettylights-syntax-markup-bold)}.markdown-body .pl-md{color:var(--color-prettylights-syntax-markup-deleted-text);background-color:var(--color-prettylights-syntax-markup-deleted-bg)}.markdown-body .pl-mi1{color:var(--color-prettylights-syntax-markup-inserted-text);background-color:var(--color-prettylights-syntax-markup-inserted-bg)}.markdown-body .pl-mc{color:var(--color-prettylights-syntax-markup-changed-text);background-color:var(--color-prettylights-syntax-markup-changed-bg)}.markdown-body .pl-mi2{color:var(--color-prettylights-syntax-markup-ignored-text);background-color:var(--color-prettylights-syntax-markup-ignored-bg)}.markdown-body .pl-mdr{font-weight:700;color:var(--color-prettylights-syntax-meta-diff-range)}.markdown-body .pl-ba{color:var(--color-prettylights-syntax-brackethighlighter-angle)}.markdown-body .pl-sg{color:var(--color-prettylights-syntax-sublimelinter-gutter-mark)}.markdown-body .pl-corl{text-decoration:underline;color:var(--color-prettylights-syntax-constant-other-reference-link)}.markdown-body [role=button]:focus:not(:focus-visible),.markdown-body [role=tabpanel][tabindex="0"]:focus:not(:focus-visible),.markdown-body a:focus:not(:focus-visible),.markdown-body button:focus:not(:focus-visible),.markdown-body summary:focus:not(:focus-visible){outline:0;box-shadow:none}.markdown-body [tabindex="0"]:focus:not(:focus-visible),.markdown-body details-dialog:focus:not(:focus-visible){outline:0}.markdown-body g-emoji{display:inline-block;min-width:1ch;font-family:"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";font-size:1em;font-style:normal!important;font-weight:var(--base-text-weight-normal,400);line-height:1;vertical-align:-.075em}.markdown-body g-emoji img{width:1em;height:1em}.markdown-body .task-list-item{list-style-type:none}.markdown-body .task-list-item label{font-weight:var(--base-text-weight-normal,400)}.markdown-body .task-list-item.enabled label{cursor:pointer}.markdown-body .task-list-item+.task-list-item{margin-top:var(--base-size-4)}.markdown-body .task-list-item .handle{display:none}.markdown-body .task-list-item-checkbox{margin:0 .2em .25em -1.4em;vertical-align:middle}.markdown-body ul:dir(rtl) .task-list-item-checkbox{margin:0 -1.6em .25em .2em}.markdown-body ol:dir(rtl) .task-list-item-checkbox{margin:0 -1.6em .25em .2em}.markdown-body .contains-task-list:focus-within .task-list-item-convert-container,.markdown-body .contains-task-list:hover .task-list-item-convert-container{display:block;width:auto;height:24px;overflow:visible;clip:auto}.markdown-body ::-webkit-calendar-picker-indicator{filter:invert(50%)}.markdown-body .markdown-alert{padding:var(--base-size-8) var(--base-size-16);margin-bottom:var(--base-size-16);color:inherit;border-left:.25em solid var(--borderColor-default)}.markdown-body .markdown-alert>:first-child{margin-top:0}.markdown-body .markdown-alert>:last-child{margin-bottom:0}.markdown-body .markdown-alert .markdown-alert-title{display:flex;font-weight:var(--base-text-weight-medium,500);align-items:center;line-height:1}.markdown-body .markdown-alert.markdown-alert-note{border-left-color:var(--borderColor-accent-emphasis)}.markdown-body .markdown-alert.markdown-alert-note .markdown-alert-title{color:var(--fgColor-accent)}.markdown-body .markdown-alert.markdown-alert-important{border-left-color:var(--borderColor-done-emphasis)}.markdown-body .markdown-alert.markdown-alert-important .markdown-alert-title{color:var(--fgColor-done)}.markdown-body .markdown-alert.markdown-alert-warning{border-left-color:var(--borderColor-attention-emphasis)}.markdown-body .markdown-alert.markdown-alert-warning .markdown-alert-title{color:var(--fgColor-attention)}.markdown-body .markdown-alert.markdown-alert-tip{border-left-color:var(--borderColor-success-emphasis)}.markdown-body .markdown-alert.markdown-alert-tip .markdown-alert-title{color:var(--fgColor-success)}.markdown-body .markdown-alert.markdown-alert-caution{border-left-color:var(--borderColor-danger-emphasis)}.markdown-body .markdown-alert.markdown-alert-caution .markdown-alert-title{color:var(--fgColor-danger)}.markdown-body>:first-child>.heading-element:first-child{margin-top:0!important}.markdown-body .highlight pre:has(+.zeroclipboard-container){min-height:52px}</style>
+		<style>
+			body {
+				margin: 0;
+			}
+
+			.markdown-body-content {
+				box-sizing: border-box;
+				min-width: 200px;
+				max-width: 980px;
+				margin: 0 auto;
+				padding: 45px;
+			}
+
+			@media (max-width: 767px) {
+				.markdown-body-content {
+					padding: 15px;
+				}
+			}
+
+			.markdown-body {
+				--base-size-8: 8px;
+				--base-size-16: 16px;
+			}
+		</style>
+	</head>
+	<body class="markdown-body">
+		<article class="markdown-body-content"><h1>Blazesockets</h1>
+<p>Writing more with less</p>
+<h2>Documentation</h2>
+<h4>Handlers</h4>
+<p>Just like the standard ws lib we expose events you can listen for and everytime this event happens we run your <code class="notranslate">handler</code></p>
+<p>We expose the following handlers</p>
+<h5>onConnection</h5>
+<p>runs whever a connection is established</p>
+<ul>
+<li>you can hook on it with beforeConnection which is executed before the handler you define, again this is a hook you wont need probably but is very good for writing plugins and/or authentication of connections (yeah if you dont want to manually define repetitve funcs you can use a gaurd here )</li>
+</ul>
+<p>Example</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate">...<span class="pl-c1">/</span><span class="pl-c1">/</span> <span class="pl-s1">your</span> <span class="pl-s1">app</span> <span class="pl-s1">code</span>
+<span class="pl-kos">.</span><span class="pl-en">onConnection</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+    <span class="pl-c1">before</span>: <span class="pl-kos">{</span>
+      <span class="pl-c1">guards</span>: <span class="pl-kos">[</span>
+        <span class="pl-kos">{</span>
+          <span class="pl-c1">schema</span>: <span class="pl-kos">{</span><span class="pl-kos">}</span><span class="pl-kos">,</span>
+          <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span><span class="pl-kos">}</span> <span class="pl-c">// handler if validation fails, by default it sends a message to the socket and closes the connection, so it left without a value the default will be apllied </span>
+        <span class="pl-kos">}</span>
+      <span class="pl-kos">]</span>
+    <span class="pl-kos">}</span>
+  <span class="pl-kos">}</span><span class="pl-kos">)</span></pre></div>
+<p>you can also supply after hooks will be passed whenever</p>
+<h5>onClose</h5>
+<p>runs whenver a connection is closed (recieves matedata both from the close and the data which was passed onConnection for this socket)</p>
+<h5>Message handler</h5>
+<p>here it is discussed only the handler for hooks defining in handler look at <code class="notranslate">Hooks</code> section</p>
+<p>so a handler is a function which rans when a certain message is recieced that agrees to the schema defined for the websockets</p>
+<p>You can define a validator for your handler and this is essesntially a guard or a match which runs when a message is handled (so it runs before any local hook - excalidraw diagram for more details)</p>
+<p>(application code inisight -&gt; techniclly a message handler is just a hook too)</p>
+<p><em>Note</em>: in a message handler you need to define a <code class="notranslate">parse</code>, a parse is a before handle guard hook that is ensured to run right before the handler so that the type of the message is the one you define in the parse</p>
+<h5>onRecievedMessage</h5>
+<p>in reality there is not a real handler with this name but you can use a <code class="notranslate">beforeHandle</code> hook so that you run something before any new message which transofrms the message</p>
+<h4>Hooks</h4>
+<p>Note that hooks can be global or local, local hooks behave in the same way but they apply only to one handler and are declared inside the handler and serve as a way of defining clearer steps in a handler (note that like in global each new hook gets the context that the one before it left so the first beforeSend could change what the next beforeSend will have acces to) for example this is cool when we want to loggically seperate the auth step and we will have something like this (see the below example )</p>
+<p>Note that if you do not explicitely ovverride the return by default the current handler will pass the context it recieved to the next handler, if you return the END utility variable nothing will be ran after the handler</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate">    <span class="pl-kos">.</span><span class="pl-en">onBeforeHandle</span><span class="pl-kos">(</span><span class="pl-kos">(</span><span class="pl-kos">{</span>msg<span class="pl-kos">,</span> <span class="pl-c1">ws</span>: <span class="pl-s1">s</span> <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+    	<span class="pl-k">if</span><span class="pl-kos">(</span><span class="pl-s1">msg</span><span class="pl-kos">.</span><span class="pl-c1">payload</span><span class="pl-kos">.</span><span class="pl-c1">authToken</span> <span class="pl-c1">===</span> <span class="pl-c1">null</span><span class="pl-kos">)</span><span class="pl-kos">{</span>
+     	<span class="pl-c">// a token shoukd be provided</span>
+     	<span class="pl-s1">ws</span><span class="pl-kos">.</span><span class="pl-en">close</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+      <span class="pl-kos">}</span>
+	<span class="pl-kos">}</span>
+        <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-s">'1'</span><span class="pl-kos">)</span>
+	<span class="pl-s1">return</span> <span class="pl-kos">{</span>...<span class="pl-s1">msg</span><span class="pl-kos">,</span> : <span class="pl-s">""</span><span class="pl-kos">}</span>
+    <span class="pl-kos">}</span><span class="pl-kos">)</span>
+    <span class="pl-kos">.</span><span class="pl-en">onBeforeHandle</span><span class="pl-kos">(</span><span class="pl-kos">(</span><span class="pl-kos">{</span>authToken <span class="pl-c">/* note we can access hihi*/</span><span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+    <span class="pl-c">// the provided token should be valid </span>
+    <span class="pl-k">if</span><span class="pl-kos">(</span><span class="pl-c1">!</span><span class="pl-v">TokenExists</span><span class="pl-kos">(</span><span class="pl-s1">authToken</span><span class="pl-kos">)</span><span class="pl-kos">)</span><span class="pl-kos">{</span>
+    <span class="pl-s1">ws</span><span class="pl-kos">.</span><span class="pl-en">close</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+    <span class="pl-kos">}</span>
+    <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-c1">5</span><span class="pl-kos">)</span>
+    <span class="pl-kos">}</span><span class="pl-kos">)</span>
+    <span class="pl-kos">.</span><span class="pl-en">onAfterHandle</span><span class="pl-kos">(</span><span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+        <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-s">'3'</span><span class="pl-kos">)</span>
+    <span class="pl-kos">}</span><span class="pl-kos">)</span>
+    <span class="pl-kos">.</span><span class="pl-en">onAfterHandler</span><span class="pl-kos">(</span><span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-c1">4</span><span class="pl-kos">)</span><span class="pl-kos">)</span>
+    <span class="pl-kos">.</span><span class="pl-c1">handler</span><span class="pl-kos">(</span><span class="pl-s">'/newalert'</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s">'hi'</span><span class="pl-kos">,</span> <span class="pl-kos">{</span>
+        <span class="pl-en">beforeHandle</span><span class="pl-kos">(</span><span class="pl-kos">{</span>authToken<span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-kos">{</span>
+            <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-s">'2'</span><span class="pl-kos">)</span>
+	    <span class="pl-k">return</span> <span class="pl-kos">{</span>
+     		<span class="pl-c1">userId</span>: <span class="pl-en">getUserIdFromAuthToken</span><span class="pl-kos">(</span><span class="pl-s1">authToken</span><span class="pl-kos">)</span>
+	    <span class="pl-kos">}</span>
+        <span class="pl-kos">}</span><span class="pl-kos">,</span>
+	<span class="pl-c1">beforeHandle</span><span class="pl-kos">(</span><span class="pl-kos">{</span><span class="pl-c1">userId</span> <span class="pl-c">/*<span class="pl-smi"> *note that the above handler only defines the userId so we wont have access to anything else/</span>} =&gt; {</span>
+<span class="pl-c"> 		console.log("18")</span>
+<span class="pl-c">   		return {</span>
+<span class="pl-c">     			user: User.new(userId)</span>
+<span class="pl-c">		}</span>
+<span class="pl-c">	})</span>
+<span class="pl-c">	handler: ({user} /* note it only has access to user nothing else*/</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">user</span><span class="pl-kos">.</span><span class="pl-s1">alert</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">;</span><span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-s1">log</span><span class="pl-kos">(</span><span class="pl-s">"10"</span><span class="pl-kos">)</span><span class="pl-kos">;</span> <span class="pl-k">return</span> <span class="pl-kos">{</span><span class="pl-c1">koko</span>: <span class="pl-en">generateRequestMetadataForLog</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">,</span> <span class="pl-c1">kuku</span>: <span class="pl-s">""</span><span class="pl-kos">}</span><span class="pl-kos">,</span>
+ 	<span class="pl-s1">afterHandle</span>: <span class="pl-kos">(</span><span class="pl-s1">msg</span><span class="pl-kos">,</span> <span class="pl-kos">{</span>koko<span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+  	<span class="pl-c1">const</span> <span class="pl-s1">logResult</span> <span class="pl-c1">=</span> <span class="pl-s1">log</span><span class="pl-kos">(</span><span class="pl-s1">koko</span><span class="pl-kos">)</span>
+  	<span class="pl-c1">console</span><span class="pl-kos">.</span><span class="pl-s1">log</span><span class="pl-kos">(</span><span class="pl-c1">8</span><span class="pl-kos">)</span>
+	<span class="pl-c1">return</span> <span class="pl-kos">{</span>
+ 		...<span class="pl-s1">msg</span><span class="pl-kos">,</span> 
+   		<span class="pl-c1">logResult</span>
+		<span class="pl-kos">}</span>
+ 	<span class="pl-kos">}</span>
+    <span class="pl-kos">}</span><span class="pl-kos">)</span><span class="pl-kos">.</span>
+    <span class="pl-s1">afterHandle</span><span class="pl-kos">(</span><span class="pl-kos">{</span>logResult<span class="pl-kos">}</span> <span class="pl-c1">=</span><span class="pl-c1">&gt;</span> <span class="pl-kos">{</span>
+    <span class="pl-en">if</span><span class="pl-kos">(</span><span class="pl-s1">logResult</span><span class="pl-kos">)</span><span class="pl-kos">{</span>
+    <span class="pl-c">// do something you got the point </span>
+    <span class="pl-kos">}</span>
+    <span class="pl-kos">}</span><span class="pl-kos">)</span>
+    <span class="pl-kos">.</span><span class="pl-en">listen</span><span class="pl-kos">(</span><span class="pl-c1">3000</span><span class="pl-kos">)</span>
+
+<span class="pl-v">Console</span> <span class="pl-s1">should</span> <span class="pl-s1">log</span> <span class="pl-s1">the</span> <span class="pl-s1">following</span><span class="pl-c1"></span>:
+<span class="pl-c">// finish this example</span>
+<span class="pl-c1">1</span>
+<span class="pl-c1">5</span>
+<span class="pl-c1">2</span>
+<span class="pl-c1">3</span>
+<span class="pl-c1">4</span></pre></div>
+<h5>Sender</h5>
+<p>To avoid redudndancy and code duplication you can hook into the luifecycle of requests into the sender (e.g. the sender from the <code class="notranslate">ws</code> object provided in the context) to not just the server since logically a websocket is split into a listener and a sender on both sides and they both expose hooks</p>
+<h6>beforeSend</h6>
+<p>in the client this hook is ran before sending the data, for example every message needs to have an id in it so you either do</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-s1">clientBuilder</span><span class="pl-kos">.</span><span class="pl-en">generateClient</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">map</span><span class="pl-kos">(</span><span class="pl-s1">a</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+  <span class="pl-s1">a</span><span class="pl-kos">.</span><span class="pl-c1">train</span><span class="pl-kos">.</span><span class="pl-en">sendalert</span><span class="pl-kos">(</span><span class="pl-kos">{</span>...<span class="pl-s1">rest_of_data</span><span class="pl-kos">,</span> <span class="pl-c1">id</span>: <span class="pl-s1">id</span><span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-s1">a</span> <span class="pl-s1">bit</span> <span class="pl-s1">redundant</span> 
+  <span class="pl-s1">a</span><span class="pl-kos">.</span><span class="pl-c1">train</span><span class="pl-kos">.</span><span class="pl-en">sendMessage</span><span class="pl-kos">(</span><span class="pl-kos">{</span>...<span class="pl-kos">.</span><span class="pl-s1">rest_of_the_data</span><span class="pl-kos">,</span> <span class="pl-c1">id</span>: <span class="pl-s1">id</span><span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-s1">a</span> <span class="pl-s1">bit</span> <span class="pl-s1">redundant</span> 
+<span class="pl-kos">}</span><span class="pl-kos">)</span>
+
+<span class="pl-c">//  or you do </span>
+
+<span class="pl-s1">clientBuilder</span><span class="pl-kos">.</span><span class="pl-en">generateClient</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+<span class="pl-en">beforeSend</span>: <span class="pl-s1">msg</span> <span class="pl-c1">=&gt;</span>  <span class="pl-kos">{</span>...<span class="pl-s1">msg</span><span class="pl-kos">,</span> <span class="pl-c1">id</span>: <span class="pl-en">getID</span><span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c">/* yes you add it  */</span> <span class="pl-kos">}</span>
+<span class="pl-kos">}</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">map</span><span class="pl-kos">(</span><span class="pl-s1">a</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+<span class="pl-s1">a</span><span class="pl-kos">.</span><span class="pl-c1">train</span><span class="pl-kos">.</span><span class="pl-en">sendalert</span><span class="pl-kos">(</span><span class="pl-s1">data</span><span class="pl-kos">)</span>
+<span class="pl-s1">a</span><span class="pl-kos">.</span><span class="pl-c1">train</span><span class="pl-kos">.</span><span class="pl-en">sendMessage</span><span class="pl-kos">(</span><span class="pl-s1">data</span><span class="pl-kos">)</span>
+<span class="pl-kos">}</span><span class="pl-kos">)</span>
+
+
+<span class="pl-c">// it also works like that with creating a server </span>
+
+<span class="pl-s1">definition</span> <span class="pl-c">// this modifies the sender field of the `ws` object provided to you in the starting point of a message </span>
+<span class="pl-kos">.</span><span class="pl-en">add</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+<span class="pl-en">beforeSend</span>: <span class="pl-s1">msg</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">msg</span><span class="pl-kos">.</span><span class="pl-c1">payload</span> <span class="pl-c1">=</span> <span class="pl-kos">{</span>...<span class="pl-s1">msg</span><span class="pl-kos">.</span><span class="pl-c1">payload</span><span class="pl-kos">,</span> <span class="pl-c1">id</span>: <span class="pl-en">getID</span><span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-kos">}</span>
+<span class="pl-kos">}</span><span class="pl-kos">)</span><span class="pl-kos">.</span>
+<span class="pl-en">implement</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+	<span class="pl-en">onNewAlert</span>: <span class="pl-kos">(</span><span class="pl-kos">{</span>ws<span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">ws</span><span class="pl-kos">.</span><span class="pl-en">send</span><span class="pl-kos">(</span><span class="pl-kos">{</span><span class="pl-c1">msg</span>: <span class="pl-s">"hi"</span><span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c">// before send will automatically add id to this</span>
+<span class="pl-kos">}</span><span class="pl-kos">)</span></pre></div>
+<h6>afterSend</h6>
+<p>runs after each sent message</p>
+<p><em>NOTE</em> since hooks can be global or local here you can too provide a hook only to a group of the handlers,<br>
+for example</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-s1">definition</span><span class="pl-kos">.</span><span class="pl-en">add</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+  <span class="pl-c1">local</span>: <span class="pl-kos">{</span>
+    <span class="pl-c1">auth</span>: <span class="pl-kos">{</span>
+      <span class="pl-c">/// your hooks </span>
+    <span class="pl-kos">}</span> <span class="pl-c">// here you will get intellisense with all the channels you can send messages to </span>
+  <span class="pl-kos">}</span>
+<span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c">// the method is overloaded</span></pre></div>
+<h5>Listener</h5>
+<h6>onError</h6>
+<p>runs whenever an exception is thrown in a beforeHandler, handler or afterHandler</p>
+<p>the context which the global onError recieves is both the original Error and the mapped result (this is the same behaviour as every other local to global e.g. every global counterpart of the local one recieves the context that the first handler of the chain got and the result of the last mapped one )</p>
+<p>To perform linear regression on the given data and make predictions, we can use a simple code implementation in Python. The approach involves calculating the linear regression parameters (slope and intercept) from the data using formulae and then using these parameters to make predictions.</p>
+<p>Here's a function that accomplishes this:</p>
+<div class="highlight highlight-source-python"><pre class="notranslate"><span class="pl-k">def</span> <span class="pl-en">linear_regression</span>(<span class="pl-s1">relation</span>, <span class="pl-s1">input_column</span>, <span class="pl-s1">output_column</span>, <span class="pl-s1">input_value</span>):
+    <span class="pl-c"># Calculate the averages of input and output columns</span>
+    <span class="pl-s1">n</span> <span class="pl-c1">=</span> <span class="pl-en">len</span>(<span class="pl-s1">relation</span>)
+    <span class="pl-s1">sum_x</span> <span class="pl-c1">=</span> <span class="pl-en">sum</span>(<span class="pl-s1">item</span>[<span class="pl-s1">input_column</span>] <span class="pl-k">for</span> <span class="pl-s1">item</span> <span class="pl-c1">in</span> <span class="pl-s1">relation</span>)
+    <span class="pl-s1">sum_y</span> <span class="pl-c1">=</span> <span class="pl-en">sum</span>(<span class="pl-s1">item</span>[<span class="pl-s1">output_column</span>] <span class="pl-k">for</span> <span class="pl-s1">item</span> <span class="pl-c1">in</span> <span class="pl-s1">relation</span>)
+    <span class="pl-s1">avg_x</span> <span class="pl-c1">=</span> <span class="pl-s1">sum_x</span> <span class="pl-c1">/</span> <span class="pl-s1">n</span>
+    <span class="pl-s1">avg_y</span> <span class="pl-c1">=</span> <span class="pl-s1">sum_y</span> <span class="pl-c1">/</span> <span class="pl-s1">n</span>
+
+    <span class="pl-c"># Calculate the slope (m) and intercept (b) for the line y = mx + b</span>
+    <span class="pl-s1">sum_xy</span> <span class="pl-c1">=</span> <span class="pl-en">sum</span>(<span class="pl-s1">item</span>[<span class="pl-s1">input_column</span>] <span class="pl-c1">*</span> <span class="pl-s1">item</span>[<span class="pl-s1">output_column</span>] <span class="pl-k">for</span> <span class="pl-s1">item</span> <span class="pl-c1">in</span> <span class="pl-s1">relation</span>)
+    <span class="pl-s1">sum_xx</span> <span class="pl-c1">=</span> <span class="pl-en">sum</span>(<span class="pl-s1">item</span>[<span class="pl-s1">input_column</span>] <span class="pl-c1">**</span> <span class="pl-c1">2</span> <span class="pl-k">for</span> <span class="pl-s1">item</span> <span class="pl-c1">in</span> <span class="pl-s1">relation</span>)
+
+    <span class="pl-c"># Using the formula: slope (m) = Σ((x - x̄)(y - ȳ)) / Σ((x - x̄)²)</span>
+    <span class="pl-s1">slope</span> <span class="pl-c1">=</span> (<span class="pl-s1">sum_xy</span> <span class="pl-c1">-</span> <span class="pl-s1">n</span> <span class="pl-c1">*</span> <span class="pl-s1">avg_x</span> <span class="pl-c1">*</span> <span class="pl-s1">avg_y</span>) <span class="pl-c1">/</span> (<span class="pl-s1">sum_xx</span> <span class="pl-c1">-</span> <span class="pl-s1">n</span> <span class="pl-c1">*</span> <span class="pl-s1">avg_x</span> <span class="pl-c1">**</span> <span class="pl-c1">2</span>)
+
+    <span class="pl-c"># Using the formula: intercept (b) = ȳ - m * x̄</span>
+    <span class="pl-s1">intercept</span> <span class="pl-c1">=</span> <span class="pl-s1">avg_y</span> <span class="pl-c1">-</span> <span class="pl-s1">slope</span> <span class="pl-c1">*</span> <span class="pl-s1">avg_x</span>
+
+    <span class="pl-c"># Calculate the predicted value using the line equation: y = mx + b</span>
+    <span class="pl-s1">prediction</span> <span class="pl-c1">=</span> <span class="pl-s1">slope</span> <span class="pl-c1">*</span> <span class="pl-s1">input_value</span> <span class="pl-c1">+</span> <span class="pl-s1">intercept</span>
+    
+    <span class="pl-k">return</span> <span class="pl-s1">prediction</span>
+
+<span class="pl-c"># Example usage</span>
+<span class="pl-s1">relation</span> <span class="pl-c1">=</span> [
+    {<span class="pl-s">"x"</span>: <span class="pl-c1">1</span>, <span class="pl-s">"y"</span>: <span class="pl-c1">2</span>},
+    {<span class="pl-s">"x"</span>: <span class="pl-c1">2</span>, <span class="pl-s">"y"</span>: <span class="pl-c1">4</span>},
+    {<span class="pl-s">"x"</span>: <span class="pl-c1">3</span>, <span class="pl-s">"y"</span>: <span class="pl-c1">6</span>}
+]
+<span class="pl-s1">input_column</span> <span class="pl-c1">=</span> <span class="pl-s">"x"</span>
+<span class="pl-s1">output_column</span> <span class="pl-c1">=</span> <span class="pl-s">"y"</span>
+<span class="pl-s1">input_value</span> <span class="pl-c1">=</span> <span class="pl-c1">4</span>
+
+<span class="pl-s1">predicted_value</span> <span class="pl-c1">=</span> <span class="pl-en">linear_regression</span>(<span class="pl-s1">relation</span>, <span class="pl-s1">input_column</span>, <span class="pl-s1">output_column</span>, <span class="pl-s1">input_value</span>)
+<span class="pl-en">print</span>(<span class="pl-s">f"Predicted value for <span class="pl-s1"><span class="pl-kos">{</span><span class="pl-s1">output_column</span><span class="pl-kos">}</span></span> when <span class="pl-s1"><span class="pl-kos">{</span><span class="pl-s1">input_column</span><span class="pl-kos">}</span></span> is <span class="pl-s1"><span class="pl-kos">{</span><span class="pl-s1">input_value</span><span class="pl-kos">}</span></span>: <span class="pl-s1"><span class="pl-kos">{</span><span class="pl-s1">predicted_value</span><span class="pl-kos">}</span></span>"</span>)</pre></div>
+<p>This code computes the slope and intercept of the line of best fit for the provided data, and then it uses these to predict the <code class="notranslate">output_column</code> value corresponding to the given <code class="notranslate">input_value</code>.</p>
+<p>Remember to adjust your environment to run the code by installing any required libraries if using a more advanced version, or make necessary adjustments if integrating into a larger system.</p>
+<h6>beforeHandle</h6>
+<p>in this listener hook you can transform the data before it arriving to your handler</p>
+<p>Imagine you want to create a user class from the id you recieve from a message so without it you would need to do it like this</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-en">clientBuilder</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">generateListener</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">add</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+<span class="pl-en">onNewAlert</span>: <span class="pl-s1">msg</span> <span class="pl-c1">=&gt;</span> <span class="pl-v">User</span><span class="pl-kos">.</span><span class="pl-en">new</span><span class="pl-kos">(</span><span class="pl-s1">msg</span><span class="pl-kos">.</span><span class="pl-c1">payload</span><span class="pl-kos">.</span><span class="pl-c1">id</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">alert</span><span class="pl-kos">(</span><span class="pl-s">"hihi"</span><span class="pl-kos">)</span><span class="pl-kos">,</span>
+<span class="pl-en">onNewMessage</span>: <span class="pl-s1">msg</span> <span class="pl-c1">=&gt;</span> <span class="pl-v">User</span><span class="pl-kos">.</span><span class="pl-en">new</span><span class="pl-kos">(</span><span class="pl-s1">msg</span><span class="pl-kos">.</span><span class="pl-c1">payload</span><span class="pl-kos">.</span><span class="pl-c1">id</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">message</span><span class="pl-kos">(</span><span class="pl-s">"hihi"</span><span class="pl-kos">)</span>
+<span class="pl-kos">}</span><span class="pl-kos">)</span>
+
+<span class="pl-c">// and with it you would do </span>
+
+
+<span class="pl-en">clientBuilder</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">generateListener</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">beforeHandle</span><span class="pl-kos">(</span><span class="pl-s1">msg</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>...<span class="pl-s1">msg</span><span class="pl-kos">,</span> <span class="pl-c1">user</span>: <span class="pl-v">User</span> <span class="pl-c">/*yes you can add properties directly to the message that didnt exist before*/</span><span class="pl-kos"></span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">add</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+<span class="pl-en">onNewAlert</span>: <span class="pl-kos">(</span><span class="pl-kos">{</span>user<span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">user</span><span class="pl-kos">.</span><span class="pl-en">alert</span><span class="pl-kos">(</span><span class="pl-s">"hihi"</span><span class="pl-kos">)</span><span class="pl-kos">,</span>
+<span class="pl-en">onNewMessage</span>: <span class="pl-kos">(</span><span class="pl-kos">{</span>user<span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">user</span><span class="pl-kos">.</span><span class="pl-en">message</span><span class="pl-kos">(</span><span class="pl-s">"jihi"</span><span class="pl-kos">)</span>
+<span class="pl-kos">}</span><span class="pl-kos">)</span></pre></div>
+<p>Another use case is to use it for custom parsing for example there is a text format we dont support in our builtin parse hook (which is a wrapper around onBeforeRequest)</p>
+<h6>parse</h6>
+<p>although there is nothing stopping you from using this in a afterHandle stack it is not useful to use it and it will cause bugs probably</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-kos">.</span><span class="pl-en">parse</span><span class="pl-kos">(</span><span class="pl-s">"json"</span> <span class="pl-c1">|</span> <span class="pl-s">"yml"</span><span class="pl-kos">)</span></pre></div>
+<h6>guard</h6>
+<p>this is a type of beforeHandle which checks if an object has the properties of the schema inside guard and if not it runs a handler, if the handler is left omitted it refuses the connection by default (a reminder it is kept in the same stack as all other beforeHandles)</p>
+<p>example</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-c">///rest of the code</span>
+<span class="pl-kos">.</span><span class="pl-en">guard</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+<span class="pl-c1">id</span>: <span class="pl-s1">z</span><span class="pl-kos">.</span><span class="pl-en">sttring</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">}</span><span class="pl-kos">,</span>
+<span class="pl-kos">(</span><span class="pl-s1">ws</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span> <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">lof</span><span class="pl-kos">(</span><span class="pl-s">"sus user"</span><span class="pl-kos">)</span> <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c">// here we define a handler to run when the validation fails, note that if a guard fails all the hooks after it (beforeHandle ordered, the handler, after Handle ordered hooks). However hooks like afterHandle will be ran since they are ran after every request (this could change in future iterations) </span>
+</pre></div>
+<h6>match</h6>
+<p>this is a tyope of beforeHandle which checks if a entity is of this type it works like guard but instead of checking if a value is there it also checks for differences and if they differ it triggers the handler which by def is to close the connection. Regarding to behaviour and failure 9it is the same as <code class="notranslate">guard</code></p>
+<h6>transform</h6>
+<p>a type of beforeHandle which gets the current body and transofrm it into something else<br>
+<em>Note</em> that depending in the placement it can before a validator or after one and so it can serve different usecases (either make every request compliant if it before or transform a validated request into something more useful)<br>
+<em>Note</em> : this hook is just a basic hook handler wrapper which enforces you to return something (by something we mean different from <code class="notranslate">END</code> too)</p>
+<h3>Overriding order</h3>
+<p>since every hook needs to be given a unique id this opens the gate to overrding order</p>
+<p>For example</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-kos">.</span><span class="pl-en">guard</span><span class="pl-kos">(</span><span class="pl-s">"1"</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-c1">0</span><span class="pl-kos">)</span><span class="pl-kos">)</span>
+<span class="pl-kos">.</span><span class="pl-en">guard</span><span class="pl-kos">(</span><span class="pl-s">"2"</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span><span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-c1">1</span><span class="pl-kos">)</span><span class="pl-kos">}</span><span class="pl-kos">)</span>
+<span class="pl-kos">.</span><span class="pl-en">before</span><span class="pl-kos">(</span><span class="pl-s">"2"</span> <span class="pl-c">/* no it is typesafe so dont worry */</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+<span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-c1">2</span><span class="pl-kos">)</span><span class="pl-kos">}</span><span class="pl-kos">)</span></pre></div>
+<p>v</p>
+<p>will result into</p>
+<pre class="notranslate"><code class="notranslate">0
+2
+1
+</code></pre>
+<p>this is helpful if you use a middleware which applies some kind of hook and you want to be before it you can do it like this and not needing to edit the library, To understand this better since the example is not that good imagine this middleware which comes from a node package (e,g, it is not a good idea to edit it)</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-c">// lib code</span>
+<span class="pl-k">const</span> <span class="pl-s1">ingMiddleware</span>  <span class="pl-c1">=</span> <span class="pl-s1">app</span><span class="pl-kos">.</span><span class="pl-en">validate</span><span class="pl-kos">(</span><span class="pl-s">"8998"</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">validate</span><span class="pl-kos">(</span><span class="pl-s">"8998"</span><span class="pl-kos">)</span>
+
+<span class="pl-c">// your code</span>
+
+<span class="pl-s1">app2</span><span class="pl-kos">.</span><span class="pl-en">use</span><span class="pl-kos">(</span><span class="pl-s1">ingMidlleware</span><span class="pl-kos">)</span></pre></div>
+<p>and you want to do somethign before omnimaning but after jaking you can do it like this</p>
+<p>app.before("omnimaning", { // yeah you can define multiple handlers like that too<br>
+() =&gt; {},<br>
+() =&gt; {}<br>
+})</p>
+<p>there is also after hook which works exaclty as you think it would</p>
+<h5>afterHandle</h5>
+<p>it is exexcuted after you handler and it is useful for common scenarios, for example you have two handlers and after they are done each of them needs to do the same thing.</p>
+<p>Whe  used in normal http api you have access to the response object before it is being sent so you can use it to modify the request before it is sent. For example you do an operation on the backend and if the operation was succefull you refresh the user token</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-en">handle</span><span class="pl-kos">(</span><span class="pl-s">"/do-something"</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-s1">req</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+	
+	<span class="pl-k">const</span> <span class="pl-s1">result</span> <span class="pl-c1">=</span> <span class="pl-en">trySomething</span><span class="pl-kos">(</span><span class="pl-s">""</span><span class="pl-kos">)</span>
+	<span class="pl-k">return</span> <span class="pl-kos">{</span>
+		<span class="pl-c1">wasSuccesful</span>: <span class="pl-s1">result</span><span class="pl-kos">.</span><span class="pl-c1">success</span>
+	<span class="pl-kos">}</span>
+
+<span class="pl-kos">}</span><span class="pl-kos">)</span>
+<span class="pl-en">handle</span><span class="pl-kos">(</span><span class="pl-s">"do-anotherthing"</span><span class="pl-kos">,</span> <span class="pl-s1">req</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+
+		<span class="pl-k">const</span> <span class="pl-s1">result</span> <span class="pl-c1">=</span> <span class="pl-en">tryAnotherThing</span><span class="pl-kos">(</span><span class="pl-s">""</span><span class="pl-kos">)</span>
+		<span class="pl-k">return</span> <span class="pl-kos">{</span>
+			<span class="pl-c1">wasSuccesful</span>: <span class="pl-s1">result</span><span class="pl-kos">.</span><span class="pl-c1">success</span>
+		<span class="pl-kos">}</span>
+	<span class="pl-kos">}</span>
+<span class="pl-kos">)</span>
+<span class="pl-en">afterHandle</span><span class="pl-kos">(</span><span class="pl-s1">req</span><span class="pl-kos">,</span> <span class="pl-s1">res</span><span class="pl-kos">)</span> <span class="pl-c1">=</span><span class="pl-c1">&gt;</span> <span class="pl-kos">{</span>
+
+	<span class="pl-en">if</span><span class="pl-kos">(</span><span class="pl-s1">res</span><span class="pl-kos">.</span><span class="pl-c1">wasSuucefull</span><span class="pl-kos">)</span><span class="pl-kos">{</span>
+		<span class="pl-s1">res</span><span class="pl-kos">.</span><span class="pl-c1">headers</span><span class="pl-kos">.</span><span class="pl-c1">newToken</span> <span class="pl-c1">=</span> <span class="pl-en">genToken</span><span class="pl-kos">(</span><span class="pl-s1">req</span><span class="pl-kos">.</span><span class="pl-c1">userId</span><span class="pl-kos">)</span> <span class="pl-c">// yes you get access to the request that the handker 			recieved too</span>
+	<span class="pl-kos">}</span>
+<span class="pl-kos">}</span>
+
+<span class="pl-kos">}</span></pre></div>
+<p>without this you would have needed to do either do the logic in the two routes seperately ir to wrap them both in a function.  Think of this like a middleware you can put after requests not before them</p>
+<h5>Using subrouters for conditional hooks</h5>
+<p>if you apply hooks to a prefixed app or to a certain channel definer they will become local instead if explicitely overriden</p>
+<h5>ordered vs unordered hooks</h5>
+<h6>Unordered</h6>
+<p>the result of the first is not pssed to the second so you dont have to comply with the result expected by a hook or the modification of the context passed instead all of them recieve the first context of the step. These are good for things which should get the primordial (find a better word next time) context and dont need to moidfy it so they shouldnt need to compily with other hooks before and after them (for example a request kogger is preferably to be here)</p>
+<h6>Ordered</h6>
+<p>the result of the first is pssed as the result to the second so this allows for some complex typesafe pipelies</p>
+<h6>5pecyfying place</h6>
+<p>by default hooks are <code class="notranslate">ordered</code> unless explicitely passing a flag</p>
+<h3>Utils</h3>
+<p>although our core was to simplify the development of websockets we also went our way to define some systems which might not be making building websocket system easier directly we made some utilities which help in day to day writing of logic inside websockets</p>
+<h4></h4>
+<h4>safe envs</h4>
+<p>we have added a package which provides a type safe way to refrnce envs and also enables you to define custom getters</p>
+<h4>Building on top of openapi</h4>
+<p>Openapi is great but i think it can be improved so i extended the openapi schema that way existing tooling can still use the definitions it just wont show/use the extra</p>
+<h4>Pseudo open api</h4>
+<p>we call it that since it is openapi but without the full path names but instead relative to the router</p>
+<p>it can be accessed by visting <code class="notranslate">{routerpath}/opeapi</code></p>
+<p>for the websockes its still there but under async api</p>
+<div class="highlight highlight-source-yaml"><pre class="notranslate"><span class="pl-ent">asyncapi</span>: <span class="pl-s"><span class="pl-pds">'</span>2.6.0<span class="pl-pds">'</span></span>
+<span class="pl-ent">info</span>:
+  <span class="pl-ent">title</span>: <span class="pl-s">Notification Service</span>
+  <span class="pl-ent">version</span>: <span class="pl-s"><span class="pl-pds">'</span>1.0.0<span class="pl-pds">'</span></span>
+  <span class="pl-ent">description</span>: <span class="pl-s">Sends notifications to users via a message broker.</span>
+  <span class="pl-ent">contact</span>:
+    <span class="pl-ent">name</span>: <span class="pl-s">API Support</span>
+    <span class="pl-ent">email</span>: <span class="pl-s">support@example.com</span>
+
+<span class="pl-ent">servers</span>:
+  <span class="pl-ent">production</span>:
+    <span class="pl-ent">url</span>: <span class="pl-s">mqtt://broker.example.com</span>
+    <span class="pl-ent">protocol</span>: <span class="pl-s">mqtt</span>
+    <span class="pl-ent">description</span>: <span class="pl-s">Production MQTT broker</span>
+
+<span class="pl-ent">channels</span>:
+  <span class="pl-ent">user/notifications</span>:
+    <span class="pl-ent">description</span>: <span class="pl-s">Channel for sending user notifications</span>
+    <span class="pl-ent">publish</span>:
+      <span class="pl-ent">summary</span>: <span class="pl-s">Send a notification</span>
+      <span class="pl-ent">operationId</span>: <span class="pl-s">sendNotification</span>
+      <span class="pl-ent">message</span>:
+        <span class="pl-ent">contentType</span>: <span class="pl-s">application/json</span>
+        <span class="pl-ent">name</span>: <span class="pl-s">UserNotification</span>
+        <span class="pl-ent">payload</span>:
+          <span class="pl-ent">type</span>: <span class="pl-s">object</span>
+          <span class="pl-ent">properties</span>:
+            <span class="pl-ent">userId</span>:
+              <span class="pl-ent">type</span>: <span class="pl-s">string</span>
+              <span class="pl-ent">format</span>: <span class="pl-s">uuid</span>
+            <span class="pl-ent">message</span>:
+              <span class="pl-ent">type</span>: <span class="pl-s">string</span>
+            <span class="pl-ent">timestamp</span>:
+              <span class="pl-ent">type</span>: <span class="pl-s">string</span>
+              <span class="pl-ent">format</span>: <span class="pl-s">date-time</span>
+          <span class="pl-ent">required</span>: <span class="pl-s">[userId, message, timestamp]</span>
+
+<span class="pl-ent">components</span>:
+  <span class="pl-ent">messages</span>:
+    <span class="pl-ent">UserNotification</span>:
+      <span class="pl-ent">name</span>: <span class="pl-s">UserNotification</span>
+      <span class="pl-ent">title</span>: <span class="pl-s">Notification for user</span>
+      <span class="pl-ent">payload</span>:
+        <span class="pl-ent">$ref</span>: <span class="pl-s"><span class="pl-pds">'</span>#/channels/user~1notifications/publish/message/payload<span class="pl-pds">'</span></span>
+
+<span class="pl-ent">tags</span>:
+  - <span class="pl-ent">name</span>: <span class="pl-s">messaging</span>
+    <span class="pl-ent">description</span>: <span class="pl-s">All messaging-related operations</span></pre></div>
+<h3>full openapi</h3>
+<p>it is not really full opneapi but it can be if you start it from the root from the project</p>
+<p>using the createSubrouter you share the openapi spec to children so the root router will have access to the full strcutre</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-k">const</span> <span class="pl-s1">app</span> <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">App</span><span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-c">// the context is shared too</span>
+
+
+
+<span class="pl-k">const</span> <span class="pl-s1">hhRouter</span> <span class="pl-c1">=</span> <span class="pl-s1">app</span><span class="pl-kos">.</span><span class="pl-en">createSubrouter</span><span class="pl-kos">(</span><span class="pl-s">"hhh"</span><span class="pl-kos">,</span><span class="pl-kos">{</span><span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c">//</span>
+
+
+<span class="pl-k">const</span> <span class="pl-s1">child</span> <span class="pl-c1">=</span> <span class="pl-s1">hhRouter</span><span class="pl-kos">.</span><span class="pl-en">createSubrouter</span><span class="pl-kos">(</span>...<span class="pl-kos">)</span> <span class="pl-c">// app has access to the openapi spec of the childSpec</span></pre></div>
+<h2>Custom client</h2>
+<p>ALthough openapi is great you need to manually genrate a cleint and yeah you could use a lin=brary but then you need to automate the genration on every new change, well we did just that we provide a client for you in an <code class="notranslate">RPC</code> like manner</p>
+<h2>Built ins</h2>
+<p>Since this is an opiniated lib on top of express we have prrovided soime builtin things which you could need</p>
+<h3>file handler</h3>
+<p>since by default express does not have a file processing capabilities we have set up one (our choise is <a href="https://www.npmjs.com/package/multer" rel="nofollow">multer</a>)</p>
+<h1>Express plug and play</h1>
+<p>We have essentially made some heplful wrappers around express but at the core an app is just an <code class="notranslate">express Router</code> so if you have an existing express server and you dont want to rewrite you can just do the follwong</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-c">// for full examples check examples</span>
+
+
+<span class="pl-c">// your exusting express code</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">app2</span> <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">WebSExpress</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+
+<span class="pl-s1">app</span><span class="pl-kos">.</span><span class="pl-en">use</span><span class="pl-kos">(</span><span class="pl-s1">app2</span><span class="pl-kos">.</span><span class="pl-en">getRouter</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">)</span></pre></div>
+<hr>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-k">const</span> <span class="pl-s1">store</span>
+ <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">App</span> 
+<span class="pl-kos">(</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">state</span>
+<span class="pl-kos">(</span><span class="pl-kos">{</span> <span class="pl-c1">visitor</span>
+: <span class="pl-c1">0</span> <span class="pl-kos">}</span><span class="pl-kos">)</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">router</span>
+ <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">App</span>
+<span class="pl-kos">(</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">use</span>
+<span class="pl-kos">(</span><span class="pl-s1">store</span>
+<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">get</span>
+<span class="pl-kos">(</span><span class="pl-s">'/increase'</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">{</span> store
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">store</span>
+<span class="pl-kos">.</span><span class="pl-c1">visitor</span>
+<span class="pl-c1">++</span><span class="pl-kos">)</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">app</span>
+ <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">App</span> 
+<span class="pl-kos">(</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">use</span>
+<span class="pl-kos">(</span><span class="pl-s1">router</span>
+<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">get</span>
+<span class="pl-kos">(</span><span class="pl-s">'/'</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">{</span> store
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">store</span>
+<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">listen</span>
+<span class="pl-kos">(</span><span class="pl-c1">3000</span><span class="pl-kos">)</span>
+
+<span class="pl-v">This</span> <span class="pl-s1">force</span> <span class="pl-s1">you</span> <span class="pl-s1">to</span> <span class="pl-k">break</span> <span class="pl-s1">down</span> <span class="pl-s1">your</span> <span class="pl-s1">application</span> <span class="pl-s1">into</span> small<span class="pl-kos"></span> <span class="pl-s1">pieces</span><span class="pl-kos">,</span> <span class="pl-s1">making</span> <span class="pl-s1">it</span> <span class="pl-s1">to</span> <span class="pl-s1">add</span> <span class="pl-s1">or</span> <span class="pl-s1">remove</span> <span class="pl-s1">features</span> <span class="pl-s1">easily</span><span class="pl-kos">.</span>
+
+<span class="pl-c1">By</span> <span class="pl-s1">default</span><span class="pl-kos">,</span> <span class="pl-s1">event</span><span class="pl-c1">/</span><span class="pl-s1">life</span><span class="pl-c1">-</span><span class="pl-s1">cycle</span> <span class="pl-k">in</span> <span class="pl-s1">each</span> <span class="pl-s1">instance</span> is <span class="pl-s1">isolated</span> <span class="pl-s1">from</span> <span class="pl-s1">each</span> <span class="pl-s1">other</span><span class="pl-kos">.</span>
+
+
+<span class="pl-c1">const</span> <span class="pl-s1">ip</span>
+ <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">App</span> 
+<span class="pl-kos">(</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">derive</span>
+<span class="pl-kos">(</span><span class="pl-kos">(</span><span class="pl-kos">{</span> server
+<span class="pl-kos">,</span> request
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">(</span><span class="pl-kos">{</span>
+		<span class="pl-c1">ip</span>
+: <span class="pl-s1">server</span>
+<span class="pl-kos">?.</span><span class="pl-en">requestIP</span>
+<span class="pl-kos">(</span><span class="pl-s1">request</span>
+<span class="pl-kos">)</span>
+	<span class="pl-kos">}</span><span class="pl-kos">)</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">get</span>
+<span class="pl-kos">(</span><span class="pl-s">'/ip'</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">{</span> ip
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">server</span> <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">App</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">use</span>
+<span class="pl-kos">(</span><span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">get</span>
+<span class="pl-kos">(</span><span class="pl-s">'/ip'</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">{</span> ip <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+<span class="pl-v">Property</span><span class="pl-kos"></span> <span class="pl-s">'ip'</span> <span class="pl-s1">does</span> <span class="pl-s1">not</span> <span class="pl-s1">exist</span> <span class="pl-s1">on</span> <span class="pl-s1">type</span><span class="pl-kos"></span> <span class="pl-s">'{ body: unknown; query: Record&lt;string, string&gt;; params: {}; headers: Record&lt;string, string | undefined&gt;; cookie: Record&lt;string, Cookie&lt;string | undefined&gt;&gt;; ... 8 more ...; error: &lt;const Code extends number | keyof StatusMap, const T = Code extends 100 | ... 58 more ... | 511 ? { ...; }[Code] : Code&gt;(code: Code, res...'</span><span class="pl-kos">.</span>
+	<span class="pl-kos">.</span><span class="pl-en">listen</span>
+<span class="pl-kos">(</span><span class="pl-c1">3000</span><span class="pl-kos">)</span>
+
+<span class="pl-v">In</span> <span class="pl-s1">this</span> <span class="pl-s1">example</span><span class="pl-kos">,</span> <span class="pl-s1">the</span> <span class="pl-s1">ip</span> <span class="pl-s1">property</span> <span class="pl-s1">is</span> <span class="pl-s1">only</span> <span class="pl-s1">share</span> <span class="pl-k">in</span> <span class="pl-s1">it</span>'s own instance but not in the server instance.
+
+<span class="pl-v">To</span> <span class="pl-s1">share</span> <span class="pl-s1">the</span> <span class="pl-s1">lifecycle</span><span class="pl-kos">,</span> <span class="pl-s1">in</span> <span class="pl-s1">our</span> <span class="pl-k">case</span><span class="pl-kos">,</span> <span class="pl-s1">an</span> <span class="pl-s1">ip</span> <span class="pl-s1">property</span> <span class="pl-s1">with</span> <span class="pl-s1">server</span> <span class="pl-s1">instance</span><span class="pl-kos">,</span> <span class="pl-s1">we</span> <span class="pl-s1">need</span> <span class="pl-s1">to</span> <span class="pl-s1">explicitly</span> <span class="pl-s1">says</span> <span class="pl-s1">it</span> <span class="pl-s1">could</span> <span class="pl-s1">be</span> <span class="pl-s1">shared</span><span class="pl-kos">.</span>
+
+
+<span class="pl-c1">const</span> <span class="pl-s1">ip</span>
+ <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">App</span> 
+<span class="pl-kos">(</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">derive</span>
+<span class="pl-kos">(</span>
+		<span class="pl-kos">{</span> <span class="pl-c1">as</span>
+: <span class="pl-s">'global'</span> <span class="pl-kos">}</span><span class="pl-kos">,</span> 
+		<span class="pl-kos">(</span><span class="pl-kos">{</span> server
+<span class="pl-kos">,</span> request
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">(</span><span class="pl-kos">{</span>
+			<span class="pl-c1">ip</span>
+: <span class="pl-s1">server</span>
+<span class="pl-kos">?.</span><span class="pl-en">requestIP</span>
+<span class="pl-kos">(</span><span class="pl-s1">request</span>
+<span class="pl-kos">)</span>
+		<span class="pl-kos">}</span><span class="pl-kos">)</span>
+	<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">get</span>
+<span class="pl-kos">(</span><span class="pl-s">'/ip'</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">{</span> ip
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">server</span>
+ <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">App</span> 
+<span class="pl-kos">(</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">use</span>
+<span class="pl-kos">(</span><span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">get</span>
+<span class="pl-kos">(</span><span class="pl-s">'/ip'</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">{</span> ip
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">listen</span>
+<span class="pl-kos">(</span><span class="pl-c1">3000</span><span class="pl-kos">)</span>
+
+<span class="pl-v">In</span> <span class="pl-s1">this</span> <span class="pl-s1">example</span><span class="pl-kos">,</span> <span class="pl-s1">ip</span> <span class="pl-s1">property</span> is <span class="pl-s1">shared</span> <span class="pl-s1">between</span> <span class="pl-s1">ip</span> <span class="pl-s1">and</span> <span class="pl-s1">server</span> <span class="pl-s1">instance</span> <span class="pl-s1">because</span> <span class="pl-s1">we</span> <span class="pl-s1">define</span> <span class="pl-s1">it</span> <span class="pl-k">as</span> <span class="pl-s1">global</span><span class="pl-kos">.</span>
+
+<span class="pl-c1">This</span> <span class="pl-s1">force</span> <span class="pl-s1">you</span> <span class="pl-s1">to</span> <span class="pl-s1">think</span> <span class="pl-s1">about</span> <span class="pl-s1">the</span> <span class="pl-s1">scope</span> <span class="pl-k">of</span> <span class="pl-s1">each</span> <span class="pl-s1">property</span> <span class="pl-s1">preventing</span> <span class="pl-s1">you</span> <span class="pl-k">from</span> <span class="pl-s1">accidentally</span> <span class="pl-s1">sharing</span> <span class="pl-s1">the</span> <span class="pl-s1">property</span> <span class="pl-s1">between</span> <span class="pl-s1">instances</span><span class="pl-kos">.</span>
+
+<span class="pl-c1">Learn</span> <span class="pl-s1">more</span> <span class="pl-s1">about</span> this <span class="pl-k">in</span> <span class="pl-s1">scope</span><span class="pl-kos">.</span>
+
+<span class="pl-c1">app</span>
+<span class="pl-kos">.</span><span class="pl-en">listen</span>
+<span class="pl-kos">(</span><span class="pl-c1">3000</span><span class="pl-kos">)</span>
+
+
+<span class="pl-v">By</span> <span class="pl-s1">default</span><span class="pl-kos">,</span> <span class="pl-s1">each</span> <span class="pl-s1">instance</span> <span class="pl-s1">will</span> <span class="pl-s1">be</span> <span class="pl-s1">re</span><span class="pl-c1">-</span><span class="pl-s1">execute</span> <span class="pl-s1">everytime</span> <span class="pl-s1">it</span>'s applied to another instance.
+
+<span class="pl-v">This</span> <span class="pl-s1">can</span> <span class="pl-s1">cause</span> <span class="pl-s1">a</span> <span class="pl-s1">duplication</span> <span class="pl-s1">of</span> <span class="pl-s1">the</span> <span class="pl-s1">same</span> <span class="pl-s1">method</span> <span class="pl-s1">being</span> <span class="pl-s1">applied</span> <span class="pl-s1">multiple</span> <span class="pl-s1">times</span> <span class="pl-s1">but</span> <span class="pl-s1">some</span> <span class="pl-s1">methods</span> <span class="pl-s1">should</span> <span class="pl-s1">be</span> <span class="pl-s1">called</span> <span class="pl-s1">once</span> <span class="pl-s1">like</span> <span class="pl-s1">lifecycle</span> <span class="pl-s1">or</span> <span class="pl-s1">routes</span><span class="pl-kos">.</span>
+
+<span class="pl-c1">To</span> <span class="pl-s1">prevent</span> <span class="pl-s1">lifecycle</span> <span class="pl-s1">methods</span> <span class="pl-s1">from</span> <span class="pl-s1">being</span> <span class="pl-s1">duplicated</span><span class="pl-kos">,</span> <span class="pl-s1">we</span> <span class="pl-s1">can</span> <span class="pl-s1">add</span> <span class="pl-s1">an</span> <span class="pl-s1">unique</span> <span class="pl-s1">identifier</span> <span class="pl-s1">to</span> <span class="pl-s1">the</span> <span class="pl-s1">instance</span><span class="pl-kos">.</span>
+
+
+<span class="pl-c1">const</span> <span class="pl-s1">ip</span>
+ <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-s1">app</span> 
+<span class="pl-kos">(</span><span class="pl-kos">{</span> <span class="pl-c1">name</span>
+: <span class="pl-s">'ip'</span> <span class="pl-kos">}</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">derive</span>
+<span class="pl-kos">(</span>
+		<span class="pl-kos">{</span> <span class="pl-c1">as</span>
+: <span class="pl-s">'global'</span> <span class="pl-kos">}</span><span class="pl-kos">,</span>
+		<span class="pl-kos">(</span><span class="pl-kos">{</span> server
+<span class="pl-kos">,</span> request
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">(</span><span class="pl-kos">{</span>
+			<span class="pl-c1">ip</span>
+: <span class="pl-s1">server</span>
+<span class="pl-kos">?.</span><span class="pl-en">requestIP</span>
+<span class="pl-kos">(</span><span class="pl-s1">request</span>
+<span class="pl-kos">)</span>
+		<span class="pl-kos">}</span><span class="pl-kos">)</span>
+	<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">get</span>
+<span class="pl-kos">(</span><span class="pl-s">'/ip'</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">{</span> ip
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">router1</span>
+ <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-s1">app</span> 
+<span class="pl-kos">(</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">use</span>
+<span class="pl-kos">(</span><span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">get</span>
+<span class="pl-kos">(</span><span class="pl-s">'/ip-1'</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">{</span> ip
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">router2</span>
+ <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-s1">app</span>
+<span class="pl-kos">(</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">use</span>
+<span class="pl-kos">(</span><span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">get</span>
+<span class="pl-kos">(</span><span class="pl-s">'/ip-2'</span><span class="pl-kos">,</span> <span class="pl-kos">(</span><span class="pl-kos">{</span> ip
+ <span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-s1">ip</span>
+<span class="pl-kos">)</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">server</span>
+ <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-s1">app</span> 
+<span class="pl-kos">(</span><span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">use</span>
+<span class="pl-kos">(</span><span class="pl-s1">router1</span>
+<span class="pl-kos">)</span>
+	<span class="pl-kos">.</span><span class="pl-en">use</span>
+<span class="pl-kos">(</span><span class="pl-s1">router2</span>
+<span class="pl-kos">)</span>
+
+<span class="pl-v">This</span> <span class="pl-s1">will</span> <span class="pl-s1">prevent</span> <span class="pl-s1">the</span> <span class="pl-s1">ip</span> <span class="pl-s1">property</span> <span class="pl-s1">from</span> <span class="pl-s1">being</span> <span class="pl-s1">call</span> <span class="pl-s1">multiple</span> <span class="pl-s1">time</span> <span class="pl-s1">by</span> <span class="pl-s1">applying</span> <span class="pl-s1">deduplication</span> using <span class="pl-s1">an</span> <span class="pl-s1">unique</span> <span class="pl-s1">name</span><span class="pl-kos">.</span>
+
+
+<span class="pl-c1">Allowing</span> <span class="pl-s1">us</span> <span class="pl-s1">to</span> <span class="pl-s1">reuse</span> <span class="pl-s1">the</span> <span class="pl-s1">same</span> <span class="pl-s1">instance</span> <span class="pl-s1">multiple</span> <span class="pl-s1">time</span> <span class="pl-s1">without</span> <span class="pl-s1">performance</span> <span class="pl-s1">penalty</span><span class="pl-kos">.</span>
+
+<span class="pl-c1">This</span> <span class="pl-s1">forces</span> <span class="pl-s1">you</span> <span class="pl-s1">to</span> <span class="pl-s1">think</span> <span class="pl-s1">about</span> <span class="pl-s1">the</span> <span class="pl-s1">dependency</span> <span class="pl-s1">of</span> <span class="pl-s1">each</span> <span class="pl-s1">instance</span><span class="pl-kos">,</span> <span class="pl-s1">allowing</span> <span class="pl-s1">for</span> <span class="pl-s1">easily</span> <span class="pl-s1">applying</span> <span class="pl-s1">migration</span> <span class="pl-s1">or</span> <span class="pl-s1">refactoring</span><span class="pl-kos">.</span>
+
+<span class="pl-c1">Learn</span> <span class="pl-s1">more</span> <span class="pl-s1">about</span> <span class="pl-smi">this</span> <span class="pl-k">in</span> <span class="pl-s1">plugin</span> <span class="pl-s1">deduplication</span><span class="pl-kos">.</span></pre></div>
+<h2>Defining your request models</h2>
+<p>we use zod for validating requests and generating openapi definitions so you should familiriaze with it (not that its difficult the devs have really made it amazing to work with for new devs )</p>
+<p>Here are some example</p>
+<h2>Optional parameters</h2>
+<p>Note: by default every paramter is required so you need to explicitely make it optional (yeah we decided it like that, yeah we think thts the way, no you dont want otherwise, think of how much of your route handlers will fail if sone parameter you are accessing directly without checking if its really there will fail)</p>
+<p>zod provides three way to make a parameter optional:</p>
+<p>// credits to <a href="https://gist.github.com/ciiqr/ee19e9ff3bb603f8c42b00f5ad8c551e">https://gist.github.com/ciiqr/ee19e9ff3bb603f8c42b00f5ad8c551e</a> for this</p>
+<p>// z.object({<br>
+//     // valid if string or:<br>
+//     optional: z.string().optional(), // field not provided, or explicitly <code class="notranslate">undefined</code><br>
+//     nullable: z.string().nullable(), // field explicitly <code class="notranslate">null</code><br>
+//     nullish: z.string().nullish(), // field not provided, explicitly <code class="notranslate">null</code>, or explicitly <code class="notranslate">undefined</code><br>
+// });</p>
+<p>// type<br>
+// {<br>
+// optional?: string | undefined;<br>
+// nullable: string | null;<br>
+// nullish?: string | null | undefined;<br>
+// }</p>
+<p>however for requests defintions (body, parameters etc...) we recommend not using null since not every language has it and i dont think you can recieve a parameter with value of null. For example if you say a parameter could or could not be there you will do something like this</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-s1">req</span><span class="pl-kos">.</span><span class="pl-c1">body</span><span class="pl-kos">.</span><span class="pl-c1">hhhh</span> <span class="pl-c">// if not there will resolve to undefined and nullable will throw an error since its undefined not null</span></pre></div>
+<h1>aim of the project</h1>
+<ul>
+<li>a lightweight library</li>
+<li>compatilbe with express</li>
+</ul>
+<h2>examples</h2>
+<p>To see example usage and some advanced usage (for example how to use guard so that we ensure all messages from a certain channel return a common subset of properties in a type safe way) go to the guthub page and search for the examples folder (TODO: add github link to the examples)</p>
+<h3>Ensuring we always return as a response from a sender</h3>
+<p>this is how it will work in an http server too</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-s1">app</span><span class="pl-kos">.</span><span class="pl-en">beforeSend</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+  <span class="pl-c1">position</span>: <span class="pl-c1">0</span> <span class="pl-c">// we ensure it is the first after send handler so that we ovverride the type, since the return type of  a send should comply with the ctx type of the first beforeSend, this will also work with after send its just that it the validation here will happen as we are passing the arguements for send instead of getting a runtime error when we try to send, for the http client however it does matter to be before since afterSend will modify the response it recieves,</span>
+  <span class="pl-s1">handler</span>: <span class="pl-s1">guard</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+      <span class="pl-c1">schema</span>: <span class="pl-s1">z</span><span class="pl-kos">.</span><span class="pl-en">object</span><span class="pl-kos">(</span><span class="pl-s1">z</span><span class="pl-kos">.</span><span class="pl-en">any</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">)</span><span class="pl-kos">,</span>
+      <span class="pl-c">// handler is left empty so if it does not match it will close the connectiom</span>
+  <span class="pl-kos">}</span><span class="pl-kos">)</span>
+<span class="pl-kos">}</span><span class="pl-kos">)</span></pre></div>
+<h3>Ensuring we only recieve json messages</h3>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-s1">app</span><span class="pl-kos">.</span><span class="pl-c1">beforeHandle</span><span class="pl-kos">(</span><span class="pl-en">guard</span><span class="pl-kos">(</span><span class="pl-en">parse</span><span class="pl-kos">(</span><span class="pl-s">"json"</span><span class="pl-kos">)</span><span class="pl-kos">)</span></pre></div>
+<h3>having access to all connections in every handler</h3>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-s1">app</span>
+<span class="pl-kos">.</span><span class="pl-en">store</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+  <span class="pl-c1">connections</span>: <span class="pl-k">new</span> <span class="pl-v">Connections</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+<span class="pl-kos">}</span><span class="pl-kos">)</span>
+<span class="pl-kos">.</span><span class="pl-en">beforeHandle</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+  <span class="pl-c1">key</span>: <span class="pl-s">"add_connection"</span><span class="pl-kos">,</span>
+  <span class="pl-en">handler</span>: <span class="pl-kos">(</span><span class="pl-kos">{</span><span class="pl-c1">ctx</span>: <span class="pl-kos">{</span>ws<span class="pl-kos">}</span><span class="pl-kos">,</span> <span class="pl-c1">store</span>: <span class="pl-kos">{</span>connections<span class="pl-kos">}</span><span class="pl-kos">}</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+     <span class="pl-s1">connections</span><span class="pl-kos">.</span><span class="pl-en">add</span><span class="pl-kos">(</span><span class="pl-s1">ws</span><span class="pl-kos">)</span>
+  <span class="pl-kos">}</span>
+<span class="pl-kos">}</span><span class="pl-kos">)</span></pre></div>
+<h2>Commonly asked questions</h2>
+<h3>is there a way to port an existing express project to your framework</h3>
+<p>Well we are thinking of a silution but for now dont forget that you can use our app inside an existing express app and that way you can have our app as an extension of your</p>
+<h3>Getting a never from a function</h3>
+<p>Getting a never from a function means you messed something for example adding a channelwith a name of a channel that already is already in use will return never, since we cant place error messages in the type system you can alway run a code that rureturns never to see the runtime error</p>
+<h3>typesafety not working</h3>
+<p>you are not method chaining</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-s1">❌</span> <span class="pl-v">Broken</span> <span class="pl-v">Method</span> <span class="pl-v">Chaining</span> <span class="pl-kos">(</span><span class="pl-s1">no</span> <span class="pl-s1">type</span> <span class="pl-s1">safety</span><span class="pl-kos">)</span>:
+<span class="pl-k">class</span> <span class="pl-smi">RpcNode</span> <span class="pl-kos">{</span>
+  <span class="pl-en">connect</span><span class="pl-kos">(</span><span class="pl-kos">)</span> <span class="pl-kos">{</span>
+    <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-s">"Connected"</span><span class="pl-kos">)</span><span class="pl-kos">;</span>
+    <span class="pl-c">// Forgot to return 'this'!</span>
+  <span class="pl-kos">}</span>
+
+  <span class="pl-en">send</span><span class="pl-kos">(</span><span class="pl-s1">data</span>: <span class="pl-smi">string</span><span class="pl-kos">)</span> <span class="pl-kos">{</span>
+    <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-s">`Sending: <span class="pl-s1"><span class="pl-kos">${</span><span class="pl-s1">data</span><span class="pl-kos">}</span></span>`</span><span class="pl-kos">)</span><span class="pl-kos">;</span>
+    <span class="pl-k">return</span> <span class="pl-smi">this</span><span class="pl-kos">;</span>
+  <span class="pl-kos">}</span>
+<span class="pl-kos">}</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">node</span> <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">RpcNode</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">;</span>
+
+<span class="pl-c">// This will error or not work as expected</span>
+<span class="pl-s1">node</span><span class="pl-kos">.</span><span class="pl-en">connect</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">send</span><span class="pl-kos">(</span><span class="pl-s">"hello"</span><span class="pl-kos">)</span><span class="pl-kos">;</span>
+
+<span class="pl-s1">✅</span> <span class="pl-v">Fixed</span> <span class="pl-v">Version</span> <span class="pl-kos">(</span><span class="pl-s1">method</span> <span class="pl-s1">chaining</span> <span class="pl-c1">+</span> <span class="pl-k">type</span> <span class="pl-s1">safety</span><span class="pl-kos">)</span>:
+
+<span class="pl-k">class</span> <span class="pl-smi">RpcNode</span> <span class="pl-kos">{</span>
+  <span class="pl-en">connect</span><span class="pl-kos">(</span><span class="pl-kos">)</span>: this <span class="pl-kos">{</span>
+    <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-s">"Connected"</span><span class="pl-kos">)</span><span class="pl-kos">;</span>
+    <span class="pl-k">return</span> <span class="pl-smi">this</span><span class="pl-kos">;</span>
+  <span class="pl-kos">}</span>
+
+  <span class="pl-en">send</span><span class="pl-kos">(</span><span class="pl-s1">data</span>: <span class="pl-smi">string</span><span class="pl-kos">)</span>: this <span class="pl-kos">{</span>
+    <span class="pl-smi">console</span><span class="pl-kos">.</span><span class="pl-en">log</span><span class="pl-kos">(</span><span class="pl-s">`Sending: <span class="pl-s1"><span class="pl-kos">${</span><span class="pl-s1">data</span><span class="pl-kos">}</span></span>`</span><span class="pl-kos">)</span><span class="pl-kos">;</span>
+    <span class="pl-k">return</span> <span class="pl-smi">this</span><span class="pl-kos">;</span>
+  <span class="pl-kos">}</span>
+<span class="pl-kos">}</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">node</span> <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">RpcNode</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">;</span>
+
+<span class="pl-s1">node</span><span class="pl-kos">.</span><span class="pl-en">connect</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">send</span><span class="pl-kos">(</span><span class="pl-s">"hello"</span><span class="pl-kos">)</span><span class="pl-kos">.</span><span class="pl-en">connect</span><span class="pl-kos">(</span><span class="pl-kos">)</span><span class="pl-kos">;</span> <span class="pl-c">// All good, fully type-safe</span></pre></div>
+<h3>I am using a bundler and the client is outside the root of the project what to do</h3>
+<p>First of all this question commonly arrises when needing to make a docker container for something which uses the exported client</p>
+<p>For example you have the folloing</p>
+<pre class="notranslate"><code class="notranslate">/frontend 
+- index.ts (uses the client)
+/backend (exports the client)
+</code></pre>
+<p>if we make a docker file for the frontend it will throw n error since we are importing it from outside the root of the project</p>
+<p>there are 3 solutions</p>
+<p>you can publish your client as an npm package and import the client (i reccoomend setting up a monorepo instead of publishing to npm )</p>
+<p>you can out your backend inside the frontend folder for just building the client</p>
+<p>you can make the root of the frontend to be also the one for the backend</p>
+<p>Example:</p>
+<p>instead of having thrm as two seperate projects</p>
+<pre class="notranslate"><code class="notranslate">/frontend
+- index.ts
+- package.json
+/ backeend
+- index.ts
+- package.json
+</code></pre>
+<p>have</p>
+<pre class="notranslate"><code class="notranslate">package.json (for both the frontedn and the backend)
+/frontend
+- index.ts
+/backeend
+- index.ts
+</code></pre>
+<h1>Lifecycle</h1>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/68f6f2e9-3fa5-47f3-9973-ad9c1ec01752"><img src="https://github.com/user-attachments/assets/68f6f2e9-3fa5-47f3-9973-ad9c1ec01752" alt="image" style="max-width: 100%;"></a></p>
+<h2>Best practices</h2>
+<h3>use <code class="notranslate">as const</code></h3>
+<p>using as const to make the ts compiler help you more</p>
+<p>Look at this example</p>
+<div class="highlight highlight-source-ts"><pre class="notranslate"><span class="pl-k">function</span> <span class="pl-en">hihi</span><span class="pl-kos">(</span><span class="pl-s1">v</span>: <span class="pl-smi">string</span><span class="pl-kos">)</span> <span class="pl-kos">{</span> 
+    <span class="pl-k">if</span> <span class="pl-kos">(</span><span class="pl-s1">v</span><span class="pl-kos">.</span><span class="pl-c1">length</span> <span class="pl-c1">==</span> <span class="pl-c1">3</span><span class="pl-kos">)</span> <span class="pl-kos">{</span>
+        <span class="pl-k">return</span> <span class="pl-s">"g"</span> 
+    <span class="pl-kos">}</span> <span class="pl-k">else</span> <span class="pl-kos">{</span>
+        <span class="pl-k">return</span> <span class="pl-s">"j"</span>
+    <span class="pl-kos">}</span>
+<span class="pl-kos">}</span>
+
+<span class="pl-k">const</span> <span class="pl-s1">gg</span> <span class="pl-c1">=</span> <span class="pl-k">new</span> <span class="pl-v">HookBuilder</span><span class="pl-kos">(</span><span class="pl-kos">)</span>
+  <span class="pl-kos">.</span><span class="pl-en">add</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+    <span class="pl-c1">key</span>: <span class="pl-s">"koko"</span><span class="pl-kos">,</span>
+    <span class="pl-en">execute</span>: <span class="pl-kos">(</span><span class="pl-s1">v</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+      <span class="pl-k">return</span> <span class="pl-kos">{</span>
+        <span class="pl-c1">hi</span>: <span class="pl-s">""</span><span class="pl-kos">,</span>
+      <span class="pl-kos">}</span><span class="pl-kos">;</span>
+    <span class="pl-kos">}</span><span class="pl-kos">,</span>
+  <span class="pl-kos">}</span><span class="pl-kos">)</span>
+  <span class="pl-kos">.</span><span class="pl-en">add</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+    <span class="pl-c1">key</span>: <span class="pl-s">"lolo"</span><span class="pl-kos">,</span>
+    <span class="pl-en">execute</span>: <span class="pl-kos">(</span><span class="pl-s1">v</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span>
+      <span class="pl-k">return</span> <span class="pl-kos">{</span>
+        ...<span class="pl-s1">v</span><span class="pl-kos">,</span>
+        <span class="pl-c1">koki</span>: <span class="pl-en">hihi</span><span class="pl-kos">(</span><span class="pl-s">"so"</span><span class="pl-kos">)</span><span class="pl-kos">,</span>
+      <span class="pl-kos">}</span> <span class="pl-k">as</span> <span class="pl-k">const</span><span class="pl-kos">;</span> <span class="pl-c">// to ensure no modification and better type inference e,g, it shortnes the scope as much as possible </span>
+    <span class="pl-kos">}</span><span class="pl-kos">,</span>
+  <span class="pl-kos">}</span><span class="pl-kos">)</span>
+  <span class="pl-kos">.</span><span class="pl-en">add</span><span class="pl-kos">(</span><span class="pl-kos">{</span>
+    <span class="pl-c1">key</span>: <span class="pl-s">"koki"</span><span class="pl-kos">,</span>
+    <span class="pl-en">execute</span>: <span class="pl-kos">(</span><span class="pl-s1">v</span><span class="pl-kos">)</span> <span class="pl-c1">=&gt;</span> <span class="pl-kos">{</span><span class="pl-kos">}</span><span class="pl-kos">,</span> <span class="pl-c">// here the return type of v is /parameter) v: {readonly koki: "g" | "j";readonly hi: string;} without it whough it is v: {koki: string;hi: string;}</span>
+  <span class="pl-kos">}</span><span class="pl-kos">)</span><span class="pl-kos">;</span></pre></div>
+<h1>Built ins</h1>
+<p>by default every websocket server also can send error messags and so you can define on the client handler for that but the point is that it is built in just use the <code class="notranslate">ws.sendError()</code> for typsafety 😃 since it will only allow you to send errors you have defined</p></article>
+	</body>
+</html>
