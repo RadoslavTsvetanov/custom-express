@@ -12,6 +12,7 @@
     "apps/**/*"
   ],
   "dependencies": {
+    "@elysiajs/swagger": "^1.2.2",
     "tsd": "^0.32.0",
     "zod": "^3.24.2"
   }

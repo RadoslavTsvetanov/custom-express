@@ -1,8 +1,7 @@
-import { AfterfixKeysOfRecord, ITrueMap, OrderedRecord, OrderedRecordBase } from "@custom-express/better-standard-library";
-import { WithKey } from "../main";
-import { Handler, TypedMessage } from "../Message/main";
+import {AfterfixKeysOfRecord, OrderedRecord} from "@custom-express/better-standard-library";
+import {TypeSafeWebsocket, WithKey} from "../main";
+import {Handler, TypedMessage} from "../Message/main";
 import {IncomingMessage} from "http"
-import { UnknownRecord } from "@custom-express/better-standard-library/src/types/unknwonString";
 
 export type HookOrderedRecordEntry<T = unknown, U = unknown> = WithKey<{
   execute: Handler<T, U>;
@@ -10,10 +9,8 @@ export type HookOrderedRecordEntry<T = unknown, U = unknown> = WithKey<{
 
 export class HookOrderedRecord<
   Elements extends HookOrderedRecordEntry[]
-  // for now you are not supposed to touch this
 > extends OrderedRecord<Elements, HookOrderedRecordEntry> {}
 
-// Example Usage 
 
 
 { // declaring new scope so that we can reuse names in the kater examples without the compiler being a bitch 
@@ -45,9 +42,8 @@ export type BaseHookBundle = Hook<unknown, HookOrderedRecordBase>
 export interface Hook<EnteringContext, Mappers extends HookOrderedRecordBase> /* extends  ITrueMap<Hook<EnteringContext, Mappers>> */
 {
   ordered: Mappers
-  independent: IndependentHandler<EnteringContext>[];// For running independent handlers (e.g. logging, side effects)
-
-};
+  independent: IndependentHandler<EnteringContext>[];
+}
 
 export type GlobalOnlyHooks<
   OnCloseHooks extends HookOrderedRecordBase,
@@ -110,3 +106,13 @@ export type HookTypes = {
 
 
 export type BaseMessageHooks = MessageHooks<BaseHookBundle, BaseHookBundle>
+export type HookDefaults = {
+  "onConnection": { ws: TypeSafeWebsocket }
+  "onClose": {},
+  "beforeHandle": { ws: TypeSafeWebsocket },
+  "afterHandle": { ws: TypeSafeWebsocket },
+  "beforeHandler": {ws: TypeSafeWebsocket},
+  "afterHandler": {ws: TypeSafeWebsocket},
+  "onError": { error: Error }
+  "onErrorr": {error: Error} // his is the lcoal onError handler
+}

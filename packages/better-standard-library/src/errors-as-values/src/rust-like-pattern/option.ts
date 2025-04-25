@@ -1,10 +1,21 @@
-import { VCallback } from "../../../types/voidcallback";
+import { Callback, VCallback } from "../../../types/voidcallback";
 import { logger } from "../utils/console";
 import { type ILeftRight, LeftRight } from "./leftRight";
 import type { Tick } from "./tick";
 import { CustomUnpackable,type IUnpackable } from "./unpackable/unpackable";
 
 export type none = null | undefined;
+
+export function Try<V, IfNoneReturn, IfNotNotNoneReturn> /* casing is like this since try is reserved word */(v: V | none, config: {
+  ifNone: () => IfNoneReturn,
+  ifNotNone: Callback<IfNotNotNoneReturn, V>
+}): IfNoneReturn | IfNotNotNoneReturn {
+  if (v === undefined || v === null) {
+    return config.ifNone()
+  }
+  return config.ifNotNone(v)
+}
+
 
 export interface IOptionable<T> extends IUnpackable<T> {
   is_none: () => boolean;

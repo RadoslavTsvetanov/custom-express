@@ -1,6 +1,5 @@
-import { AfterfixKeysOfRecord, ITrueMap, OrderedRecord, URecord, With } from "@custom-express/better-standard-library";
-import { z, ZodObject, ZodRawShape, ZodSchema, ZodUnknown } from "zod";
-import { IncomingMessage } from 'http';
+import {URecord, With} from "@custom-express/better-standard-library";
+import {WebSocket} from "bun";
 
 // -------------------------------------
 // Utility Types
@@ -18,4 +17,13 @@ export type WithKey<T extends URecord> = With<T, "key", string>;
 // -------------------------------------
 
 
-
+export type TypeSafeWebsocket<
+    MessagesItCanSend = Record<string, unknown>
+> = {
+    raw: WebSocket,
+    safe: WebSocket & {
+        send: {
+            [Key in keyof MessagesItCanSend]: (v: MessagesItCanSend[Key]) => void
+        }
+    },
+}

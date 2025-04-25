@@ -1,26 +1,19 @@
-import { Last, OrderedRecord } from "@custom-express/better-standard-library";
-import { GlobalHooks, HookOrderedRecord, HookOrderedRecordEntry } from "../../../types/Hooks/main";
-import { Handler } from "../../../types/Message/main";
-import { WebSocket } from "bun";
-import { expectType } from "tsd";
-import { z, ZodObject, ZodRawShape } from "zod";
+import {Last, OrderedRecord} from "@custom-express/better-standard-library";
+import {GlobalHooks, HookDefaults, HookOrderedRecord, HookOrderedRecordEntry} from "../../../types/Hooks/main";
+import {Handler} from "../../../types/Message/main";
+import {z, ZodObject, ZodRawShape} from "zod";
 
 
 type WithDefault<Default, Type> = [Type] extends [never] ? Default : Type;
 
 type g = WithDefault<{}, never>;
 
-type HookDefaults = {
-  "onConnection": {ws: WebSocket}
-  "onClose": {},
-  "beforeHandle": { ws: WebSocket },
-  "afterHandle": { ws: WebSocket },
-  onError: {error: Error}
-}
-
+// type provideContextToHookDefault<T extends Record<string, unknown>> =
 
 //! this test must pass
 type j = keyof HookDefaults
+
+
 
 
 export class HookBuilder<

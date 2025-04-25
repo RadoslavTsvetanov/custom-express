@@ -1,6 +1,6 @@
 import { First, ifNotNone, Last, OrderedRecord, FirstArg } from "@custom-express/better-standard-library";
 import { HookBuilder } from "./HookBuilder";
-import { BaseHookBundle, BaseMessageHooks, HookOrderedRecord, HookOrderedRecordEntry, HookTypes, MessageHooks } from "../../../types/Hooks/main";
+import { BaseHookBundle, BaseMessageHooks, HookDefaults, HookOrderedRecord, HookOrderedRecordEntry, HookTypes, MessageHooks } from "../../../types/Hooks/main";
 import { MessageHandler, MessageItCanReceive, MessageThatCanBeSent } from "../../../types/Message/main";
 import { z, ZodObject, ZodRawShape } from "zod";
 import { ChannelBuilder } from "./ChannekBuilder";
@@ -39,7 +39,7 @@ export class MessageThatCanBeReceivedBuilder<
         >(
             hooks: Hooks,
             parser: Parser | undefined, // if not undefined parser will just be a guard hook that is added to the hooks 
-            handler: typeof parser extends z.ZodType<infer U> ? (v: U) => unknown : MsgHandler["handler"]) {
+            handler: typeof parser extends z.ZodType<infer U> ? (v: U) => unknown : MsgHandler["handler"] /* TODO: if no before handler hooks are passed get the return of the last before handle hook*/) {
                 const newHooks = parser == undefined ? hooks : new HookBuilder(hooks.elements.value).build()
         return new MessageThatCanBeReceivedBuilder({
             
@@ -59,7 +59,12 @@ export class MessageThatCanBeReceivedBuilder<
     {
         return 
         }
-    createHookBuilder(type: "beforeHandler" /* HookTypes["MessageOnlyHooks"] TODO: fix this sinceit fails cuz onError is not hook type but regualr callback*/): HookBuilder<Hooks[typeof type]["ordered"]["elements"]["value"]>{ // this is so that we cant pass a hook with a name that already exists 
+    createHookBuilder(
+        type: HookTypes["MessageOnlyHooks"]
+    ): HookBuilder<
+        typeof type extends "afterHandler" | "beforeHandler" ? Hooks[typeof type]["ordered"]["elements"]["value"]: null,
+        HookDefaults[typeof type]
+    >{ // this is so that we cant pass a hook with a name that already exists 
         return new HookBuilder<Hooks[typeof type]["ordered"]["elements"]["value"]>(this._hooks[type].ordered.elements.value)
     }
 
