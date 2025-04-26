@@ -4,11 +4,15 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "bun-types":"latest",
+    "@custom-express/better-standard-library": "1.0.0",
     "@types/bun": "latest",
-    "@custom-express/better-standard-library": "1.0.0"
+    "@types/ws": "^8.18.1",
+    "bun-types": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.18.1"
   }
 }

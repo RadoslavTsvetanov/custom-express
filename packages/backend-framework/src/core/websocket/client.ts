@@ -162,7 +162,6 @@ export class WebsocketClient<
     this.url = url;
     this.channels = endpoints;
     this.context = new Optionable(context).unpack_with_default({} as Context);
-    console.log("ooo", JSON.stringify(this.url.valueOf()));
     this.ws = new WebSocket(this.url.value);
 
     this.ws.onopen = () => {
@@ -274,7 +273,7 @@ export class WebsocketClient<
   generateClient(): {
     [Channel in keyof Channels]: {
       [Message in keyof Channels[Channel]["messagesItCanReceive"]]: (
-        data: FirstArg<Channels[Channel]["messagesItCanReceive"][Message]["config"]["handler"]> 
+        data: Omit<FirstArg<Channels[Channel]["messagesItCanReceive"][Message]["config"]["handler"]>, "ws"> 
       ) => void;
     };
   } {
@@ -339,6 +338,7 @@ class ExtendedWebsocketListener<
     return this.hook({
       ...v,
       handler: (ctx) => {
+        console.log("lll",v)
         const validationResult = v.schema.partial().safeParse(v);
         if (validationResult.success) {
           return v;

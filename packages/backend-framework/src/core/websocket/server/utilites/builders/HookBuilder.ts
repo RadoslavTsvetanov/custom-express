@@ -57,7 +57,13 @@ export class HookBuilder<
     ): HookBuilder<[...Elements, {key: Key, execute: Handler<HookDefaults[HookType], z.infer<Guard>>}], HookType>{
     return this.add({
       key,
-      execute: v => {return {original: v, msg: t.parse(v)}}
+      execute: v => {
+        console.log("loko",t.shape, v)
+        return {
+          original: v,
+          msg: t.parse(v)
+        }
+      }
     }) 
   }
 }

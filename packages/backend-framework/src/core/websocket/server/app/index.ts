@@ -1,4 +1,3 @@
-import { WebSocketServer, WebSocket } from "ws";
 import { object, z, ZodObject, type ZodRawShape } from "zod";
 import { BetterArray, entries, GetSet, ifNotNone, keyofonlystringkeys, map, Optionable, panic, Port, VCallback, WebsocketUrl } from "@custom-express/better-standard-library"
 import { HookBuilder } from "../utilites/builders/HookBuilder";
@@ -10,6 +9,8 @@ import { WebsocketClient } from "../../client";
 import { UnknownRecord } from "@custom-express/better-standard-library/src/types/unknwonString";
 import { ChannelBuilder } from "../utilites/builders/ChannekBuilder";
 import { MessageThatCanBeReceivedBuilder } from "../utilites/builders/MessageBuilder";
+import { WebSocketServer } from 'ws';
+
 
 
 // ---------
@@ -93,7 +94,8 @@ export class CustomWebSocketRouter<
   > {
     try {
       return new Optionable(JSON.parse(v));
-    } catch {
+    } catch(e) {
+      throw new Error(e.message)
       return new Optionable<
         TypedMessage<keyofonlystringkeys<Channels[keyof Channels]>, unknown>
       >(null);
@@ -128,8 +130,10 @@ export class CustomWebSocketRouter<
             
             ws.on("message", async (message) => {
               // TODO: Add a hook here to intercept message pre-parsing
-              console.log("mgfg",message, )
-              this.transformMsg(message.toString()).try({
+              console.log("mgfg",message.toString(), )
+              this.transformMsg(message.toString())
+                .tick(v => console.log("parsed message"))
+                .try({
                 ifNone: () => {
                   this.sendUnprocessableMessageType(ws, {
                     channel: "unknown",
@@ -148,7 +152,7 @@ export class CustomWebSocketRouter<
                     new Optionable(
                       BetterArray
                         .new(Object.entries(this.channels))
-                        .tick(v => console.log("ooo"))
+                        .tick(v => v)
                         .filter(([channelName]) => channelName === parsedMessage.channel)
                         .at(0)
                     ).try({
