@@ -1,5 +1,5 @@
 {
-  "name": "kafka-code-as-config",
+  "name": "reactive-entities",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {

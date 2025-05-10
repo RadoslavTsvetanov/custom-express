@@ -1,3 +1,6 @@
 [submodule "apps/trainy"]
 	path = apps/trainy
 	url = https://github.com/RadoslavTsvetanov/Train-y
+[submodule "apps/graphy-broswer-extension"]
+	path = apps/graphy-broswer-extension
+	url = https://github.com/RadoslavTsvetanov/Graphy.git

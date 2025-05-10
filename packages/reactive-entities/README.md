@@ -1,4 +1,4 @@
-# kafka-code-as-config
+# reactive-entities
 
 To install dependencies:
 

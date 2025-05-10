@@ -1,5 +1,5 @@
 {
-  "name": "kafka-code-as-config",
+  "name": "simple-http-server-for-logging-the-extension",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
@@ -9,9 +9,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@custom-express/better-standard-library": "1.0.0",
-    "@custom-express/framework": "1.0.1",
-    "kafkajs": "^2.2.4",
-    "tsd": "^0.32.0"
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
   }
 }
