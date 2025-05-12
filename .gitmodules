@@ -4,3 +4,6 @@
 [submodule "apps/graphy-broswer-extension"]
 	path = apps/graphy-broswer-extension
 	url = https://github.com/RadoslavTsvetanov/Graphy.git
+[submodule "packages/frontend-thingies"]
+	path = packages/frontend-thingies
+	url = https://github.com/TS-Underated-lang/frontend-components.git
