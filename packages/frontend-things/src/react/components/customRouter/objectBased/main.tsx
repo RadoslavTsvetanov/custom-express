@@ -1,47 +1,6 @@
 import React from "react";
 import type { URecord } from "@custom-express/better-standard-library";
 import type { JsxElement } from "typescript";
-import { createRoute, NavigationBar, type ExtractParam, type RouteDefinition } from "./urlBased";
-
-const UserPage: React.FC<{ params: { id: string } }> = ({ params }) => (
-  <div>User ID: {params.id}</div>
-);
-
-const HomePage: React.FC<{ params: {} }> = () => (
-  <div>Home Page</div>
-);
-
-const routes = [
-  { path: '/user/:id', component: UserPage },
-  { path: '/', component: HomePage },
-] as const;
-
-export const Route = <Url extends string>({
-  path,
-  handler,
-}: {
-  path: Url;
-  handler: (v: ExtractParam<Url>) => React.ReactNode;
-}): React.ReactElement => {
-  // We'll just render this as a placeholder for the actual matching logic
-  return <div>{handler({})}</div>;
-};
-
-createRoute({
-    path: "/:koko",
-    component: v => v.params.koko
-})
-
-export const App = () => (
-    <NavigationBar currentUrl="/user/123" routes={
-        [
-            createRoute({
-                path: "/:user/:poop",
-                component: v => {return <div>{v.params.poop}</div>}
-           }) 
-        ]
-  } />
-);
 // ✅ 1. Strong Type Safety
 
 // Each route is tied to a specific shape (url object), so your handlers automatically get typed input. TypeScript knows exactly what keys and values the handler receives based on the url object. For example:
@@ -94,36 +53,58 @@ type objectBasedRoute<T extends URecord> = {
 };
 
 // Generic factory to preserve type
-function newRoute<T extends URecord>(v: objectBasedRoute<T>): objectBasedRoute<T> {
+export function newRoute<T extends URecord>(v: objectBasedRoute<T>): objectBasedRoute<T> {
   return v;
 }
 
-// Helper to preserve the tuple type
 function defineRoutes<T extends readonly objectBasedRoute<URecord>[]>(...routes: T): T {
   return routes;
 }
 
-const routes3 = defineRoutes(
-  newRoute({
-    url: { ji: "" },
-    handler: v => <div>hi {v.ji}</div> 
-  }),
-  newRoute({
-    url: { ko: "" },
-    handler: v => <div>kur {v.ko}</div>
-  }),
-  newRoute({
-    url: {
-      userId: "",
-    },
-      handler: v => <div>{v.userId}</div>
-  })
-);
 
-function handleRoutes<T extends readonly objectBasedRoute<URecord>[]>(r: T) {
-  r.forEach(route => {
-    console.log(Object.keys(route.url)); 
-  });
+type ExtractKey<T, K> = K extends keyof T ? T[K] : never;
+
+const compareObjects = (a: URecord, b: URecord): number => {
+  let score = 0;
+
+  // Compare properties of a and b
+  for (let key in a) {
+    if (a[key] === b[key]) {
+      score += 1; // Increase score for a match
+    }
+  }
+
+  return score;
+};
+
+export function findClosest<T extends URecord[]>(range: T, provided: T[number]): number {
+  let closestIndex = -1;
+  let bestScore = -1;
+
+  for (let i = 0; i < range.length; i++) {
+    const candidate = range[i];
+    const score = compareObjects(provided, candidate);
+
+    if (score > bestScore) {
+      closestIndex = i;
+      bestScore = score;
+    }
+  }
+
+  return closestIndex;
 }
 
-handleRoutes(routes);
+
+export const Pages = <T extends readonly URecord[]>(
+    { pages, currentUrl }: {
+        pages: { [K in keyof T]: objectBasedRoute<
+            T[K]> }; currentUrl: T[number]
+    }
+) => {
+ 
+  return (
+    <div>
+        {pages[findClosest(pages.map(page => page.url))]["handler"]}
+    </div>
+  );
+};
