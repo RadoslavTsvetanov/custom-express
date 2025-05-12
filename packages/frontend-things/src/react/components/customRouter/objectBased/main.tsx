@@ -101,10 +101,10 @@ export const Pages = <T extends readonly URecord[]>(
             T[K]> }; currentUrl: T[number]
     }
 ) => {
- 
+const CurrentPage = pages[findClosest(pages.map(page => page.url), currentUrl)]["handler"] 
   return (
     <div>
-        {pages[findClosest(pages.map(page => page.url))]["handler"]}
+        <CurrentPage />
     </div>
   );
 };

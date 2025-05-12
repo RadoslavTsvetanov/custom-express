@@ -14,7 +14,7 @@ const PageRoutable3 = () => {
                     url: { ko: "" },
                     handler: v => <div>kur {v.ko}</div>
                 })
-            ] as const 
+            ] as const //important
         }
     />
 }
