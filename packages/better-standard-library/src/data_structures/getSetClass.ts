@@ -43,6 +43,8 @@ export class Get<V> {
   public get v() {
     return this.value;
   }
+
+  
 }
 
 export type inferType<T extends GetSet<unknown>> = T["value"];

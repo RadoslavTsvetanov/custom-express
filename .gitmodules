@@ -7,3 +7,9 @@
 [submodule "packages/frontend-thingies"]
 	path = packages/frontend-thingies
 	url = https://github.com/TS-Underated-lang/frontend-components.git
+[submodule "apps/better-chat"]
+	path = apps/better-chat
+	url = https://github.com/TS-Underated-lang/better-chat.git
+[submodule "apps/better-ai-chat"]
+	path = apps/better-ai-chat
+	url = https://github.com/TS-Underated-lang/better-chat.git

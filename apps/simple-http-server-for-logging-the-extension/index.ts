@@ -16,20 +16,7 @@ app.post("/log", (req, res) => {
   console.log("Received message:", req.body);
   res.status(200)
 });
-const response = await fetch(`http://localhost:${PORT}/log`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ message: "Hello from Bun!" }),
-  });
 
-// Start server
-// app.listen(PORT, async () => {
-//   console.log(`Server running at http://localhost:${PORT}`);
-
-//   // Send a JSON request after the server starts
-  
-//   const text = await response.text();
-//   console.log("Response from /log:", text);
-// });
+ app.listen(PORT, async () => {
+   console.log(`Server running at http://localhost:${PORT}`);
+ });
