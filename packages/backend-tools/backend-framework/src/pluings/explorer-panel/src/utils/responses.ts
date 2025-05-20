@@ -1,4 +1,4 @@
-import type { RequestResponse } from './../app';
+import type { RequestResponse } from '../app';
 import { ResponseStatus } from "../app"
 
 export const responsesStatuses = {

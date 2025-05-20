@@ -1,7 +1,7 @@
-import {parseZodUnion} from "../../../src/utils/zod-related/main.ts";
+import {parseZodUnion} from "../../../src/utils/zod-related/main.js";
 import { expect, test } from "bun:test"
 import {z} from "zod";
-import {logWithoutMethods} from "../../../src/utils/logging.ts";
+import {logWithoutMethods} from "../../../src/utils/logging.js";
 import exp from "node:constants";
 
 function expectForComapringObjectsByValue(thing: any){

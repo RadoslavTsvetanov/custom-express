@@ -1,9 +1,9 @@
 import {expect, test} from "bun:test";
 import {z} from "zod";
-import {zodSchemaIntoOpenapiResponseContentDefinition} from "../../../src/utils/zod-related/parseZodSchema.ts";
-import {parseZodUnion} from "../../../src/utils/zod-related/main.ts";
-import {logWithoutMethods} from "../../../src/utils/logging.ts";
-import {MyZodDefinitions} from "../../../src/types/zod/zod.ts";
+import {zodSchemaIntoOpenapiResponseContentDefinition} from "../../../src/utils/zod-related/parseZodSchema.js";
+import {parseZodUnion} from "../../../src/utils/zod-related/main.js";
+import {logWithoutMethods} from "../../../src/utils/logging.js";
+import {MyZodDefinitions} from "../../../src/types/zod/zod.js";
 
 
 

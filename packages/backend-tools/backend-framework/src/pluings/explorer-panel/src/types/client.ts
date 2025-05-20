@@ -1,5 +1,5 @@
-import {Url} from "./networking/url.ts";
-import {MyOpenApiDefinitions} from "./openapi/main.ts";
+import {Url} from "./networking/url.js";
+import {MyOpenApiDefinitions} from "./openapi/main.js";
 import {z} from "zod";
 
 

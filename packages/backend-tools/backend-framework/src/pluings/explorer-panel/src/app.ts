@@ -9,7 +9,7 @@ import {
   type ZodRawShape,
 } from "zod";
 import { ApiPath } from "./types/apiApth";
-import { TypeSafeClassBase } from "../../packages/better-standard-library/data_structures/contextsafetype.ts";
+import { TypeSafeClassBase } from "../../packages/better-standard-library/data_structures/contextsafetype";
 import * as f from "safe-envs-mk-3";
 import { Optionable } from "errors-as-types/lib/rust-like-pattern/option";
 import { Port } from "./types/networking/port";
@@ -20,13 +20,13 @@ import {
   type RouterMetadata,
   SubrouteDefinition,
 } from "./types/openapi/main";
-import type { StatusCode } from "./types/networking/statusCode.ts";
-import { logWithoutMethods } from "../../packages/better-standard-library/logging.ts";
-import { zodSchemaIntoOpenapiResponseContentDefinition } from "./utils/zod-related/parseZodSchema.ts";
-import { parseZodUnion } from "./utils/zod-related/main.ts";
+import type { StatusCode } from "./types/networking/statusCode";
+import { logWithoutMethods } from "../../packages/better-standard-library/logging";
+import { zodSchemaIntoOpenapiResponseContentDefinition } from "./utils/zod-related/parseZodSchema";
+import { parseZodUnion } from "./utils/zod-related/main";
 import { error } from "console";
-import { GetSet } from "../../packages/better-standard-library/data_structures/getSetClass.ts";
-import { Url } from "./types/networking/url.ts";
+import { GetSet } from "../../packages/better-standard-library/data_structures/getSetClass";
+import { Url } from "./types/networking/url";
 import { console, url } from "inspector";
 import swaggerui from "swagger-ui-express";
 

@@ -4,12 +4,15 @@
 [submodule "apps/graphy-broswer-extension"]
 	path = apps/graphy-broswer-extension
 	url = https://github.com/RadoslavTsvetanov/Graphy.git
-[submodule "packages/frontend-thingies"]
-	path = packages/frontend-thingies
-	url = https://github.com/TS-Underated-lang/frontend-components.git
 [submodule "apps/better-chat"]
 	path = apps/better-chat
 	url = https://github.com/TS-Underated-lang/better-chat.git
 [submodule "apps/better-ai-chat"]
 	path = apps/better-ai-chat
 	url = https://github.com/TS-Underated-lang/better-chat.git
+[submodule "apps/dev-branch-exposer"]
+	path = apps/dev-branch-exposer
+	url = https://github.com/TS-Underated-lang/dev-branches-exposer.git
+[submodule "packages/frontend-components"]
+	path = packages/frontend-components
+	url = https://github.com/TS-Underated-lang/frontend-components.git

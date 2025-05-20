@@ -2,12 +2,12 @@ import { ResponseStatus, WebRouter } from "../src/app";
 import express from "express";
 import { z } from "zod";
 import { FileName } from "../src/types/filename";
-import {builtIns} from "../src/builtins/main.ts";
-import {Port} from "../src/types/networking/port.ts";
-import { SubrouteDefinition } from "../src/types/openapi/main.ts";
-import { ApiPath } from "../src/types/apiApth.ts";
-import { Url } from "../src/types/networking/url.ts";
-import { GetSet } from "../src/utils/getSetClass.ts";
+import {builtIns} from "../src/builtins/main";
+import {Port} from "../src/types/networking/port";
+import { SubrouteDefinition } from "../src/types/openapi/main";
+import { ApiPath } from "../src/types/apiApth";
+import { Url } from "../src/types/networking/url";
+import { GetSet } from "../src/utils/getSetClass";
 
 interface DB {
   getUser(userId: string): string | null;
