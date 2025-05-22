@@ -6,6 +6,10 @@ export function map<T, ReturnType>(v: T,func: (v: T) => ReturnType): ReturnType 
     return func(v)
 }
 
+export  function tap<T>(v: T, func: (v: T) => void): T {
+    func(v)
+    return v
+}
 
 export class TrueMap<T> implements ITrueMap<T> {
     private v: T

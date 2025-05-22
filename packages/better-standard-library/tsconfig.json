@@ -1,9 +1,8 @@
 {
     "extends": "../../tsconfig.json",
-    // "compilerOptioVns": {
-    //     "baseUrl": ".",
-    //     "paths": {
-    //         "@better-standard-internal": ["src"]
-    //     }
-    // }
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@better-standard-internal/*": ["src/*"]        }
+    }
 }
