@@ -5,6 +5,13 @@ import type { valuesOf } from "@custom-express/better-standard-library/src/metap
 
 type SplitType = "horizontal" | "vertical";
 
+
+
+
+
+
+
+ 
 type Pane = OneOf.Instance<{
   split: {
     dimensions: [number, number];

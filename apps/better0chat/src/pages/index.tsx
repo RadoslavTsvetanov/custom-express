@@ -2,12 +2,34 @@ import Head from "next/head";
 import Link from "next/link";
 // import {CommandPalette, SimpleCommandPrompt, InternetChecker} from "@custom-express/frontend-thingies"
 import { api } from "~/utils/api";
-import { Editor, PaneInstance, type EditorState as EditorStateType } from "~/components/editor";
-import { useState } from "react";
+import { , Editor, PaneInstance, type EditorState as EditorStateType } from "~/components/custom/editor";
+import { useEffect, useState } from "react";
 import { OneOf } from "@custom-express/better-standard-library";
+import type { ChatProps } from "~/components/custom/chat";
+
+type ChatState = {
+  chats: ChatProps[]
+} 
+
 
 export default function Home() {
-  const hello = api.post.hello.useQuery({ text: "from tRPC" });
+
+  const ChatState = useState<ChatState>({
+    chats: []
+  })
+  useEffect(() => {
+
+    window.addEventListener('keydown', (event) => {
+
+      if ((event.ctrlKey || event.metaKey) && event.key === '/') {
+        event.preventDefault();
+        console.log('Ctrl + / pressed!');
+        // Your logic here
+      }
+    });
+  }, []);
+
+
   const [state, setState] = useState<EditorStateType>({
     pane: new PaneInstance({
       type: "split",
@@ -21,7 +43,7 @@ export default function Home() {
           buffers: [
             new PaneInstance({
               type: "content",
-              content: "Top Left Panel"
+              content: 
             }),
             new PaneInstance({
               type: "split",
@@ -73,7 +95,7 @@ export default function Home() {
             }),
             new PaneInstance({
               type: "split",
-              splitType: "vertical",
+              splitType: "vertical",            
               dimensions: [70, 30],
               buffers: [
                 new PaneInstance({
