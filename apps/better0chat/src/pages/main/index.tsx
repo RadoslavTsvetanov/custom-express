@@ -3,12 +3,12 @@ import {
   PaneInstance,
   type EditorState as EditorStateType,
 } from "~/pages/main/components/editor";
-import { useEffect, useRef, useState, type FC } from "react";
-import { map, OneOf } from "@custom-express/better-standard-library";
-import type { ChatProps } from "~/pages/main/components/chat";
-import Chat from "~/pages/main/components/chat";
+import { useEffect, useRef } from "react";
+import { map } from "@custom-express/better-standard-library";
+import type { ChatProps, ChatState } from "~/pages/main/components/chat";
+import { Chat } from "~/pages/main/components/chat";
 import { Switcher } from "~/components/custom/switcher";
-import { UseState } from "@custom-express/frontend-thingies"
+import { UseState } from "@custom-express/frontend-thingies";
 import { BatchResponse } from "~/pages/main/components/batchResponse";
 import { Menu } from "lucide-react";
 // ---
@@ -25,10 +25,6 @@ function subscribeToKeyboardClick(keyCombination: (typeof keys)[number][]){}
 //------------------
 // Chat
 // ------------
-
-type ChatState = {
-  chats: { messages: ChatProps["messages"] }[];
-};
 
 export default function Home() {
   const state = {
