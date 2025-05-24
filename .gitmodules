@@ -6,7 +6,7 @@
 	url = https://github.com/RadoslavTsvetanov/Graphy.git
 [submodule "apps/better-chat"]
 	path = apps/better-chat
-	url = https://github.com/TS-Underated-lang/better-chat.git
+	url = https://github.com/RadoslavTsvetanov/better-chat.git
 [submodule "apps/better-ai-chat"]
 	path = apps/better-ai-chat
 	url = https://github.com/TS-Underated-lang/better-chat.git
