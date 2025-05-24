@@ -2,14 +2,15 @@ import {
   Editor,
   PaneInstance,
   type EditorState as EditorStateType,
-} from "~/components/custom/editor";
+} from "~/pages/main/components/editor";
 import { useEffect, useRef, useState, type FC } from "react";
 import { map, OneOf } from "@custom-express/better-standard-library";
-import type { ChatProps } from "~/components/custom/chat";
-import Chat from "~/components/custom/chat";
+import type { ChatProps } from "~/pages/main/components/chat";
+import Chat from "~/pages/main/components/chat";
 import { Switcher } from "~/components/custom/switcher";
 import { UseState } from "@custom-express/frontend-thingies"
-import { BatchResponse } from "~/components/custom/batchResponse";
+import { BatchResponse } from "~/pages/main/components/batchResponse";
+import { Menu } from "lucide-react";
 // ---
 // Menu
 // ---
@@ -20,20 +21,6 @@ const keys = ["Ctrl", 1, 2, 3, 4, 5, 6, 7, 8, 9, "a", "b", "s" ] as const
 
 function subscribeToKeyboardClick(keyCombination: (typeof keys)[number][]){}
 
-
-export const Menu: FC = () => {
-  const chats = UseState<{ title: string }[]>([])
-  // should be gotten from index db
-  return (
-    <div>
-      <h1>Menu</h1>
-      <button onClick={() => {}}>new </button>
-      {chats.value.map((chat) => (
-        <div>{chat.title}</div>
-      ))}
-    </div>
-  );
-};
 
 //------------------
 // Chat
@@ -98,13 +85,20 @@ export default function Home() {
         content: (
           <Chat
             messages={state.chat.value.chats[0]?.messages ?? []}
-            onNewQuestion={async (question) => {
+            onNewQuestion={async ({question, currentModel}) => {
               state.chat.set((prev) => {
+
                 const newChats = [...prev.chats];
                 newChats[0] = {
                   messages: [
                     ...newChats[0].messages,
                     { message: question, isUser: true },
+                    { 
+                      message: (typeof currentModel === "string") 
+                      ? "hihi" 
+                      : <Switcher components={[<div>f</div>, "jiji"]}/>,
+                      isUser: false
+                    }
                   ],
                 };
                 return { chats: newChats };

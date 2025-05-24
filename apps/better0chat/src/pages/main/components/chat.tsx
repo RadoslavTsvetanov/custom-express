@@ -3,15 +3,17 @@ import { Card, CardContent } from "~/components/ui/card"
 import {ModeSelector, type ModeType} from "./editor"
 import { UseState } from "@custom-express/frontend-thingies"
 import { OneOf } from "@custom-express/better-standard-library"
+import React, { useState } from 'react';
+import type { State } from "@custom-express/frontend-thingies/src/react/hooks/useStateAsObject"
 
 export type ChatMessage = {
-  message: string
+  message: React.ReactNode
   isUser: boolean
 }
 
 export type ChatProps = {
   messages: ChatMessage[],
-  onNewQuestion: (question: string) => Promise<void>
+  onNewQuestion: (v: {question: string, currentModel: string | string[]}) => Promise<void>
 }
 
 interface QuestionInputProps {
@@ -35,7 +37,7 @@ const QuestionInput: FC<QuestionInputProps> = ({ onNewQuestion }) => {
     const mode = UseState<ModeType>('single')
 
     const state = {
-      currentModel: UseState<string | string[]>("chatgpt")
+      currentModel: UseState<string | string[]>("chatgpt") //TODO: refactor to use oneOf
     }
 
     useEffect(() => {
@@ -43,7 +45,7 @@ const QuestionInput: FC<QuestionInputProps> = ({ onNewQuestion }) => {
         if ((event.ctrlKey || event.metaKey) && event.key === '/') {
           event.preventDefault();
           if (question.trim() !== '') {
-            onNewQuestion(question.trim());
+            onNewQuestion({question:  question.trim()});
             setQuestion('');
           }
         }
@@ -62,7 +64,6 @@ const QuestionInput: FC<QuestionInputProps> = ({ onNewQuestion }) => {
     }
   
     return (
-      // add radio in which the user can select which model they wat to use (e,g, url)
       <form onSubmit={handleSubmit}>
         <div>
           {
@@ -76,16 +77,16 @@ const QuestionInput: FC<QuestionInputProps> = ({ onNewQuestion }) => {
                 options={["","chatgpt", "h"]} 
                 onChange={e => state.currentModel.set(
                   prev => {
-let newState: string[];
+                    let newState: string[];
 
-  if (typeof prev === "string") {
-    newState = [state.currentModel.value];
-  } else {
-    newState = [...prev];
-  }
+                    if (typeof prev === "string") {
+                      newState = [state.currentModel.value];
+                    } else {
+                      newState = [...prev];
+                    }
 
-  newState.push(e.target.value);
-  return newState;
+                    newState.push(e.target.value);
+                    return newState;
 
                   }
                 )}/>
@@ -126,8 +127,6 @@ export default function Chat({ messages, onNewQuestion }: ChatProps) {
 // ---
 
 
-import React, { useState } from 'react';
-import type { State } from "@custom-express/frontend-thingies/src/react/hooks/useStateAsObject"
 
 
 export const Dropdown: React.FC<({ options: string[], current: State<string> })> = ({current, options}) => {
