@@ -1,6 +1,6 @@
 import { z, ZodObject, ZodRawShape } from "zod";
 import { map } from "./errors-as-values/mapThatIsLikeInRust";
-import { Try } from "./errors-as-values/src/rust-like-pattern/option";
+import { Try } from "./errors-as-values/rust-like-pattern/option";
 
 // type Overloads = 
 

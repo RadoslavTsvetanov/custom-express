@@ -1,6 +1,8 @@
+import { valuesOf } from "@better-standard-internal/metaprogramming/valuesOf";
 import { LeftRight } from "./leftRight";
 import { type IOptionable, Optionable } from "./option";
 import { CustomUnpackable, type Unpackable } from "./unpackable/unpackable";
+import { map } from "../..//errors-as-values/mapThatIsLikeInRust";
 
 export interface ICustomError {
   message: string;
@@ -113,7 +115,69 @@ export class ConcreteResult<T> extends Result<T, Errors> {}
 
 
 
+export function objectEntries<T extends object>(obj: T): [keyof T, T[keyof T]][] {
+  return Object.entries(obj) as [keyof T, T[keyof T]][];
+}
 
 
 
 // ---------------------
+
+
+type Ok<T> = {
+  ok: true,
+  data: T
+}
+
+type ResultError<E> = {
+  ok: false
+  type: string
+  message: string,
+  value: E
+}
+
+
+export class SimpleResult<Success, Errors extends Record<string, ResultError<Success>>>{
+  private value: Ok<Success> | valuesOf<Errors>
+  constructor(v: Ok<Success> | valuesOf<Errors>){
+    this.value = v
+  }
+
+  isOk(): boolean {
+    return this.value.ok === true
+  }
+
+  ifOk<R>(v: (v: Success) => R): Optionable<Success> {
+    if(this.isOk()){
+      return new Optionable(this.value as Success)
+    }
+    return new Optionable(null)
+  }
+
+  private onError<R>(func: (v: valuesOf<Errors>) => R): R {
+    
+    return  func(this.value)
+  }
+
+  ifError(
+    v: {
+      [K in keyof Errors]: (v: Errors[K]) => unknown
+    }
+  ): Optionable<ReturnType<valuesOf<typeof v>>> {
+    if(this.isOk()){
+      return new Optionable(null)
+    }
+    return new Optionable(this.onError(error => {
+      return map(
+        objectEntries(v)
+        .find(([key, v]) => {
+          key === error.type 
+        }),
+      v => {return v?.[1](error)}
+    ) 
+    }))
+  }
+
+
+
+}

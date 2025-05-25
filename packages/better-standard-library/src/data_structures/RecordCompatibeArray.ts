@@ -1,6 +1,6 @@
 import type { TrueMap } from "../errors-as-values/mapThatIsLikeInRust";
-import type { Mapable } from "../errors-as-values/src/rust-like-pattern/mapable";
-import { ifNotNone, Optionable } from "../errors-as-values/src/rust-like-pattern/option";
+import type { Mapable } from "../errors-as-values/rust-like-pattern/mapable";
+import { ifNotNone, Optionable } from "../errors-as-values/rust-like-pattern/option";
 import type { Last } from "../metaprogramming/tuple/getLast";
 import { panic } from "../panic";
 import { GetSet } from "./getSetClass";

@@ -1,4 +1,4 @@
-import { ifNotNone } from "../errors-as-values/src/rust-like-pattern/option"
+import { ifNotNone } from "../errors-as-values/rust-like-pattern/option"
 import { valuesOf } from "../metaprogramming/valuesOf"
 import { Filter } from "../types/filter"
 import { UnknownRecord } from "../types/unknwonString"

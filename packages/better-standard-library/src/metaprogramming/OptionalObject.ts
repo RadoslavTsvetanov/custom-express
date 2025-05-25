@@ -1,4 +1,4 @@
-import type { Optionable } from "../errors-as-values/src/rust-like-pattern/option";
+import type { Optionable } from "../errors-as-values/rust-like-pattern/option";
 
 type Optional<T extends Record<string, unknown>> = {
     [Entry in keyof T]: Optionable<T[Entry]>

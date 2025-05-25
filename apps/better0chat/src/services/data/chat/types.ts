@@ -19,11 +19,3 @@ export interface ChatService {
     getChats: Chat[]
     getProjects: Project[]
 }
-
-
-function g<T,R, FirstReturn, SecondReturn>(v: R | T, g: {
-    first: (v: R) => FirstReturn,
-    second: (v: T) => SecondReturn
-}){
-
-}

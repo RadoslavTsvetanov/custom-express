@@ -1,4 +1,4 @@
-import { panic } from "../../../../panic";
+import { panic } from "../../../panic";
 import { type ILeftRight, LeftRight } from "../leftRight";
 import { Mapable } from "../mapable";
 import { none } from "../option";

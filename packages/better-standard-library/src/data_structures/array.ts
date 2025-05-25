@@ -1,4 +1,4 @@
-import { Tick } from "../errors-as-values/src/rust-like-pattern/tick";
+import { Tick } from "../errors-as-values/rust-like-pattern/tick";
 import { VCallback } from "../types/voidcallback";
 
 export class BetterArray<V> implements Tick<V[]>{

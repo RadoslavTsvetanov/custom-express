@@ -21,11 +21,6 @@ const keys = ["Ctrl", 1, 2, 3, 4, 5, 6, 7, 8, 9, "a", "b", "s" ] as const
 
 function subscribeToKeyboardClick(keyCombination: (typeof keys)[number][]){}
 
-
-//------------------
-// Chat
-// ------------
-
 export default function Home() {
   const state = {
     workspace: UseState(1),
@@ -92,7 +87,8 @@ export default function Home() {
                     { 
                       message: (typeof currentModel === "string") 
                       ? "hihi" 
-                      : <Switcher components={[<div>f</div>, "jiji"]}/>,
+                      : 
+                      <BatchResponse responses={[<div>f</div>, "jiji"]}/>,
                       isUser: false
                     }
                   ],
@@ -125,7 +121,6 @@ export default function Home() {
         ]}
         currentComponent={state.workspace.value - 1 }
       />
-      <BatchResponse responses={['0', 9]} />
     </div>
   );
 }
