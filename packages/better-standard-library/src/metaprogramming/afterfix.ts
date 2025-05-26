@@ -31,3 +31,8 @@ type IsExact<A, B> = // this is since any extends everything and everything exte
 
 export type WithDefault<TInitial, TMatch, TDefault> =
   IsExact<TInitial, TMatch> extends true ? TDefault : TInitial;
+
+export type SharedProperties<T, U> = {
+  [K in keyof T & keyof U]: T[K] extends U[K] ? (U[K] extends T[K] ? T[K] : never) : never;
+};
+

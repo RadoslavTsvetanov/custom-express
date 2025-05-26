@@ -72,3 +72,34 @@ export class FunctionOverload<Y extends OverloadsBase, T extends OverloadsImplBa
         }
     }
 }
+
+
+type Overloader<T extends readonly ZodObject<ZodRawShape>[]> = {
+    [K in keyof T]: (v: z.infer<T[K]>) => unknown
+}
+
+function overload<
+T extends readonly ZodObject<ZodRawShape>[],
+ R extends Overloader<T>
+>(
+    v: T,
+     d: R
+): <E extends number>(v: Parameters<R[E]>[0]) => ReturnType<R[E]> {}
+
+{
+const exmaple = overload(
+    [
+        z.object({
+            hi: z.string()
+        }),
+        z.object({
+            koko: z.number()
+        })
+    ] as const, // very importnat to place as const
+    [
+        v => {return ""},
+        v => {return 3}
+    ]
+)
+exmaple({hi: ""}) 
+}
