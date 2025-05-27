@@ -111,6 +111,4 @@ export function ifNotNone<T>(v: T | none, callback: (v: T) => void) {
   return new Optionable(v as T).ifCanBeUnpacked(callback)
 }
 
-export function ifNotNone<T, R>(v: T | none, callback: (v:T) => R): R {
-  
-}
+export function ifNotNone<T, R>(v: T | none, callback: (v:T) => R)
