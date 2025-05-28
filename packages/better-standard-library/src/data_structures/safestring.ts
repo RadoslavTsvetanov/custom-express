@@ -58,11 +58,11 @@ export class V1<Entries extends Entry<string>>{
 
 
 const ggg = new V1({
-    "kkk": v => ""
+    "dname": v => ""
 }, "")
 
 ggg.getParts()
-const hg  = ggg.getPart("kkk")
+const hg  = ggg.getPart("dname")
 
 
 

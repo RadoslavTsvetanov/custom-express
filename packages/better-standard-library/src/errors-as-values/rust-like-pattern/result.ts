@@ -123,7 +123,6 @@ export function objectEntries<T extends object>(obj: T): [keyof T, T[keyof T]][]
 
 // ---------------------
 
-
 type Ok<T> = {
   ok: true,
   data: T
@@ -136,48 +135,115 @@ type ResultError<E> = {
   value: E
 }
 
+// Helper type to get union of object values
+type ValuesOf<T> = T[keyof T]
 
-export class SimpleResult<Success, Errors extends Record<string, ResultError<Success>>>{
-  private value: Ok<Success> | valuesOf<Errors>
-  constructor(v: Ok<Success> | valuesOf<Errors>){
+// Helper type for object entries
+type ObjectEntries<T> = Array<[keyof T, T[keyof T]]>
+
+// Simple Optionable class for chaining
+class Optionable<T> {
+  constructor(private value: T | null) {}
+  
+  getValue(): T | null {
+    return this.value
+  }
+  
+  map<R>(fn: (value: T) => R): Optionable<R> {
+    if (this.value === null) {
+      return new Optionable<R>(null)
+    }
+    return new Optionable(fn(this.value))
+  }
+}
+
+// Helper functions
+function objectEntries<T extends Record<string, any>>(obj: T): ObjectEntries<T> {
+  return Object.entries(obj) as ObjectEntries<T>
+}
+
+function map<T, R>(value: T | undefined, fn: (value: T) => R): R | null {
+  if (value === undefined) return null
+  return fn(value)
+}
+
+export class SimpleResult<Success, Errors extends Record<string, ResultError<any>>> {
+  private value: Ok<Success> | ValuesOf<Errors>
+  
+  constructor(v: Ok<Success> | ValuesOf<Errors>) {
     this.value = v
   }
-
-  isOk(): boolean {
+  
+  isOk(): this is SimpleResult<Success, Errors> & { value: Ok<Success> } {
     return this.value.ok === true
   }
-
-  ifOk<R>(v: (v: Success) => R): Optionable<Success> {
-    if(this.isOk()){
-      return new Optionable(this.value as Success)
+  
+  ifOk<R>(fn: (v: Success) => R): Optionable<R> {
+    if (this.isOk()) {
+      return new Optionable(fn((this.value as Ok<Success>).data))
     }
     return new Optionable(null)
   }
-
-  private onError<R>(func: (v: valuesOf<Errors>) => R): R {
-    
-    return  func(this.value)
+  
+  private onError<R>(func: (v: ValuesOf<Errors>) => R): R {
+    return func(this.value as ValuesOf<Errors>)
   }
-
-  ifError(
-    v: {
-      [K in keyof Errors]: (v: Errors[K]) => unknown
-    }
-  ): Optionable<ReturnType<valuesOf<typeof v>>> {
-    if(this.isOk()){
+  
+  ifError<ErrorHandlers extends {
+    [K in keyof Errors]: (v: Errors[K]) => any
+  }>(
+    handlers: ErrorHandlers
+  ): Optionable<ReturnType<ValuesOf<ErrorHandlers>>> {
+    if (this.isOk()) {
       return new Optionable(null)
     }
+    
     return new Optionable(this.onError(error => {
-      return map(
-        objectEntries(v)
-        .find(([key, v]) => {
-          key === error.type 
-        }),
-      v => {return v?.[1](error)}
-    ) 
+      const entry = objectEntries(handlers)
+        .find(([key, handler]) => key === error.type)
+      
+      return map(entry, ([key, handler]) => handler(error as any))
     }))
   }
-
-
-
+  
+  // Additional utility methods
+  getData(): Success | null {
+    if (this.isOk()) {
+      return (this as Ok<Success>).data
+    }
+    return null
+  }
+  
+  getError(): ValuesOf<Errors> | null {
+    if (!this.isOk()) {
+      return this.value as ValuesOf<Errors>
+    }
+    return null
+  }
 }
+
+// Usage example:
+type UserNotFoundError = ResultError<{ userId: string }>
+type ValidationError = ResultError<{ field: string }>
+
+type UserErrors = {
+  userNotFound: UserNotFoundError
+  validation: ValidationError
+}
+
+// Example usage:
+const successResult = new SimpleResult<string, UserErrors>({ ok: true, data: "John Doe" })
+const errorResult = new SimpleResult<string, UserErrors>({
+  ok: false,
+  type: "userNotFound",
+  message: "User not found",
+  value: { userId: "123" }
+})
+
+// Using the result:
+successResult.ifOk(data => console.log(`Success: ${data}`))
+
+errorResult.ifError({
+  userNotFound: (err) => console.log(`User ${err.value.userId} not found`),
+  validation: (err) => console.log(`Validation error on field: ${err.value.field}`)
+})
