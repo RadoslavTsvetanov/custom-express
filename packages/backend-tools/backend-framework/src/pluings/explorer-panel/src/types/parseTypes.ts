@@ -1,1 +1,1 @@
-export type parseTypes = "json" | "yml"
+export type parseTypes = 'json' | 'yml'

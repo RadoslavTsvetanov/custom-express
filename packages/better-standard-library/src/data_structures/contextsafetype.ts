@@ -1,9 +1,10 @@
 export class TypeSafeClassBase<T> {
-  private value: T;
+  private value: T
   constructor(value: T) {
-    this.value = value;
+    this.value = value
   }
+
   getValue(): T {
-    return this.value;
+    return this.value
   }
 }

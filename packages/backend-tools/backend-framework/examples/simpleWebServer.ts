@@ -1,37 +1,36 @@
-import { ResponseStatus, WebRouter } from "../src/app";
-import express from "express";
-import { z } from "zod";
-import { FileName } from "../src/types/filename";
-import {builtIns} from "../src/builtins/main";
-import {Port} from "../src/types/networking/port";
-import { SubrouteDefinition } from "../src/types/openapi/main";
-import { ApiPath } from "../src/types/apiApth";
-import { Url } from "../src/types/networking/url";
-import { GetSet } from "../src/utils/getSetClass";
+import { z } from 'zod'
 
-interface DB {
-  getUser(userId: string): string | null;
+import { ResponseStatus, WebRouter } from '../src/app'
+import { builtIns } from '../src/builtins/main'
+import { ApiPath } from '../src/types/apiApth'
+import { FileName } from '../src/types/filename'
+import { Port } from '../src/types/networking/port'
+import { Url } from '../src/types/networking/url'
+import { SubrouteDefinition } from '../src/types/openapi/main'
+import { GetSet } from '../src/utils/getSetClass'
+
+type DB = {
+  getUser: (userId: string) => string | null
 }
 
 const port = 3003
 
 class ExampleDb implements DB {
   getUser(userId: string): string | null {
-    return "hi";
+    return 'hi'
   }
 }
 
-const app = new WebRouter({ db: new ExampleDb() }, new SubrouteDefinition(new Url(new GetSet("http://localhost:"+port)))); //TODO make the second argumnt to instead be amde internally 
+const app = new WebRouter({ db: new ExampleDb() }, new SubrouteDefinition(new Url(new GetSet(`http://localhost:${port}`)))) // TODO make the second argumnt to instead be amde internally
 
 app.withMiddlewares(
-  builtIns.middlewares.fileUploading.defaultFileUpload(new FileName("file"))
-);
+  builtIns.middlewares.fileUploading.defaultFileUpload(new FileName('file')),
+)
 
-
-const userRouter = app.createChildRouter({usersRepo: {}}, new ApiPath("/users"))
+const userRouter = app.createChildRouter({ usersRepo: {} }, new ApiPath('/users'))
 
 userRouter.post(
-  new ApiPath("/user"),
+  new ApiPath('/user'),
   {
     body: z.object({
       name: z.string(),
@@ -46,14 +45,14 @@ userRouter.post(
           statusCode: z.literal(400),
           hui: z.string().min(20),
         }),
-      ]
+      ],
     ),
     params: z.object({
       hui: z.string(),
       userId: z.string(),
-    }), 
+    }),
     query: z.object({
-      gg: z.string().min(30)
+      gg: z.string().min(30),
     }),
   },
   async (r) => {
@@ -62,16 +61,12 @@ userRouter.post(
       status: new ResponseStatus(201),
       data: {
         statusCode: 201 as 400,
-        hui: "User created"
+        hui: 'User created',
       },
-    };
-  }
+    }
+  },
 )
 
+export const cleint = await app.generateClient()
 
-export const cleint = await app.generateClient() 
-
-
-
-
-app.start(new Port(port));
+app.start(new Port(port))

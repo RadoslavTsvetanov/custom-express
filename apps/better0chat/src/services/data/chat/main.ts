@@ -1,3 +1,3 @@
-export interface IChatService {
-    
+export type IChatService = {
+
 }

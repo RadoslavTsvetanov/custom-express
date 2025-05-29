@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { Port } from "../../../src/types/networking/port";
-import { CustomWebSocketRouter } from "../../../src/builtins/websocket/server";
+import { z } from 'zod'
+
+import { CustomWebSocketRouter } from '../../../src/builtins/websocket/server'
 
 export const wsRouter = new CustomWebSocketRouter(
   {

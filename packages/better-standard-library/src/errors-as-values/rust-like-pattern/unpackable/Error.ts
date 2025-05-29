@@ -1,1 +1,1 @@
-class UnpakcableError{}
+class UnpakcableError {}

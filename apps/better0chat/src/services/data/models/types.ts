@@ -1,4 +1,4 @@
 export type ModelSettings = {
-    url: string,
-    name: string
+  url: string
+  name: string
 }

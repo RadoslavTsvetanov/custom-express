@@ -1,6 +1,6 @@
-import { HookBuilder } from "../../src/core/websocket/server/utilites/builders/HookBuilder";
-import { MessageThatCanBeReceivedBuilder } from "../../src/core/websocket/server/utilites/builders/MessageBuilder";
-import { hooks } from "./Hook";
+import { HookBuilder } from '../../src/core/websocket/server/utilites/builders/HookBuilder'
+import { MessageThatCanBeReceivedBuilder } from '../../src/core/websocket/server/utilites/builders/MessageBuilder'
+import { hooks } from './Hook'
 
 export const msg = new MessageThatCanBeReceivedBuilder(
   {
@@ -12,15 +12,15 @@ export const msg = new MessageThatCanBeReceivedBuilder(
       ordered: hooks,
       independent: [],
     },
-    onErrorr: () => "" as const,
+    onErrorr: () => '' as const,
   },
   (v) => {
     return {
       ...v,
-      koko: "",
-    };
-  }
-);
+      koko: '',
+    }
+  },
+)
 
 export const pukiMessage = new MessageThatCanBeReceivedBuilder(
   {
@@ -28,8 +28,8 @@ export const pukiMessage = new MessageThatCanBeReceivedBuilder(
       ordered: HookBuilder
         .new()
         .add({
-          key: "ojjoi" as const,
-          execute: (v) => ({ ko: "" }),
+          key: 'ojjoi' as const,
+          execute: v => ({ ko: '' }),
         })
         .build(),
       independent: [],
@@ -37,18 +37,16 @@ export const pukiMessage = new MessageThatCanBeReceivedBuilder(
     beforeHandler: {
       ordered: HookBuilder.new()
         .add({
-          key: "iooi" as const,
-          execute: (v) => ({ lolo: "" } as const),
+          key: 'iooi' as const,
+          execute: v => ({ lolo: '' } as const),
         } as const)
         .build(),
       independent: [],
     } as const,
-    onErrorr: v => "",
+    onErrorr: v => '',
   },
-  (v) => {console.log("ko") }
+  (v) => { console.log('ko') },
 ).build()
-
-
 
 export const newTrainData = new MessageThatCanBeReceivedBuilder(
   {
@@ -56,8 +54,8 @@ export const newTrainData = new MessageThatCanBeReceivedBuilder(
       ordered: HookBuilder
         .new()
         .add({
-          key: "ojjoi" as const,
-          execute: (v) => ({ ko: "" }),
+          key: 'ojjoi' as const,
+          execute: v => ({ ko: '' }),
         })
         .build(),
       independent: [],
@@ -65,14 +63,13 @@ export const newTrainData = new MessageThatCanBeReceivedBuilder(
     beforeHandler: {
       ordered: HookBuilder.new()
         .add({
-          key: "iooi" as const,
-          execute: (v) => ({ lolo: "" } as const),
+          key: 'iooi' as const,
+          execute: v => ({ lolo: '' } as const),
         } as const)
         .build(),
       independent: [],
     } as const,
-    onErrorr: v => "",
+    onErrorr: v => '',
   },
-  (v) => {console.log("ko") }
+  (v) => { console.log('ko') },
 ).build()
-

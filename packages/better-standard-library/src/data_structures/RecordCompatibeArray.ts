@@ -1,139 +1,134 @@
-import type { TrueMap } from "../errors-as-values/mapThatIsLikeInRust";
-import type { Mapable } from "../errors-as-values/rust-like-pattern/mapable";
-import { ifNotNone, Optionable } from "../errors-as-values/rust-like-pattern/option";
-import type { Last } from "../metaprogramming/tuple/getLast";
-import { panic } from "../panic";
-import { GetSet } from "./getSetClass";
+import type { Last } from '../metaprogramming/tuple/getLast'
 
-type WithKey<T> = {key: string} & T
+import { Optionable } from '../errors-as-values/rust-like-pattern/option'
+import { panic } from '../panic'
+import { GetSet } from './getSetClass'
+
+type WithKey<T> = { key: string } & T
 
 type Widen<T> = T extends string
   ? string
   : T extends number
-  ? number
-  : T extends boolean
-  ? boolean
-  : T extends Array<infer U>
-  ? Array<Widen<U>>
-  : T extends object
-  ? { [K in keyof T]: Widen<T[K]> }
-  : T;
+    ? number
+    : T extends boolean
+      ? boolean
+      : T extends Array<infer U>
+        ? Array<Widen<U>>
+        : T extends object
+          ? { [K in keyof T]: Widen<T[K]> }
+          : T
 
 export class OrderedRecordBase<
   V extends readonly Schema[],
-  Schema extends { key: string }
-> extends Array<Schema>{
+  Schema extends { key: string },
+> extends Array<Schema> {
   public get getElementsType(): V {
     // use only as means to gget the type of the elemnts inside e.g. get the V generic
-    return this.elements.value;
+    return this.elements.value
   }
-  public readonly elements: GetSet<V> = new GetSet<V>([] as unknown as V);
+
+  public readonly elements: GetSet<V> = new GetSet<V>([] as unknown as V)
 
   constructor(elements: V) {
     super(...elements)
-    this.elements.setV(elements);
+    this.elements.setV(elements)
   }
 
   public getByPosition<Index extends number>(
-    index: Index
-  ): Optionable<V[Index]>{
-    return panic("not implemented yet")
+    index: Index,
+  ): Optionable<V[Index]> {
+    return panic('not implemented yet')
   }
 
   public get toNormalObject(): {
-    [K in V[number]["key"]]: Omit<Extract<V[number], { key: K }>, "key">;
+    [K in V[number]['key']]: Omit<Extract<V[number], { key: K }>, 'key'>;
   } {
     return this.elements.value.reduce((acc, item) => {
-      acc[item.key] = item; // We can safely assume `item` matches the type since it's of type `V[number]`
-      return acc;
-    }, {} as { [K in V[number]["key"]]: Omit<Extract<V[number], { key: K }>, "key"> });
+      acc[item.key] = item // We can safely assume `item` matches the type since it's of type `V[number]`
+      return acc
+    }, {} as { [K in V[number]['key']]: Omit<Extract<V[number], { key: K }>, 'key'> })
   }
 
-  get(key: V[number]["key"]): Optionable<Schema> {
-    return new Optionable(this.elements.value.find((el) => el.key === key));
+  get(key: V[number]['key']): Optionable<Schema> {
+    return new Optionable(this.elements.value.find(el => el.key === key))
   }
 
   placeBefore<NewValueKey extends string>(
-    key: V[number]["key"],
-    newValue: Omit<V[number], "key"> & { key: NewValueKey }
+    key: V[number]['key'],
+    newValue: Omit<V[number], 'key'> & { key: NewValueKey },
   ) {
     return this.add(
       newValue,
-      this.elements.value.findIndex((el) => el.key === key)
-    );
+      this.elements.value.findIndex(el => el.key === key),
+    )
   }
 
   placeAfter<NewValueKey extends string>(
-    key: V[number]["key"],
-    newValue: Omit<V[number], "key"> & { key: NewValueKey }
+    key: V[number]['key'],
+    newValue: Omit<V[number], 'key'> & { key: NewValueKey },
   ) {
     return this.add(
       newValue,
-      this.elements.value.findIndex((el) => el.key === key) + 1
-    );
+      this.elements.value.findIndex(el => el.key === key) + 1,
+    )
   }
 
-  getIndexOfKey(key: V[number]["key"]): number | undefined {
-    return this.elements.value.findIndex((el) => el.key === key);
+  getIndexOfKey(key: V[number]['key']): number | undefined {
+    return this.elements.value.findIndex(el => el.key === key)
   }
 
   set(value: V[number]): void {
-    const index = this.elements.value.findIndex((el) => el.key === value.key);
+    const index = this.elements.value.findIndex(el => el.key === value.key)
     if (index !== -1) {
       this.elements.value.map((array) => {
-        array[index] = value;
-        return array;
-      });
+        array[index] = value
+        return array
+      })
     }
   }
 
+  add<
+    NewKey extends string,
+    T extends Widen<AdditionalData> & { key: NewKey },
+    AdditionalData extends Omit<Schema, 'key'>,
+  >(
+    v: T,
+    position?: number,
+  ): OrderedRecord<readonly [...V, T], Schema> {
+    if (!this.get(v.key).is_none()) {
+      throw new Error('key already exists')
+    }
 
-add<
-  NewKey extends string,
-  T extends Widen<AdditionalData> & { key: NewKey },
-  AdditionalData extends Omit<Schema, "key">
->(
-  v: T,
-  position?: number
-): OrderedRecord<readonly [...V, T], Schema> {
-  if (!this.get(v.key).is_none()) {
-    throw new Error("key already exists");
-  }
+    let newElements: readonly [...V, T]
 
-  let newElements: readonly [...V, T];
-
-  if (position === undefined) {
+    if (position === undefined) {
     // Append to the end
-    newElements = [...this.elements.value, v] as readonly [...V, T];
-  } else {
+      newElements = [...this.elements.value, v] as readonly [...V, T]
+    }
+    else {
     // Insert at a specific position
-    newElements = [
-      ...this.elements.value.slice(0, position),
-      v,
-      ...this.elements.value.slice(position)
-    ] as const;
+      newElements = [
+        ...this.elements.value.slice(0, position),
+        v,
+        ...this.elements.value.slice(position),
+      ] as const
+    }
+
+    return new OrderedRecordBase(newElements)
   }
-
-  return new OrderedRecordBase(newElements);
-}
-
 }
 
 export class OrderedRecord
-  <
-    V extends readonly Schema[],
-    Schema extends { key: string }
-  >
+<
+  V extends readonly Schema[],
+  Schema extends { key: string },
+>
   extends OrderedRecordBase
   <
-    V, 
-    Schema 
+    V,
+    Schema
   > {
-
   public get lastElement(): Last<[V]> {
     return this.elements.value[this.elements.value.length - 1]
   }
-
 }
-
-

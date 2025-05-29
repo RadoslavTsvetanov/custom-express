@@ -1,34 +1,33 @@
-import { WebsocketUrl } from "../../../src/types/networking/urls/websocket"
-import { wsRouter } from "./definition"
+import { WebsocketUrl } from '../../../src/types/networking/urls/websocket'
+import { wsRouter } from './definition'
 
-wsRouter.getCLientBuilder(new WebsocketUrl("ws://localhost:4000")).setupListeners({
+wsRouter.getCLientBuilder(new WebsocketUrl('ws://localhost:4000')).setupListeners({
   helloRoute: {
     sendHelloTheOtherListeners: {
-      handler: async v => {
-      console.log(v.message)
-      }
+      handler: async (v) => {
+        console.log(v.message)
+      },
     },
     sayByeToRestOfTheListeners: {
-      handler: async v => {
-      console.log(v)
-      }
-    }
+      handler: async (v) => {
+        console.log(v)
+      },
+    },
   },
   userRoute: {
     deletedUser: {
-      handler: async v => {
-      v
-      }
+      handler: async (v) => {
+        v
+      },
     },
     invalidUserDetected: {
-      handler: async v => {
-      v
+      handler: async (v) => {
+        v
       },
-      unsafe: true
-    }
-  }
+      unsafe: true,
+    },
+  },
 })
-
 
 // const wsClient = wsRouter.generateClient()
 

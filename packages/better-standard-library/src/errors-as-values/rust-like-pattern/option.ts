@@ -1,13 +1,13 @@
-import { Callback, VCallback } from "../../types/voidcallback";
-import { logger } from "../utils/console";
-import { type ILeftRight, LeftRight } from "./leftRight";
-import type { Tick } from "./tick";
-import { CustomUnpackable,type IUnpackable } from "./unpackable/unpackable";
+import type { Callback, VCallback } from '../../types/voidcallback'
+import type { Tick } from './tick'
+import type { IUnpackable } from './unpackable/unpackable'
 
-export type none = null | undefined;
+import { CustomUnpackable } from './unpackable/unpackable'
 
-export function Try<V, IfNoneReturn, IfNotNotNoneReturn> /* casing is like this since try is reserved word */(v: V | none, config: {
-  ifNone: () => IfNoneReturn,
+export type none = null | undefined
+
+export function Try<V, IfNoneReturn, IfNotNotNoneReturn>/* casing is like this since try is reserved word */(v: V | none, config: {
+  ifNone: () => IfNoneReturn
   ifNotNone: Callback<IfNotNotNoneReturn, V>
 }): IfNoneReturn | IfNotNotNoneReturn {
   if (v === undefined || v === null) {
@@ -16,10 +16,9 @@ export function Try<V, IfNoneReturn, IfNotNotNoneReturn> /* casing is like this 
   return config.ifNotNone(v)
 }
 
-
-export interface IOptionable<T> extends IUnpackable<T> {
-  is_none: () => boolean;
-}
+export type IOptionable<T> = {
+  is_none: () => boolean
+} & IUnpackable<T>
 
 // export class Optionable<T> implements IOptionable<T>{
 //     private value: T | none = null
@@ -59,56 +58,54 @@ export interface IOptionable<T> extends IUnpackable<T> {
 //    }
 // }
 
-//Plan -> write tests for this and then remake it to inherit since currently it will easier to test it whether it behaves cirrectly and if not debugging will be easier
-
+// Plan -> write tests for this and then remake it to inherit since currently it will easier to test it whether it behaves cirrectly and if not debugging will be easier
 
 export const statics = {
-  messageForWhenOptionIsNone: "Option is None "
+  messageForWhenOptionIsNone: 'Option is None ',
 }
 
-
-export class Optionable<T> extends CustomUnpackable<T> implements Tick<CustomUnpackable<T>>{
+export class Optionable<T> extends CustomUnpackable<T> implements Tick<CustomUnpackable<T>> {
   constructor(v: T | none) {
     super(v as T, (v) => {
-      return !this.is_none() //! chatbots will say this does not work ignore it, it works as expected
-    });
-    this.messageWhenYouCntUnpack = statics.messageForWhenOptionIsNone 
+      return !this.is_none() // ! chatbots will say this does not work ignore it, it works as expected
+    })
+    this.messageWhenYouCntUnpack = statics.messageForWhenOptionIsNone
   }
 
   public get optionValue(): T {
-    return 
+
   }
 
   is_none(): boolean {
-    return this.value === null || this.value === undefined;
+    return this.value === null || this.value === undefined
   }
 
   ifNone(v: () => void): void {
     if (this.is_none()) {
-    v()
+      v()
     }
   }
 
-  tick(callback: VCallback<CustomUnpackable<T>>){
+  tick(callback: VCallback<CustomUnpackable<T>>) {
     callback(this)
     return this
   }
+
   try<IfNonNoneReturnType, IfNoneReturnType>(options: {
     ifNotNone: (v: T) => IfNonNoneReturnType
-    ifNone: () => IfNoneReturnType 
+    ifNone: () => IfNoneReturnType
   }): IfNonNoneReturnType | IfNoneReturnType {
     if (this.is_none()) {
-      return options.ifNone();
-    } else {
+      return options.ifNone()
+    }
+    else {
       return options.ifNotNone(this.value)
     }
   }
-
 }
-
 
 export function ifNotNone<T>(v: T | none, callback: (v: T) => void) {
   return new Optionable(v as T).ifCanBeUnpacked(callback)
 }
 
-export function ifNotNone<T, R>(v: T | none, callback: (v:T) => R)
+export function ifNotNone<T, R>(v: T | none, callback: (v: T) => R)

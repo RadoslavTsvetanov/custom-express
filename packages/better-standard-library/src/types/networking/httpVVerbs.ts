@@ -1,8 +1,7 @@
-export type HttpVerb = 
-   "get"
-  | "post"
-  | "put"
-  | "delete"
-  |  "patch"
- | "options"
-
+export type HttpVerb =
+  'get'
+  | 'post'
+  | 'put'
+  | 'delete'
+  | 'patch'
+  | 'options'

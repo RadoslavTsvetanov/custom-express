@@ -1,16 +1,17 @@
-import { z } from "zod";
-import { pukiMessage } from "./Message";
-import { HookBuilder } from "../../src/core/websocket/server/utilites/builders/HookBuilder";
-import { CustomWebSocketRouter } from "../../src/core/websocket/server/app";
+import { z } from 'zod'
 
-export const router = new CustomWebSocketRouter({}).addChannel("channel-1", {
+import { CustomWebSocketRouter } from '../../src/core/websocket/server/app'
+import { HookBuilder } from '../../src/core/websocket/server/utilites/builders/HookBuilder'
+import { pukiMessage } from './Message'
+
+export const router = new CustomWebSocketRouter({}).addChannel('channel-1', {
   hooks: {
     beforeHandle: {
       ordered: HookBuilder
         .new()
         .add({
-          key: "lolo",
-          execute: (v) => ({ hi: "" } as const),
+          key: 'lolo',
+          execute: v => ({ hi: '' } as const),
         })
         .build(),
       independent: [],
@@ -24,4 +25,4 @@ export const router = new CustomWebSocketRouter({}).addChannel("channel-1", {
       puki: z.string(),
     }),
   },
-});
+})

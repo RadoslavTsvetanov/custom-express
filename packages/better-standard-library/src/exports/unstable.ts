@@ -1,4 +1,5 @@
-import { GetSet } from './../data_structures/getSetClass';
+import { GetSet } from './../data_structures/getSetClass'
+
 export {
-    GetSet
+  GetSet,
 }

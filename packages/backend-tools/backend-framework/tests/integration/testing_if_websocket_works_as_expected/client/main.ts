@@ -1,24 +1,26 @@
-import { Port, WebsocketUrl } from "@custom-express/better-standard-library";
-import { router } from "../../../dummmies/app";
+import { Port, WebsocketUrl } from '@custom-express/better-standard-library'
+
+import { router } from '../../../dummmies/app'
+
 const clientBuilder = router.getCLientBuilder(WebsocketUrl.unsafe.withLocalhost(new Port(4000)))
 const sender = clientBuilder.generateClient()
 
-sender["channel-1"].puki({
-    lolo: ""
+sender['channel-1'].puki({
+  lolo: '',
 })
 
 async function h<T>(a: T) {
-    console.log(a)
+  console.log(a)
 }
 
 const listener = clientBuilder.setupListeners({
-    "channel-1": {
-        "puki": {handler: h}
-    },
-    "onError": {
-        "unprocessableMessage": h 
-    }
-}) 
+  'channel-1': {
+    puki: { handler: h },
+  },
+  'onError': {
+    unprocessableMessage: h,
+  },
+})
 
 // // throw new Error("")
 // const ws = new WebSocket("ws://localhost:4000");

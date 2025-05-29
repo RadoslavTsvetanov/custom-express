@@ -45,10 +45,8 @@
 //     return this.channels;
 //   }
 
-
-
 //   guard<NewHookName extends string>(config: { schema: ZodObject<ZodRawShape>, name: NewHookName, type: string }) {
-//     return map(config,({ name, type, schema }) => 
+//     return map(config,({ name, type, schema }) =>
 
 //       this.hook({
 //         name,
@@ -68,10 +66,8 @@
 //     )
 //   }
 
-
-  
 //   match<NewHookName extends string>(config: { schema: ZodObject<ZodRawShape>, name: NewHookName, type: string }) {
-//     return map(config,({ name, type, schema }) => 
+//     return map(config,({ name, type, schema }) =>
 
 //       this.hook({
 //         name,
@@ -93,9 +89,6 @@
 
 // }
 
-
-
-
 // export class BuilderEnhanced<
 //     ChannelNames extends string,
 //     Channels extends Record<
@@ -115,14 +108,14 @@
 // > extends Extended<
 
 //     ChannelNames,
-//     Channels , 
+//     Channels ,
 //     Context  ,
 //     ContextKeys ,
 //     BeforeHooks,
-//     LastHookReturnType 
+//     LastHookReturnType
 // ,
 // LastHook ,
-//     BaseRequest 
+//     BaseRequest
 // >{
 //   constructor() {
 //     super()

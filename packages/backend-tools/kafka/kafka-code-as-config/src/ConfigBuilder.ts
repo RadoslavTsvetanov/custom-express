@@ -1,17 +1,18 @@
-import type { ChannelsDefault } from "../types";
-import { KafkaClient } from "./cleints/ClientBuilder";
+import type { ChannelsDefault } from '../types'
+
+import { KafkaClient } from './cleints/ClientBuilder'
 
 export class KafkaConfig<Channels extends ChannelsDefault> {
-  private channels: Channels;
+  private channels: Channels
   constructor(channels: Channels) {
-    this.channels = channels;
+    this.channels = channels
   }
 
   public get channel(): Channels {
-    return this.channels;
+    return this.channels
   }
 
   public generateClient() {
-    return new KafkaClient.KafkaConsumer<Channels>({});
+    return new KafkaClient.KafkaConsumer<Channels>({})
   }
 }

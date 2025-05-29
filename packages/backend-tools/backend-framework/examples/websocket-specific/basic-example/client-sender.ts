@@ -1,13 +1,13 @@
-import { WebsocketUrl } from "../../../src/types/networking/urls/websocket";
-import { wsRouter } from "./definition";
+import { WebsocketUrl } from '../../../src/types/networking/urls/websocket'
+import { wsRouter } from './definition'
 
 const client = wsRouter
-  .getCLientBuilder(new WebsocketUrl("ws://localhost:4000"))
+  .getCLientBuilder(new WebsocketUrl('ws://localhost:4000'))
 
 client.generateClient()
 
-  .helloRoute.newData({
-  message:
-    "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
-});
-
+  .helloRoute
+  .newData({
+    message:
+    'ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss',
+  })

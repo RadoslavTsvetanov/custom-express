@@ -22,69 +22,70 @@ npm install
 ### Basic Usage
 
 ```typescript
-import { Result, Ok, Err } from 'better-standard';
+import { Err, Ok, Result } from 'better-standard'
 
 // Basic result creation
-const success = Ok(42);
-const failure = Err('Something went wrong');
+const success = Ok(42)
+const failure = Err('Something went wrong')
 
 // Pattern matching
 const value = success.match({
-  Ok: (val) => val,
-  Err: (err) => 0
-});
+  Ok: val => val,
+  Err: err => 0
+})
 
 // Chaining operations
 const result = success
-  .map((val) => val * 2)
-  .mapErr((err) => `Error: ${err}`);
+  .map(val => val * 2)
+  .mapErr(err => `Error: ${err}`)
 ```
 
 ### Error Handling
 
 ```typescript
-import { Result, Ok, Err } from 'better-standard';
+import { Err, Ok, Result } from 'better-standard'
 
 function divide(a: number, b: number): Result<number, string> {
   if (b === 0) {
-    return Err('Cannot divide by zero');
+    return Err('Cannot divide by zero')
   }
-  return Ok(a / b);
+  return Ok(a / b)
 }
 
 // Using the function
 const result = divide(10, 2)
-  .andThen((val) => divide(val, 0))
-  .mapErr((err) => `Calculation failed: ${err}`);
+  .andThen(val => divide(val, 0))
+  .mapErr(err => `Calculation failed: ${err}`)
 ```
 
 ### TypeScript Integration
 
 ```typescript
-import { Result, Ok, Err } from 'better-standard';
+import { Err, Ok, Result } from 'better-standard'
 
-interface User {
-  id: number;
-  name: string;
+type User = {
+  id: number
+  name: string
 }
 
 function fetchUser(id: number): Result<User, string> {
   // Implementation
-  return Ok({ id, name: 'John Doe' });
+  return Ok({ id, name: 'John Doe' })
 }
 
 // Type-safe error handling
 const user = fetchUser(1)
-  .map((user) => ({
+  .map(user => ({
     ...user,
     fullName: user.name
   }))
-  .unwrapOrThrow();
+  .unwrapOrThrow()
 ```
 
 ## Contributing
 
 Feel free to add more examples or improve existing ones. Each example should:
+
 1. Be self-contained
 2. Demonstrate a specific concept
 3. Include proper error handling

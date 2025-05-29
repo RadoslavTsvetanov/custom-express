@@ -1,14 +1,11 @@
-import {URecord, With} from "@custom-express/better-standard-library";
-import {WebSocket} from "bun";
+import type { URecord, With } from '@custom-express/better-standard-library'
+import type { WebSocket } from 'bun'
 
 // -------------------------------------
 // Utility Types
 // -------------------------------------
 
-
-
-
-export type WithKey<T extends URecord> = With<T, "key", string>;
+export type WithKey<T extends URecord> = With<T, 'key', string>
 // -------------------------------------
 // Message & Channel Types
 // -------------------------------------
@@ -16,14 +13,13 @@ export type WithKey<T extends URecord> = With<T, "key", string>;
 // Hook Types
 // -------------------------------------
 
-
 export type TypeSafeWebsocket<
-    MessagesItCanSend = Record<string, unknown>
+  MessagesItCanSend = Record<string, unknown>,
 > = {
-    raw: WebSocket,
-    safe: WebSocket & {
-        send: {
-            [Key in keyof MessagesItCanSend]: (v: MessagesItCanSend[Key]) => void
-        }
-    },
+  raw: WebSocket
+  safe: WebSocket & {
+    send: {
+      [Key in keyof MessagesItCanSend]: (v: MessagesItCanSend[Key]) => void
+    }
+  }
 }

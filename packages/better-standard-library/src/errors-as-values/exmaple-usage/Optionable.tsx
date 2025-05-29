@@ -1,18 +1,13 @@
-import { LeftRight } from "../rust-like-pattern/leftRight";
-import react, { useEffect, useState } from "react";
-import {ConcreteResult, CustomError, Result} from "../rust-like-pattern/result"
-import axios from "axios";
-import { Optionable } from "../rust-like-pattern/option";
+import type { Optionable } from '../rust-like-pattern/option'
+import type { ConcreteResult } from '../rust-like-pattern/result'
 
 /*
 
-this is more of an example of how to use multiple of the types in tanthem but it still shows how to use the optional type 
+this is more of an example of how to use multiple of the types in tanthem but it still shows how to use the optional type
 
 */
 
-
 type WebRequest<RequestResponse> = Optionable<ConcreteResult<RequestResponse>>
-
 
 // function useCustomFetchHook<RequestResponseType>(fetchData: () => Promise<RequestResponseType>): WebRequest<RequestResponseType> {
 //     const [ data, setData ] = useState<WebRequest<RequestResponseType>>(new Optionable(new ConcreteResult<RequestResponseType>(new Optionable<RequestResponseType>(null), new Optionable(new CustomError("still loading ")))))
@@ -27,8 +22,6 @@ type WebRequest<RequestResponse> = Optionable<ConcreteResult<RequestResponse>>
 //                 setData(new Optionable(new Result(new Optionable<RequestResponseType>(null), new Optionable(err))))
 //             })
 
-        
-
 //     },[])
 
 //     return data
@@ -42,7 +35,7 @@ type WebRequest<RequestResponse> = Optionable<ConcreteResult<RequestResponse>>
 //     try {
 //         userData.unpack()
 //     } catch (err) {
-        
+
 //    }
 
 //     return (

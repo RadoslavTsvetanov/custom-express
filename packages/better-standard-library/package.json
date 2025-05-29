@@ -1,8 +1,11 @@
 {
   "name": "@custom-express/better-standard-library",
-  "version": "1.0.0",
   "type": "module",
+  "version": "1.0.0",
   "module": "index.ts",
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
   "dependencies": {
     "@types/bun": "latest",
     "bun-types": "latest",
@@ -10,8 +13,5 @@
   },
   "devDependencies": {
     "vitest": "^0.34.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
   }
 }

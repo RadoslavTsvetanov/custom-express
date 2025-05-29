@@ -1,8 +1,6 @@
 # Created using T3 app
 
-
 # Conventions
-
 
 # components inside pages
 
