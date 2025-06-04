@@ -25,3 +25,6 @@
 [submodule "packages/better-standard"]
 	path = packages/better-standard
 	url = https://github.com/DockerByTheGo/improved-standard-library.git
+[submodule "packages/backend-tools/custom-backend/lib"]
+	path = packages/backend-tools/custom-backend/lib
+	url = https://github.com/DockerByTheGo/blaze-library.git

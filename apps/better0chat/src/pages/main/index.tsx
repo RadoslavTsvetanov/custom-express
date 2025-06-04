@@ -4,13 +4,11 @@ import { Menu } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import type { ChatState } from "~/pages/main/components/chat";
-import type { EditorState as EditorStateType } from "~/pages/main/components/editor";
-
+import * as TWM from "@custom-express/browser-tiling-window-manager"
 import { Switcher } from "~/components/custom/switcher";
 import { BatchResponse } from "~/pages/main/components/batchResponse";
 import { Chat } from "~/pages/main/components/chat";
-import { PaneInstance } from "~/pages/main/components/editor";
-import { TilingWindowEditor } from "~/pages/main/components/TilingWindowEditor";
+
 // ---
 // Menu
 // ---
@@ -28,8 +26,8 @@ export default function Home() {
                 { messages: [{ message: "string", isUser: false }] },
             ],
         }),
-        editor: UseState<EditorStateType>({
-            pane: new PaneInstance({ type: "content", content: "" }),
+        editor: UseState<TWM.EditorState>({
+            pane: new TWM.PaneInstance({ type: "content", content: "" }),
         }),
     };
 
@@ -71,7 +69,7 @@ export default function Home() {
             <Menu />
             <Switcher
                 components={[
-                    <TilingWindowEditor
+                    <TWM.TilingWindowEditor
                         key={0}
                         chatState={state.chat.value}
                         setChatState={state.chat.set}
