@@ -1,29 +1,35 @@
 {
-  "name": "custom-express",
-  "type": "module",
-  "version": "1.0.0",
-  "private": true,
-  "module": "index.ts",
-  "scripts": {
-    "start": "bun run index.ts",
-    "lint": "bunx eslint .",
-    "lint-fix": "bunx eslint . --fix"
-  },
-  "workspaces": [
-    "packages/**/*",
-    "apps/**/*"
-  ],
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@elysiajs/swagger": "^1.2.2",
-    "tsd": "^0.32.0",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
-    "@antfu/eslint-config": "^4.13.2",
-    "@types/bun": "latest",
-    "eslint-plugin-format": "^1.0.1"
-  }
+    "name": "custom-express",
+    "type": "module",
+    "version": "1.0.0",
+    "private": true,
+    "module": "index.ts",
+    "scripts": {
+        "start": "bun run index.ts",
+        "lint": "bunx eslint .",
+        "lint-fix": "bunx eslint . --fix",
+        "prepare": "husky"
+    },
+    "workspaces": [
+        "packages/**/*",
+        "apps/**/*"
+    ],
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@elysiajs/swagger": "^1.2.2",
+        "ts-pattern": "^5.7.1",
+        "tsd": "^0.32.0",
+        "zod": "^3.24.2"
+    },
+    "devDependencies": {
+        "@antfu/eslint-config": "^4.13.2",
+        "@types/bun": "latest",
+        "eslint-plugin-format": "^1.0.1",
+        "lint-staged": ""
+    },
+    "lint-staged": {
+        "*": "bun run lint"
+    }
 }

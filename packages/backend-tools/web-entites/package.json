@@ -1,11 +1,11 @@
 {
-  "name": "web-entites",
-  "type": "module",
-  "module": "index.ts",
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
-  }
+    "name": "web-entites",
+    "type": "module",
+    "module": "index.ts",
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    }
 }

@@ -1,12 +1,12 @@
 {
-  "name": "reactive-entities",
-  "type": "module",
-  "module": "index.ts",
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "devDependencies": {
-    "@custom-express/better-standard-library": "1.0.0",
-    "@types/bun": "latest"
-  }
+    "name": "reactive-entities",
+    "type": "module",
+    "module": "index.ts",
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "devDependencies": {
+        "@custom-express/better-standard-library": "1.0.0",
+        "@types/bun": "latest"
+    }
 }

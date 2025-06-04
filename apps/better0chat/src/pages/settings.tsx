@@ -1,11 +1,11 @@
-function getUrls()
+function getUrls();
 
 export default function Home() {
-  const models = usestate()
+    const models = usestate();
 
-  return (
-    <div>
-      hi
-    </div>
-  )
+    return (
+        <div>
+            hi
+        </div>
+    );
 }

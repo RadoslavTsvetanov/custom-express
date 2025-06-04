@@ -1,21 +1,21 @@
-export type ProjectID = string
+export type ProjectID = string;
 
 export type Message = {
-  isUser: boolean
-  message: string[]
-}
+    isUser: boolean;
+    message: string[];
+};
 
 export type Chat = {
-  project: ProjectID
-  messages: Message[]
-}
+    project: ProjectID;
+    messages: Message[];
+};
 
 export type Project = {
-  chats: Chat[]
-  projects: Project[]
-}
+    chats: Chat[];
+    projects: Project[];
+};
 
 export type ChatService = {
-  getChats: Chat[]
-  getProjects: Project[]
-}
+    getChats: Chat[];
+    getProjects: Project[];
+};

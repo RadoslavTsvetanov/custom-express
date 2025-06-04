@@ -1,1 +1,1 @@
-export type AiResponse = string
+export type AiResponse = string;

@@ -10,19 +10,19 @@ this is mainly for directly exposing memebrs of classes so that you can observe 
 
 ```ts
 class SomeService {
-  private internalState: number = 42
+    private internalState: number = 42;
 
-  public _devInternalState?: number
+    public _devInternalState?: number;
 
-  constructor() {
-    if (process.env.NODE_ENV === 'development') {
-      this._devInternalState = this.internalState
+    constructor() {
+        if (process.env.NODE_ENV === "development") {
+            this._devInternalState = this.internalState;
+        }
     }
-  }
 
-  doSomething() {
+    doSomething() {
     // logic here...
-  }
+    }
 }
 ```
 
@@ -31,50 +31,50 @@ class SomeService {
 for example you expose a method which serves as a debug utility
 
 ```ts
-import { OrderedRecord } from '@custom-express/better-standard-library'
+import { OrderedRecord } from "@custom-express/better-standard-library";
 
-import { HookOrderedRecord, HookOrderedRecordEntry } from '../../../types/Hooks/main'
-import { MessageHandler } from '../../../types/Message/main'
-import { HookBuilder } from './HookBuilder'
+import { HookOrderedRecord, HookOrderedRecordEntry } from "../../../types/Hooks/main";
+import { MessageHandler } from "../../../types/Message/main";
+import { HookBuilder } from "./HookBuilder";
 
 export class MessageThatCanBeReceivedBuilder<
-  Context,
-  BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,
-  MsgHandler extends MessageHandler<BeforeHooks['lastElement'], unknown, BeforeHooks>
+    Context,
+    BeforeHooks extends HookOrderedRecord<HookOrderedRecordEntry[]>,
+    MsgHandler extends MessageHandler<BeforeHooks["lastElement"], unknown, BeforeHooks>
 > {
-  public _message: MsgHandler
-  public _hooks: BeforeHooks
-  public __l: BeforeHooks // server no real purpose outside of provding a quick way to observer some state for pure debug purposes
-  constructor(name: string, hooks: BeforeHooks, handler: ReturnType<MsgHandler['handler']>) {
+    public _message: MsgHandler;
+    public _hooks: BeforeHooks;
+    public __l: BeforeHooks; // server no real purpose outside of provding a quick way to observer some state for pure debug purposes
+    constructor(name: string, hooks: BeforeHooks, handler: ReturnType<MsgHandler["handler"]>) {
 
-  }
+    }
 
-  addHook()
+    addHook();
 
-  createHookBuilder()
+    createHookBuilder();
 }
 
 const hooks = HookBuilder
-  .new() // using new is the reccomended way since it is a cleaner although
-  .add({ key: 'ok', execute: v => '' } as const)
-  .add({ key: 'hohoh', execute: (v) => { return {} as const } } as const)
-  .build()
+    .new() // using new is the reccomended way since it is a cleaner although
+    .add({ key: "ok", execute: v => "" } as const)
+    .add({ key: "hohoh", execute: (v) => { return {} as const; } } as const)
+    .build();
 
 {
 
 }
 
 {
-  const newMsg = new MessageThatCanBeReceivedBuilder(
-    'hi',
+    const newMsg = new MessageThatCanBeReceivedBuilder(
+        "hi",
 
-    hooks,
-    (v) => {}
-  )
+        hooks,
+        (v) => {}
+    );
 
-  {
-    const g = newMsg.__l.elements.value[0]
-  }
+    {
+        const g = newMsg.__l.elements.value[0];
+    }
 }
 ```
 

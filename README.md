@@ -163,12 +163,12 @@ for example
 
 ```ts
 definition.add({
-  local: {
-    auth: {
-      /// your hooks
-    } // here you will get intellisense with all the channels you can send messages to
-  }
-}) // the method is overloaded
+    local: {
+        auth: {
+            /// your hooks
+        } // here you will get intellisense with all the channels you can send messages to
+    }
+}); // the method is overloaded
 ```
 
 ##### Listener
@@ -306,11 +306,11 @@ this is helpful if you use a middleware which applies some kind of hook and you 
 
 ```ts
 // lib code
-const ingMiddleware = app.validate('8998').validate('8998')
+const ingMiddleware = app.validate("8998").validate("8998");
 
 // your code
 
-app2.use(ingMidlleware)
+app2.use(ingMidlleware);
 ```
 
 and you want to do somethign before omnimaning but after jaking you can do it like this
@@ -400,52 +400,52 @@ for the websockes its still there but under async api
 ```yml
 asyncapi: 2.6.0
 info:
-  title: Notification Service
-  version: 1.0.0
-  description: Sends notifications to users via a message broker.
-  contact:
-    name: API Support
-    email: support@example.com
+    title: Notification Service
+    version: 1.0.0
+    description: Sends notifications to users via a message broker.
+    contact:
+        name: API Support
+        email: support@example.com
 
 servers:
-  production:
-    url: mqtt://broker.example.com
-    protocol: mqtt
-    description: Production MQTT broker
+    production:
+        url: mqtt://broker.example.com
+        protocol: mqtt
+        description: Production MQTT broker
 
 channels:
-  user/notifications:
-    description: Channel for sending user notifications
-    publish:
-      summary: Send a notification
-      operationId: sendNotification
-      message:
-        contentType: application/json
-        name: UserNotification
-        payload:
-          type: object
-          properties:
-            userId:
-              type: string
-              format: uuid
+    user/notifications:
+        description: Channel for sending user notifications
+        publish:
+            summary: Send a notification
+            operationId: sendNotification
             message:
-              type: string
-            timestamp:
-              type: string
-              format: date-time
-          required: [userId, message, timestamp]
+                contentType: application/json
+                name: UserNotification
+                payload:
+                    type: object
+                    properties:
+                        userId:
+                            type: string
+                            format: uuid
+                        message:
+                            type: string
+                        timestamp:
+                            type: string
+                            format: date-time
+                    required: [userId, message, timestamp]
 
 components:
-  messages:
-    UserNotification:
-      name: UserNotification
-      title: Notification for user
-      payload:
-        $ref: '#/channels/user~1notifications/publish/message/payload'
+    messages:
+        UserNotification:
+            name: UserNotification
+            title: Notification for user
+            payload:
+                $ref: "#/channels/user~1notifications/publish/message/payload"
 
 tags:
-  - name: messaging
-    description: All messaging-related operations
+    - name: messaging
+        description: All messaging-related operations
 ```
 
 ### full openapi
@@ -485,9 +485,9 @@ We have essentially made some heplful wrappers around express but at the core an
 
 // your exusting express code
 
-const app2 = new WebSExpress()
+const app2 = new WebSExpress();
 
-app.use(app2.getRouter())
+app.use(app2.getRouter());
 ```
 
 ---
@@ -708,7 +708,7 @@ zod provides three way to make a parameter optional:
 however for requests defintions (body, parameters etc...) we recommend not using null since not every language has it and i dont think you can recieve a parameter with value of null. For example if you say a parameter could or could not be there you will do something like this
 
 ```ts
-req.body.hhhh // if not there will resolve to undefined and nullable will throw an error since its undefined not null
+req.body.hhhh; // if not there will resolve to undefined and nullable will throw an error since its undefined not null
 ```
 
 # aim of the project
@@ -744,15 +744,15 @@ app.beforeHandle(guard(parse("json"))
 
 ```ts
 app
-  .store({
-    connections: new Connections()
-  })
-  .beforeHandle({
-    key: 'add_connection',
-    handler: ({ ctx: { ws }, store: { connections } }) => {
-      connections.add(ws)
-    }
-  })
+    .store({
+        connections: new Connections()
+    })
+    .beforeHandle({
+        key: "add_connection",
+        handler: ({ ctx: { ws }, store: { connections } }) => {
+            connections.add(ws);
+        }
+    });
 ```
 
 ## Commonly asked questions
@@ -866,36 +866,36 @@ Look at this example
 
 ```ts
 function hihi(v: string) {
-  if (v.length == 3) {
-    return 'g'
-  }
-  else {
-    return 'j'
-  }
+    if (v.length == 3) {
+        return "g";
+    }
+    else {
+        return "j";
+    }
 }
 
 const gg = new HookBuilder()
-  .add({
-    key: 'koko',
-    execute: (v) => {
-      return {
-        hi: '',
-      }
-    },
-  })
-  .add({
-    key: 'lolo',
-    execute: (v) => {
-      return {
-        ...v,
-        koki: hihi('so'),
-      } as const // to ensure no modification and better type inference e,g, it shortnes the scope as much as possible
-    },
-  })
-  .add({
-    key: 'koki',
-    execute: (v) => {}, // here the return type of v is /parameter) v: {readonly koki: "g" | "j";readonly hi: string;} without it whough it is v: {koki: string;hi: string;}
-  })
+    .add({
+        key: "koko",
+        execute: (v) => {
+            return {
+                hi: "",
+            };
+        },
+    })
+    .add({
+        key: "lolo",
+        execute: (v) => {
+            return {
+                ...v,
+                koki: hihi("so"),
+            } as const; // to ensure no modification and better type inference e,g, it shortnes the scope as much as possible
+        },
+    })
+    .add({
+        key: "koki",
+        execute: (v) => {}, // here the return type of v is /parameter) v: {readonly koki: "g" | "j";readonly hi: string;} without it whough it is v: {koki: string;hi: string;}
+    });
 ```
 
 # Built ins

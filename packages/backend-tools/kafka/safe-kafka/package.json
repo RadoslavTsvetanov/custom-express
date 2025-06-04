@@ -1,11 +1,11 @@
 {
-  "name": "safe-kafka",
-  "type": "module",
-  "module": "index.ts",
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
-  }
+    "name": "safe-kafka",
+    "type": "module",
+    "module": "index.ts",
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    }
 }

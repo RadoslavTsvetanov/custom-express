@@ -45,30 +45,30 @@
 Example
 
 ```ts
-a(b(c(d(e()))))
+a(b(c(d(e()))));
 ```
 
 then show how people normally fix this or proceed if they want to debug the output of e for example
 
 ```ts
-const eRes = e()
-console.log(eRes)
+const eRes = e();
+console.log(eRes);
 
-const dRes = d(e)
-const cRes = c(d)
-const bRes = b(c)
-const aRes = a(b)
+const dRes = d(e);
+const cRes = c(d);
+const bRes = b(c);
+const aRes = a(b);
 ```
 
 now show your example
 
 ```ts
 e()
-  .tap(console.log) // resokves to (res => console.log(res));
-  .map(d)
-  .map(c)
-  .map(b)
-  .map(a)
+    .tap(console.log) // resokves to (res => console.log(res));
+    .map(d)
+    .map(c)
+    .map(b)
+    .map(a);
 ```
 
 much cleaner if you ask me
