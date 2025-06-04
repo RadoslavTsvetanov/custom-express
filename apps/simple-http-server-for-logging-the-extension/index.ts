@@ -1,6 +1,5 @@
-import { fetch } from "bun";
-import express from "express";
 import cors from "cors";
+import express from "express";
 
 const app = express();
 const PORT = 7777;
@@ -13,10 +12,10 @@ app.use(express.json());
 
 // POST /log endpoint
 app.post("/log", (req, res) => {
-  console.log("Received message:", req.body);
-  res.status(200)
+    console.log("Received message:", req.body);
+    res.status(200);
 });
 
- app.listen(PORT, async () => {
-   console.log(`Server running at http://localhost:${PORT}`);
- });
+app.listen(PORT, async () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+});

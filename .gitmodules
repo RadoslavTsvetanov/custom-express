@@ -16,3 +16,12 @@
 [submodule "packages/frontend-components"]
 	path = packages/frontend-components
 	url = https://github.com/TS-Underated-lang/frontend-components.git
+[submodule "packages/backend-tools/kafka/orm"]
+	path = packages/backend-tools/kafka/orm
+	url = https://github.com/DockerByTheGo/kafka-orm.git
+[submodule "packages/browser-tiling-window-manager"]
+	path = packages/browser-tiling-window-manager
+	url = https://github.com/DockerByTheGo/browser-tiling-window-manager.git
+[submodule "packages/better-standard"]
+	path = packages/better-standard
+	url = https://github.com/DockerByTheGo/improved-standard-library.git
