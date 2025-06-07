@@ -28,3 +28,6 @@
 [submodule "packages/backend-tools/custom-backend/lib"]
 	path = packages/backend-tools/custom-backend/lib
 	url = https://github.com/DockerByTheGo/blaze-library.git
+[submodule "apps/graphy"]
+	path = apps/graphy
+	url = https://github.com/RadoslavTsvetanov/Graphy.git
