@@ -1,8 +1,8 @@
 // EventHooker.integration.test.ts
-import { FakeBrowser } from "tests/__mocks__/browser";
 import { describe, it, expect, beforeEach } from "vitest";
 import { TabService } from "../../src/application/services/TabService";
 import { EventHooker } from "../../src/eventHooker";
+import {FakeBrowser} from "@blazyts/simple-browser-mock"
 
 describe("EventHooker integration", () => {
   let browser: FakeBrowser;

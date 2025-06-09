@@ -21,7 +21,6 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@blazyts/browser-tiling-window-manager":"1.0.0",
         "@blazyts/better-standard-library": "1.0.0",
         "@blazyts/frontend-thingies": "1.0.0",
         "@prisma/client": "^6.5.0",
