@@ -1,6 +1,7 @@
 import { wrap } from "@blazyts/better-standard-library/src/errors-as-values/rust-like-pattern/tick";
 import { TabService } from "./application/services/TabService";
 import type { ITab } from "~domain/tabs/entities/Tab";
+import { ifNotNone } from "@blazyts/better-standard-library";
 
 export interface TabsAPI {
   tabs: {
@@ -85,11 +86,13 @@ export class EventHooker {
       console.log("Extension starting up...");
       try {
         const tabs = await this.browser.tabs.query({});
+        console.log("hhh",tabs)
         for (const tab of tabs) {
           if (tab.active && tab.id && tab.windowId) {
-            await this.tabService.addTab(this.sanitizeTab(tab));
+              this.tabService.addTab(this.sanitizeTab(tab));
           }
         }
+        console.log(this.tabService.windows)
         console.log("Extension initialized");
       } catch (error) {
         console.error("Error initializing extension:", error);
@@ -112,6 +115,7 @@ export class EventHooker {
       width: (tab as any).width,
       height: (tab as any).height,
       sessionId: (tab as any).sessionId,
+      openerId: tab.openerTabId
     };
   }
 }

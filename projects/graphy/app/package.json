@@ -14,6 +14,7 @@
   "dependencies": {
     "@blazyts/simple-browser-mock": "1.0.0",
     "@types/firefox-webext-browser": "^120.0.4",
+    "@blazyts/better-standard-library": "1.0.0",
     "cross-env": "^7.0.3",
     "plasmo": "0.90.3",
     "react": "18.2.0",

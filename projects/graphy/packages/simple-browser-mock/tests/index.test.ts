@@ -1,22 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { FakeBrowser } from '..';
+import { createTab, FakeBrowser } from '..';
 
-const createTab = (id: number, url = 'https://example.com'): browser.tabs.Tab => ({
-  id,
-  url,
-  active: true,
-  discarded: false,
-  favIconUrl: '',
-  height: 800,
-  width: 1200,
-  incognito: false,
-  index: 0,
-  pinned: false,
-  highlighted: false,
-  status: 'complete',
-  title: `Tab ${id}`,
-  windowId: 1,
-});
+
 
 describe('FakeBrowser', () => {
   let browser: FakeBrowser;

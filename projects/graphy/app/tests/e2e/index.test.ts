@@ -1,10 +1,10 @@
-// EventHooker.integration.test.ts
-import { describe, it, expect, beforeEach } from "vitest";
-import { TabService } from "../../src/application/services/TabService";
-import { EventHooker } from "../../src/eventHooker";
-import {FakeBrowser} from "@blazyts/simple-browser-mock"
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-describe("EventHooker integration", () => {
+import  { EventHooker } from '../../src/eventHooker';
+import { TabService } from '../../src/application/services/TabService';
+import { createTab, FakeBrowser } from '@blazyts/simple-browser-mock';
+
+describe("EventHooker integration - end-to-end graph test", () => {
   let browser: FakeBrowser;
   let hooker: EventHooker;
   let service: TabService;
@@ -16,55 +16,47 @@ describe("EventHooker integration", () => {
     hooker.registerAllHooks();
   });
 
-  it("should track tab lifecycle correctly", async () => {
-    // Simulate startup with one tab
-    browser.mockTabs.push({
-      id: 1,
-      windowId: 101,
-      url: "https://example.com",
-      title: "Example",
-      active: true,
-      status: "complete",
-    });
+  it("should construct a correct tab graph with multiple levels and an unrelated tab", async () => {
+    // Step 1: Create base tab (tab 1) with no opener
+    const tab1 = createTab(1); // no `openerTabId`
+    browser.mockTabs.push(tab1);
     browser.triggerStartup();
-    expect((await service.getTabGraph(1)).tabs.length).toBe(1);
 
-    // Simulate tab activation (open new tab)
-    browser.mockTabs.push({
-      id: 2,
-      windowId: 101,
-      url: "https://google.com",
-      title: "Google",
-      active: true,
-      status: "complete",
-    });
+    // Step 2: Open two tabs from tab 1
+    const tab2 = createTab(2);
+    const tab3 = createTab(3);
+    browser.utilities.openTab(tab2, 1);
+    browser.utilities.openTab(tab3, 1);
     browser.triggerActivated(2);
+    browser.triggerActivated(3);
     await new Promise((r) => setTimeout(r, 0));
 
-    const graphAfterActivation = await service.getTabGraph(2);
-    expect(graphAfterActivation.tabs.length).toBe(2);
-
-    // Simulate tab update
-    const updatedTab = {
-      id: 2,
-      windowId: 101,
-      url: "https://google.bg",
-      title: "Google BG",
-      active: true,
-      status: "complete",
-    };
-    browser.mockTabs[1] = updatedTab;
-    browser.triggerUpdated(updatedTab);
+    // Step 3: Open a tab from one of tab 1's children (tab 2)
+    const tab4 = createTab(4);
+    browser.utilities.openTab(tab4, 2);
+    browser.triggerActivated(4);
     await new Promise((r) => setTimeout(r, 0));
 
-    const graphAfterUpdate = await service.getTabGraph(2);
-    expect(graphAfterUpdate.tabs.find((t) => t.id === 2).info.url).toBe("https://google.bg");
-
-    // Simulate tab close
-    browser.triggerRemoved(1);
+    // Step 4: Open an unrelated tab (tab 5)
+    const tab5 = createTab(5); // no `openerTabId`
+    browser.utilities.openTab(tab5);
+    browser.triggerActivated(5);
     await new Promise((r) => setTimeout(r, 0));
 
-    const graphAfterRemove = await service.getTabGraph(2);
-    expect(graphAfterRemove.tabs.some((t) => t.id === 1)).toBe(false);
+    // Fetch the full graph rooted at tab 1
+    const graph = await service.getTabGraph(1);
+
+    // Validate structure
+    const allTabIds = graph.tabs.map(t => t.id);
+    expect(allTabIds).toEqual(expect.arrayContaining([1, 2, 3, 4]));
+    expect(allTabIds).not.toContain(5); // Tab 5 is unrelated
+
+    const getChildren = (id: number) =>
+      graph.tabs.filter(t => t.openerTabId === id).map(t => t.id);
+
+    expect(getChildren(1)).toEqual(expect.arrayContaining([2, 3]));
+    expect(getChildren(2)).toEqual([4]);
+    expect(getChildren(3)).toEqual([]);
+    expect(getChildren(4)).toEqual([]);
   });
 });
