@@ -31,7 +31,7 @@ class SomeService {
 for example you expose a method which serves as a debug utility
 
 ```ts
-import { OrderedRecord } from "@custom-express/better-standard-library";
+import { OrderedRecord } from "@blazyts/better-standard-library";
 
 import { HookOrderedRecord, HookOrderedRecordEntry } from "../../../types/Hooks/main";
 import { MessageHandler } from "../../../types/Message/main";

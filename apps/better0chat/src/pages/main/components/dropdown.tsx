@@ -1,4 +1,4 @@
-import type { State } from "@custom-express/frontend-thingies/src/react/hooks/useStateAsObject";
+import type { State } from "@blazyts/frontend-thingies/src/react/hooks/useStateAsObject";
 
 export const Dropdown: React.FC<{ options: string[]; current: State<string> }> = ({ current, options }) => {
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

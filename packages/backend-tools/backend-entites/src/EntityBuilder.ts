@@ -1,5 +1,6 @@
-import type { URecord } from "@custom-express/better-standard-library";
-import type { z } from "zod";
+import type { URecord } from "@blazyts/better-standard-library";
+import type { z, ZodRawShape } from "zod";
+import type { ZodObject } from "zod";
 
 type Class<T> = { new(...args: any[]): T };
 
@@ -16,6 +17,12 @@ type Service<
         [K in keyof T["subServices"]]: T["subServices"][K];
     };
 };
+
+
+export class Piper<Schema, Elements extends Schema[]>{
+    constructor
+}
+
 
 export class EntityBuilder<
     Methods extends Record<string, unknown>,
@@ -116,3 +123,34 @@ export class EntityBuilder<
         };
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+type Entity<T extends string, K extends Record<string, unknown>> = {name: string, additionalProperties: K} 
+type g<T extends Entity<string, URecord>[]> = T
+function jj<T extends Entity<string, URecord>[]>(v: g<T>) : g<T>{}
+const h = jj([{name: "hi", additionalProperties: {jojo: "string"}
+}, {name: "jojo", additionalProperties: {
+    "koko": "kokol"
+}}] as const)
+
+

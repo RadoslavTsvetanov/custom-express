@@ -1,10 +1,10 @@
-import { map } from "@custom-express/better-standard-library";
-import { UseState } from "@custom-express/frontend-thingies";
+import { map } from "@blazyts/better-standard-library";
+import { UseState } from "@blazyts/frontend-thingies";
 import { Menu } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import type { ChatState } from "~/pages/main/components/chat";
-import * as TWM from "@custom-express/browser-tiling-window-manager"
+import * as TWM from "@blazyts/browser-tiling-window-manager"
 import { Switcher } from "~/components/custom/switcher";
 import { BatchResponse } from "~/pages/main/components/batchResponse";
 import { Chat } from "~/pages/main/components/chat";
@@ -69,10 +69,8 @@ export default function Home() {
             <Menu />
             <Switcher
                 components={[
-                    <TWM.TilingWindowEditor
+                    <TWM.Editor
                         key={0}
-                        chatState={state.chat.value}
-                        setChatState={state.chat.set}
                         editorState={state.editor.value}
                         setEditorState={state.editor.set}
                     />,

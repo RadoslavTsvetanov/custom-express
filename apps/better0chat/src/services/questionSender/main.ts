@@ -1,4 +1,4 @@
-import { SimpleResult } from "@custom-express/better-standard-library";
+import { SimpleResult } from "@blazyts/better-standard-library";
 
 import type { AiResponse } from "./types";
 

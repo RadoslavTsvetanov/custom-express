@@ -21,9 +21,9 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@custom-express/browser-tiling-window-manager":"1.0.0",
-        "@custom-express/better-standard-library": "1.0.0",
-        "@custom-express/frontend-thingies": "0.0.1",
+        "@blazyts/browser-tiling-window-manager":"1.0.0",
+        "@blazyts/better-standard-library": "1.0.0",
+        "@blazyts/frontend-thingies": "1.0.0",
         "@prisma/client": "^6.5.0",
         "@radix-ui/react-radio-group": "^1.3.7",
         "@t3-oss/env-nextjs": "^0.12.0",

@@ -1,4 +1,4 @@
-import type { URecord } from "@custom-express/better-standard-library";
+import type { URecord } from "@blazyts/better-standard-library";
 import type { z, ZodObject, ZodRawShape } from "zod";
 
 type Pipe<Input extends ZodObject<ZodRawShape>, ReturnType> = {

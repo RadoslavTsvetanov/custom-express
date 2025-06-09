@@ -1,6 +1,6 @@
 import type { FC } from "react";
 
-import { UseState } from "@custom-express/frontend-thingies";
+import { UseState } from "@blazyts/frontend-thingies";
 
 export const Menu: FC = () => {
     const chats = UseState<{ title: string }[]>([]);

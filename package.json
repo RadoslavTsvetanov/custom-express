@@ -19,6 +19,7 @@
     },
     "dependencies": {
         "@elysiajs/swagger": "^1.2.2",
+        "husky": "^9.1.7",
         "ts-pattern": "^5.7.1",
         "tsd": "^0.32.0",
         "zod": "^3.24.2"

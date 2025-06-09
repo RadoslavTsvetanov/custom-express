@@ -1,7 +1,7 @@
 import type { FC } from "react";
 
-import { OneOf } from "@custom-express/better-standard-library";
-import { UseState } from "@custom-express/frontend-thingies";
+import { OneOf } from "@blazyts/better-standard-library";
+import { UseState } from "@blazyts/frontend-thingies";
 import { useEffect } from "react";
 
 import type { ModeType } from "./editor";
