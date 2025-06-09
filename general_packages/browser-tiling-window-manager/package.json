@@ -1,0 +1,15 @@
+{
+  "name": "@blazyts/browser-tiling-window-manager",
+  "version": "1.0.0",
+  "module": "index.ts",
+  "type": "module",
+  "dependencies": {
+    "@blazyts/better-standard-library": "1.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

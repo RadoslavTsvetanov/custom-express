@@ -1,0 +1,17 @@
+{
+    "name": "kafka-code-as-config",
+    "type": "module",
+    "module": "index.ts",
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@blazyts/better-standard-library": "1.0.0",
+        "@blazyts/framework": "1.0.1",
+        "kafkajs": "^2.2.4",
+        "tsd": "^0.32.0"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    }
+}

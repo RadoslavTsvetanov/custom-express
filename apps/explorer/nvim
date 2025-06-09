@@ -1,0 +1,29 @@
+vite v6.3.5 building SSR bundle for development...
+transforming...
+✓ 2 modules transformed.
+rendering chunks...
+out/main/index.js  1.48 kB
+✓ built in 53ms
+
+build the electron main process successfully
+
+-----
+
+vite v6.3.5 building SSR bundle for development...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  0.42 kB
+✓ built in 8ms
+
+build the electron preload files successfully
+
+-----
+
+dev server running for the electron renderer process at:
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+start electron app...
+
