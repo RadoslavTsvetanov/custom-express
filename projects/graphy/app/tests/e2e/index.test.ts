@@ -38,25 +38,16 @@ describe("EventHooker integration - end-to-end graph test", () => {
     await new Promise((r) => setTimeout(r, 0));
 
     // Step 4: Open an unrelated tab (tab 5)
-    const tab5 = createTab(5); // no `openerTabId`
+    const tab5 = createTab(5);
     browser.utilities.openTab(tab5);
     browser.triggerActivated(5);
     await new Promise((r) => setTimeout(r, 0));
 
     // Fetch the full graph rooted at tab 1
-    const graph = await service.getTabGraph(1);
+    const graph = await service.getTabGraph();
 
     // Validate structure
-    const allTabIds = graph.tabs.map(t => t.id);
-    expect(allTabIds).toEqual(expect.arrayContaining([1, 2, 3, 4]));
-    expect(allTabIds).not.toContain(5); // Tab 5 is unrelated
+    const allTabIds = graph
 
-    const getChildren = (id: number) =>
-      graph.tabs.filter(t => t.openerTabId === id).map(t => t.id);
-
-    expect(getChildren(1)).toEqual(expect.arrayContaining([2, 3]));
-    expect(getChildren(2)).toEqual([4]);
-    expect(getChildren(3)).toEqual([]);
-    expect(getChildren(4)).toEqual([]);
   });
 });

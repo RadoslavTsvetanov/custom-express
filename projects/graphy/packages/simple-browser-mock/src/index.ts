@@ -48,7 +48,7 @@ export class FakeBrowser implements TabsAPI {
     private removedListeners: TabListener[] = [];
     private startupListeners: (() => void)[] = [];
     utilities = {
-        openTab: (tabInfo: browser.tabs.Tab, openerTabId: browser.tabs.Tab["id"]) => {
+        openTab: (tabInfo: browser.tabs.Tab, openerTabId?: browser.tabs.Tab["id"]) => {
             this.mockTabs.push({
                 ...tabInfo,
                 openerTabId
