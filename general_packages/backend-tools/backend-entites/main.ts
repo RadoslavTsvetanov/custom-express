@@ -1,117 +1,121 @@
-// Imports
-import type { URecord } from "@blazyts/better-standard-library";
-import { z, ZodObject, type ZodRawShape } from "zod";
+import type { Last } from "@blazyts/better-standard-library";
+import express, { Request, Response, Express } from "express";
+import { z, ZodObject, ZodRawShape, type infer } from "zod";
 
-// Utility Types
-type Last<T extends readonly any[]> = T extends [...infer _, infer L] ? L : never;
+// --- Utility Types ---
 
-type Flatten<T extends Record<string, unknown>> = {
-    [K in keyof T]: T[K] extends Record<string, unknown> ? Flatten<T[K]> : {};
+// --- Action Type ---
+type Action<T extends ZodObject<any>, B> = {
+  data: z.infer<T> & B;
+  schema: ZodObject<any>;
+  handler: (v: z.infer<T> & B) => void;
 };
 
-// Pipe System
-class Pipe<Input, ReturnType> {
-    constructor(public handler: (v: Input) => ReturnType) {}
+// --- Entity Builder ---
+class EntityBuilder<
+  Befores extends readonly ZodObject<any>[] = [],
+  Actions extends Record<string, Action<any, any>> = {}
+> {
+  private befores: Befores = [] as Befores;
+  private actions: Actions = {} as Actions;
+
+  before<T extends ZodObject<ZodRawShape>>(input: {
+    data: T;
+    handler: (v: z.infer<T>) => void;
+  }): EntityBuilder<[...Befores, T], Actions> {
+    input.handler(input.data.parse({})); // type-safe dummy usage
+    const updated = new EntityBuilder<[...Befores, T], Actions>();
+    updated.befores = [...this.befores, input.data] as [...Befores, T];
+    updated.actions = this.actions;
+    return updated;
+  }
+
+  addAction<Name extends string, T extends ZodObject<ZodRawShape>>(
+    name: Name,
+    input: {
+      data: T;
+      handler: (v: z.infer<T> & z.infer<Last<Befores>>) => void;
+    }
+  ): EntityBuilder<
+    Befores,
+    Actions & { [K in Name]: Action<T, z.infer<Last<Befores>>> }
+  > {
+    const lastBefore = this.getLastBefore();
+    const mergedSchema = lastBefore ? input.data.merge(lastBefore) : input.data;
+
+    const updated = new EntityBuilder<
+      Befores,
+      Actions & { [K in Name]: Action<T, z.infer<Last<Befores>>> }
+    >();
+    updated.befores = this.befores;
+    updated.actions = {
+      ...this.actions,
+      [name]: {
+        data: {} as any,
+        schema: mergedSchema,
+        handler: input.handler
+      }
+    } as any;
+    return updated;
+  }
+
+  private getLastBefore(): ZodObject<any> | undefined {
+    return this.befores.length > 0 ? this.befores[this.befores.length - 1] : undefined;
+  }
+
+  getActions() {
+    return this.actions;
+  }
 }
 
-class Piper<T extends Pipe<any, any>[]> {
-    constructor(public pipes: T) {}
+// --- Route Registration ---
+function registerEntity(app: Express, prefix: string, entity: EntityBuilder) {
+  const actions = entity.getActions();
 
-    addPipe<
-        Return,
-        PrevPipe extends Pipe<any, any> = Last<T>,
-        Input extends ReturnType<PrevPipe["handler"]> = ReturnType<PrevPipe["handler"]>
-    >(handler: (v: Input) => Return): Piper<[...T, Pipe<Input, Return>]> {
-        return new Piper<[...T, Pipe<Input, Return>]>([...this.pipes, new Pipe(handler)]);
-    }
+  for (const [name, action] of Object.entries(actions)) {
+    app.post(`/${prefix}/${name}`, (req: Request, res: Response) => {
+      const parsed = action.schema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.format() });
+      }
 
-    static new<Input, Return>(p: Pipe<Input, Return>): Piper<[Pipe<Input, Return>]> {
-        return new Piper<[Pipe<Input, Return>]>([p]);
-    }
-}
-
-// Example Pipe Usage
-const examplePipe = new Pipe(v => []);
-const piped = Piper.new(new Pipe((v) => ({ hi: "" } as const))).addPipe(v => {return 7});
-
-// Client Adapter
-type Client = URecord;
-
-class ClientAdapter<T extends Client> {
-    public v: T;
-    constructor(v: T) {
-        this.v = v;
-    }
-    react(): {
-        flat: {};
-        nested: {};
-    } {
-        return {
-            flat: {},
-            nested: {},
-        };
-    }
-}
-
-// Entity Builder
-class EntityBuilder<Before extends readonly unknown[] = []> {
-    private state;
-    private befores: Before;
-
-    constructor() {}
-
-    before<T extends ZodObject<ZodRawShape>>(v: {
-        data: T;
-        handler: (v: z.infer<T>) => void;
-    }) {
-        return this; // Optional chaining to enable chaining
-    }
-
-    addAction<T extends ZodObject<ZodRawShape>, Responses>(v: {
-        data: z.infer<T> & z.infer<Before[Before["length"]]>;
-        handler: (v: T) => void;
-    }) {
-        return this;
-    }
-
-    addSubEntity(v: EntityBuilder) {
-        return this;
-    }
-}
-
-// Example EntityBuilder (commented out for optional use)
-/*
-const server = new Server({})
-    .addEntity({
-        name: "hihi",
-        service: EntityBuilder
-            .new()
-            .before({
-                input: z.object({ ko: z.string() }),
-                handler: v => ({ hi: "f" })
-            })
-            .addMethod(
-                "tuturututu",
-                z.object({ hi: z.string() }),
-                v => ""
-            ),
+      try {
+        action.handler(parsed.data);
+        res.json({ status: "ok" });
+      } catch (err: any) {
+        res.status(500).json({ error: err.message || "Internal error" });
+      }
     });
-*/
-
-// Miscellaneous Utilities
-function g(g: any, h: any) {}
-
-class G {
-    h = () => "h";
-    j() {}
+  }
 }
 
-const h = new G();
-console.log(h.h.name, h.j.name);
+// --- Example Usage ---
+const userEntity = new EntityBuilder()
+  .before({
+    data: z.object({ authToken: z.string() }),
+    handler: ({ authToken }) => {
+      console.log("Auth token:", authToken);
+    }
+  })
+  .addAction("login", {
+    data: z.object({ username: z.string(), password: z.string() }),
+    handler: ({ username, password, authToken }) => {
+      console.log("Login:", username, password, "Auth:", authToken);
+    }
+  })
+  .addAction("logout", {
+    data: z.object({ reason: z.string().optional() }),
+    handler: ({ reason, authToken }) => {
+      console.log("Logout:", reason ?? "no reason", "Auth:", authToken);
+    }
+  });
 
-// Example Flatten Usage
-type ExampleFlatten = Flatten<{ hi: { ji: string } }>;
-// const example: ExampleFlatten;
-// example;
+// --- Express App Setup ---
+const app = express();
+app.use(express.json());
 
-// End
+registerEntity(app, "user", userEntity);
+
+app.listen(3000, () => {
+  console.log("🚀 Server running on http://localhost:3000");
+});

@@ -1,6 +1,6 @@
-import type { Filter } from "../types/filter";
+import type { Filter } from "../type-level-functions/filter";
 
-import { ifNotNone } from "../errors-as-values/rust-like-pattern/option";
+import { ifNotNone } from "./option";
 
 export namespace OneOf {
 

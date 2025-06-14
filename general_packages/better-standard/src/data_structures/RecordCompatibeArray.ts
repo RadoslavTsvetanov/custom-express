@@ -1,7 +1,7 @@
-import type { Last } from "../metaprogramming/tuple/getLast";
+import type { Last } from "../type-level-functions/tuple/getLast";
 
-import { Optionable } from "../errors-as-values/rust-like-pattern/option";
-import { panic } from "../panic";
+import { Optionable } from "./option";
+import { panic } from "../functions/panic";
 import { GetSet } from "./getSetClass";
 
 type WithKey<T> = { key: string } & T;

@@ -1,7 +1,7 @@
-import type { ISimpleMapable } from "../errors-as-values/rust-like-pattern/mapable";
+import type { ISimpleMapable } from "./mapable";
 import type { VCallback } from "../types/voidcallback";
 
-import { ifNotNone } from "../errors-as-values/rust-like-pattern/option";
+import { ifNotNone } from "./option";
 
 export class GetSet<V> implements ISimpleMapable<V> {
     private v: V;

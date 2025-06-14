@@ -1,4 +1,4 @@
-import { objectEntries } from "../../src/errors-as-values/rust-like-pattern/result";
+import { objectEntries } from "./result";
 
 type extractParts<T extends string, Parts extends readonly [] = []> = T extends `${infer T} ${infer Rest}`
     ? extractParts<Rest, [...Parts, T]>

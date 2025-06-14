@@ -1,26 +1,31 @@
+// Data Structures
 export * from "./src/data_structures/array";
 export * from "./src/data_structures/getSetClass";
-export * from "./src/data_structures/group.ts";
-export * from "./src/data_structures/oneOf.ts";
+export * from "./src/data_structures/group";
+export * from "./src/data_structures/oneOf";
 export * from "./src/data_structures/RecordCompatibeArray";
-export * from "./src/data_structures/safestring.ts";
-export * from "./src/errors-as-values/mapThatIsLikeInRust";
-export * from "./src/errors-as-values/rust-like-pattern/option.ts";
-export * from "./src/errors-as-values/rust-like-pattern/result.ts";
-export * from "./src/logging.ts";
-export * from "./src/mapObject";
-export * from "./src/metaprogramming/afterfix";
-export * from "./src/metaprogramming/IfNotUndefinedWithDefault.ts";
-export * from "./src/metaprogramming/keyofonlystringkeys";
-export * from "./src/metaprogramming/OptionalObject";
-export * from "./src/metaprogramming/prefix";
-export * from "./src/metaprogramming/tuple/getFirst";
-export * from "./src/metaprogramming/tuple/getLast";
-export * from "./src/metaprogramming/With";
-export * from "./src/panic";
-export * from "./src/types/networking/port";
-export * from "./src/types/networking/urls/websocket";
-export * from "./src/types/OptionaPromise.ts";
-export * from "./src/types/promises/boolean";
-export * from "./src/types/UnknownRecord.ts";
-export * from "./src/types/voidcallback";
+export * from "./src/data_structures/safestring";
+
+// Error Handling
+export * from "./src/data_structures/mapThatIsLikeInRust";
+export * from "./src/data_structures/option";
+export * from "./src/data_structures/result";
+
+// Type Utilities
+export * from "./src/type-level-functions";
+
+// Utility Functions
+export * from "./src/functions/logging";
+export * from "./src/functions/mapObject";
+export * from "./src/functions/panic";
+// Re-export common types for backward compatibility
+export type { OptionalPromise, OPromise } from "./src/type-level-functions/utility-types";
+export type { URecord } from "./src/type-level-functions/utility-types";
+export type { VoidCallback } from "./src/type-level-functions/utility-types";
+export type { PromiseBoolean } from "./src/type-level-functions/utility-types";
+export type {Last} from "./src/type-level-functions/getLastElementOfTuple"
+export type { PortNumber } from "./src/types/networking";
+export type { WebSocketUrl } from "./src/types/networking";
+// Note: The following exports are kept for backward compatibility but are deprecated
+// and will be removed in a future version. Please import from their new locations.
+export * from "./src/data_structures/metaprogramming";

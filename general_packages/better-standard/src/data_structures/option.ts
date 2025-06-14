@@ -1,5 +1,5 @@
-import type { Callback, VCallback } from "../../types/voidcallback";
-import type { Tick } from "./tick";
+import type { Callback, VCallback } from "../types/voidcallback";
+import type { Tick } from "../errors-as-values/rust-like-pattern/tick";
 import type { IUnpackable } from "./unpackable/unpackable";
 
 import { CustomUnpackable } from "./unpackable/unpackable";

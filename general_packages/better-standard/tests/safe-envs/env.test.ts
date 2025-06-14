@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 
-import { EnvManager } from "../../src/safe-envs/env";
+import { EnvManager } from "../../src/data_structures/env";
 
 const e = new EnvManager([
     {

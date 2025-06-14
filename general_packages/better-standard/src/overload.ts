@@ -2,7 +2,7 @@ import type { ZodObject, ZodRawShape } from "zod";
 
 import { z } from "zod";
 
-import { Try } from "./errors-as-values/rust-like-pattern/option";
+import { Try } from "./data_structures/option";
 
 // type Overloads =
 

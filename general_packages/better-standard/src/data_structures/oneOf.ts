@@ -1,8 +1,8 @@
-import type { valuesOf } from "../metaprogramming/valuesOf";
-import type { Filter } from "../types/filter";
+import type { valuesOf } from "../type-level-functions/valuesOf";
+import type { Filter } from "../type-level-functions/filter";
 import type { UnknownRecord } from "../types/unknwonString";
 
-import { ifNotNone } from "../errors-as-values/rust-like-pattern/option";
+import { ifNotNone } from "./option";
 
 type RemoveKey<T extends Record<string, object>, K extends PropertyKey> = {
     [P in keyof T]: Omit<T[P], K>;
