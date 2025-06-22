@@ -1,4 +1,6 @@
-export { CustomWebSocketRouter } from "./backend-framework/src/core/websocket/server/app";
-export { HookBuilder } from "./backend-framework/src/core/websocket/server/utilites/builders/HookBuilder";
+export  { Extended as app } from "./src/core/websocket/server/app/extended";
 
-export { MessageThatCanBeReceivedBuilder } from "./backend-framework/src/core/websocket/server/utilites/builders/MessageBuilder";
+export { HookBuilder } from "./src/core/websocket/server/utilites/builders/HookBuilder";
+
+export { MessageThatCanBeReceivedBuilder } from "./src/core/websocket/server/utilites/builders/MessageBuilder";
+

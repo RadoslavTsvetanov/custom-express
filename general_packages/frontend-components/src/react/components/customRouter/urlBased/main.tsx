@@ -1,27 +1,11 @@
 
 import { match } from "path-to-regexp";
-export type ExtractParam<
-  T extends string,
-  ReturnType extends Record<string, string> = {}
-> = T extends `/${infer CurrentParam}`
-  ? CurrentParam extends `:${infer ParamName}`
-    ? ParamName extends `${infer Param}/${infer Rest}`
-      ? ExtractParam<`/${Rest}`, { [P in Param]: string } & { [P in keyof ReturnType]: string}>
-      : {[p in keyof ReturnType]: string} & {[p in ParamName]: string} 
-    : CurrentParam extends `${infer NotDynamicParam}/${infer Rest}`
-      ? ExtractParam<`/${Rest}`, ReturnType>
-      : ReturnType
-  : never 
-
-
-type j = ExtractParam<"/koko/lolo/userId/:product/:koko/lolo/:lolo/popo/:kiki">;
-
 
 
 
 export type RouteDefinition<Path extends string> = {
   path: Path;
-  component: React.FC<{ params: ExtractParam<Path> }>;
+  component: React.FC<{ params: ExtractParams<Path> }>;
 };
 
 type Routes = readonly RouteDefinition<string>[]  

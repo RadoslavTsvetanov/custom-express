@@ -14,18 +14,21 @@ import { runHookHandler } from "./helpers";
 // ---------
 // This is the core class with only domain/bussiness logic e.g. without any utilities like map pipe etc... to see them go below to CustomWebsocketRouter where they are implemented i decided
 // --------
+
+export type BaseChannelConfig = ChannelConfig<
+    Record<string, ZodObject<ZodRawShape>>,
+    Record<string, MessageItCanReceive<BaseMessageHooks, unknown>>,
+    Partial<ServerHooks<BaseHookBundle, BaseHookBundle>>
+>;
+
+
+
 export class CustomWebSocketRouter<
     Channels extends Record<
         string,
-        ChannelConfig<
-            Record<string, ZodObject<ZodRawShape>>,
-            Record<string, MessageItCanReceive<MessageHooks<BaseHookBundle, BaseHookBundle>, unknown>>,
-            Partial<ServerHooks<BaseHookBundle, BaseHookBundle>>
-        >
+        BaseChannelConfig
     >,
-    Context extends Record<string, unknown>,
     Hooks extends GlobalHooks,
-// BeforeHandle extends Hook<TypedMessage<unknown, unknown>,UnknownRecord>,
 > {
     public readonly prefix: GetSet<Optionable<string>>;
 
@@ -42,6 +45,11 @@ export class CustomWebSocketRouter<
         this.channels = endpoints ?? ({} as Channels);
         this.hooks = hooks;
     }
+
+    public hook<Hook>(h: Hook): CustomWebSocketRouter<Channels, Context, Hooks & Hook> {
+        return new CustomWebSocketRouter(this.channels, this.context, this.hooks.setV(h));
+    }
+
 
     public plug<
         NewChannels extends Record<
@@ -105,7 +113,8 @@ export class CustomWebSocketRouter<
         object: T,
     ): CustomWebSocketRouter<
             Channels,
-    Context & { [Key in keyof T]: T[Key] }
+    Context & { [Key in keyof T]: T[Key] },
+    Hooks
         > {
         return new CustomWebSocketRouter(this.channels, {
             ...this.context,
