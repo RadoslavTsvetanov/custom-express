@@ -1,11 +1,23 @@
+import type { Optionable } from "@blazyts/better-standard-library";
+
 type ContainsAtTheEnd<T extends string, Y extends string> = T extends `${infer Rest}${Y}` ? true : false;
+type ContainsAtTheStart<T extends string, Y extends string> = T extends `${Y}${infer Rest}` ? true : false
 
-type k = ContainsAtTheEnd<"koko$", "$">  extends true ? number : string;
+type InferParamType<Param extends string> =
+  ContainsAtTheEnd<Param, "$"> extends true
+    ? number
+    : ContainsAtTheEnd<Param, "("> extends true
+      ? Date
+      : ContainsAtTheEnd<Param, "^"> extends true
+        ? boolean
+        : string;
+
+type k = ContainsAtTheEnd<"koko$", "$"> extends true ? number : string;
 
 
 
 
-type Alphabet = 
+type Alphabet =
   | "a" | "b" | "c" | "d" | "e" | "f" | "g"
   | "h" | "i" | "j" | "k" | "l" | "m" | "n"
   | "o" | "p" | "q" | "r" | "s" | "t" | "u"
@@ -17,10 +29,10 @@ type Alphabet =
 
 type RemoveNonAlphabetic<S extends string> =
   S extends `${infer First}${infer Rest}`
-    ? First extends Alphabet
-      ? `${First}${RemoveNonAlphabetic<Rest>}`
-      : RemoveNonAlphabetic<Rest>
-    : "";
+  ? First extends Alphabet
+  ? `${First}${RemoveNonAlphabetic<Rest>}`
+  : RemoveNonAlphabetic<Rest>
+  : "";
 
 
 
@@ -31,27 +43,22 @@ export type ExtractParams<
   ? CurrentParam extends `:${infer ParamName}`
     ? ParamName extends `${infer Param}/${infer Rest}`
       ? ExtractParams<
-      `/${Rest}`,
-       { 
-        [P in Param as RemoveNonAlphabetic<P>]: 
-        ContainsAtTheEnd<Param,  "$"> extends true 
-          ? number 
-          : ContainsAtTheEnd<Param, "("> extends true 
-            ? Date 
-            : ContainsAtTheEnd<Param, "^"> extends true 
-              ? boolean 
-              : string }
-           & 
-        { [P in keyof ReturnType]: ReturnType[P]}>
-      : {[P in keyof ReturnType]: ReturnType[P]} & {[p in ParamName]: string} 
-    : CurrentParam extends `${infer NotDynamicParam}/${infer Rest}`
-      ? ExtractParams<`/${Rest}`, ReturnType>
-      : ReturnType
-  : never 
+        `/${Rest}`,
+        {
+          [P in Param as RemoveNonAlphabetic<P>]: ContainsAtTheStart<Param, "?"> extends true ? Optionable<InferParamType<Param>> :   InferParamType<Param>
+        }
+     &
+        {
+          [P in keyof ReturnType]: ReturnType[P]
+        }
+      >
+    : { [P in keyof ReturnType]: ReturnType[P] } & { [p in ParamName]: string }
+      : CurrentParam extends `${infer NotDynamicParam}/${infer Rest}`
+        ? ExtractParams<`/${Rest}`, ReturnType>
+        : ReturnType
+  : never
 
-
-type j = ExtractParams<"/koko/lolo/userId/:product^/:koko/lolo/:lolo$/popo/:kiki">;
 
 export function extractParams<T extends string>(path: T): ExtractParams<T> {
-    return {} as ExtractParams<T>;
+  return {} as ExtractParams<T>;
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
 import { extractParams, type ExtractParams } from '../src/index';
+import type { Optionable } from '@blazyts/better-standard-library'; // Import Optionable for type assertions
 
 describe('ExtractParams', () => {
   // Runtime tests for the type utility
@@ -97,3 +98,74 @@ expectTypeOf(Merge(extractParams('/api/v1/users/:userId/profile/:tab')))
 
 expectTypeOf(Merge(extractParams('')))
 .toEqualTypeOf<never>();
+
+// Test type inference with special suffixes
+expectTypeOf(Merge(extractParams('/users/:id$/profile')))
+.toEqualTypeOf<{ id: number }>();
+
+expectTypeOf(Merge(extractParams('/:createdAt(/')))
+.toEqualTypeOf<{ createdAt: Date }>();
+
+expectTypeOf(Merge(extractParams('/feature/:isEnabled^/'))) // Note if a dyncamic param is at the end place a trailing "/"
+.toEqualTypeOf<{ isEnabled: boolean }>();
+
+// Test optional parameters
+
+expectTypeOf(Merge(extractParams('/users/:?userId/')))
+.toEqualTypeOf<{ userId: Optionable<string> }>();
+
+expectTypeOf(Merge(extractParams('/users/:?userId$/profile/:?tab/')))
+.toEqualTypeOf<{ userId: Optionable<number>; tab: Optionable<string> }>();
+
+
+() => {
+const j = Merge(extractParams('/api/v1/users/:userId/posts/:postId(/:?page$/:?limit$/'))
+expectTypeOf(j)
+.toEqualTypeOf<{ 
+  userId: string; 
+  postId: Date;
+  page: Optionable<number>;
+  limit: Optionable<number>;
+}>();
+}
+() => {
+const j = Merge(extractParams('/api/v1/users/:userId/posts/:postId(/:?page$/:?limit^/:?sort)/'))
+expectTypeOf(j)
+.toEqualTypeOf<{ 
+  userId: string; 
+  postId: Date;
+  page: Optionable<number>;
+  limit: Optionable<boolean>;
+  sort: Optionable<string>;
+}>();
+
+}
+// Test complex path with all parameter types
+// Test parameter name cleanup (removing non-alphabetic characters)
+expectTypeOf(Merge(extractParams('/users/:user-id$/profile')))
+.toEqualTypeOf<{ userid: number }>();
+
+expectTypeOf(Merge(extractParams('/users/:user_id(/')))
+.toEqualTypeOf<{ userid: Date }>();
+
+// Test edge cases
+expectTypeOf(Merge(extractParams('/:?')))
+.toEqualTypeOf<{}>();
+
+expectTypeOf(Merge(extractParams('/:?invalidParam!@#')))
+.toEqualTypeOf<{ invalidparam: Optionable<string> }>();
+
+// Test with query parameters (should be treated as regular parameters)
+expectTypeOf(Merge(extractParams('/search?:query/:page$')))
+.toEqualTypeOf<{ query: Optionable<string>; page: number }>();
+
+// Test with multiple optional parameters
+() => {
+const j = Merge(extractParams('/api/:?filter^/:?page$/:?limit$/'))
+expectTypeOf(j)
+.toEqualTypeOf<{ 
+  filter: Optionable<boolean>;
+  page: Optionable<number>;
+  limit: Optionable<number>;
+}>();
+}
