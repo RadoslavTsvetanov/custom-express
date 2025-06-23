@@ -75,15 +75,6 @@ function Merge<T extends Record<string, unknown>>(v: T): {[K in keyof T]: T[K]} 
     return v;
 }
 
-const h = extractParams("/users/:id")
-
-const h2 = Merge(extractParams('/users/:id'))
-h2.id
-
-
-
-
-
 expectTypeOf(Merge(extractParams('/users/:id')))
 .toEqualTypeOf<{ id: string }>();
 
@@ -140,8 +131,6 @@ expectTypeOf(j)
 }>();
 
 }
-// Test complex path with all parameter types
-// Test parameter name cleanup (removing non-alphabetic characters)
 expectTypeOf(Merge(extractParams('/users/:user-id$/profile')))
 .toEqualTypeOf<{ userid: number }>();
 

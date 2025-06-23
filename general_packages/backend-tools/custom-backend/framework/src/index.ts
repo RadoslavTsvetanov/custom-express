@@ -1,0 +1,106 @@
+import "@blazyts/better-standard-library"
+import { ifNotNone, map, objectEntries, Try } from "@blazyts/better-standard-library";
+
+type Subscribeable<T extends Record<string, (value: unknown) => any>> = {
+    [K in keyof T]: {
+        invoke: (v: Parameters<T[K]>) => ReturnType<T[K]>;
+        on: (v: Parameters<T[K]>) => void
+    }
+};
+
+
+
+
+
+class Node {
+    constructor ( public name: string, public children: Record<string, Node>) {
+
+    }
+}
+
+
+
+function tokenizeRouter(x: Record<string, unknown>, r: Record<string, Node> = {}): Record<string, Node> {
+    objectEntries(x).forEach(([name, value]) => {
+        Try(r[name],{
+            ifNone: () => {
+                r[name] = new Node(name, {})
+            },
+            ifNotNone: v => {
+            }
+        })
+    })    
+}
+
+
+function checkEntry(x: string, existingRputes: Node) {
+    Try(existingRputes.children[x],{
+        ifNone: () => {
+            existingRputes.children[x] = new Node(x, {})
+        },
+        ifNotNone: v => {
+            checkEntry(x, v)
+        }
+    })
+
+    return existingRputes
+}
+
+
+console.log(checkEntry("", new Node("", {})))
+
+let g = 0
+
+function tokenizeRoute(x: string, existingRputes: Node = new Node("", {})) {
+    if(x === "/" || x === ""){
+        return existingRputes 
+    }
+    console.log("k", x)
+    map(x.slice(1,x.slice(1,x.length).indexOf("/") + 1), ((part) => {
+        Try(existingRputes.children[part],{
+            ifNone: () => {
+                existingRputes.children[part] = new Node(part, {})
+                tokenizeRoute(x.slice(x.slice(1,x.length).indexOf("/") + 1, x.length), existingRputes.children[part])
+                
+            },
+            ifNotNone: v => {
+                tokenizeRoute(x.slice(x.slice(1,x.length).indexOf("/") + 1, x.length), existingRputes.children[part])
+            }
+        })
+    }))
+
+    return existingRputes
+}
+
+
+
+
+
+
+const k = tokenizeRoute("/api/v1/users/", new Node("", {}))
+const kk = tokenizeRoute("/api/v1/koko/", k)
+
+console.log(JSON.stringify(kk, null, 2))
+
+
+function createSubscribeable<T extends Record<string, (value: any) => any>>(
+    handlers: T
+): Subscribeable<T> {
+    const result = {} as any;
+    for (const key in handlers) {
+        if (Object.prototype.hasOwnProperty.call(handlers, key)) {
+            const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+            const eventKey = `on${capitalizedKey}` as const;
+            
+            const fn = ((value?: any) => {
+                return handlers[key](value);
+            }) as any;
+            
+            fn[eventKey] = (value: any) => handlers[key](value);
+            
+            result[key] = fn;
+        }
+    }
+    
+    return result as Subscribeable<T>;
+}
