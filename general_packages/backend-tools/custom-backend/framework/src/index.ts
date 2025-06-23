@@ -77,8 +77,8 @@ function tokenizeRoute(x: string, existingRputes: Node = new Node("", {})) {
 
 
 
-const k = tokenizeRoute("/api/v1/users/", new Node("", {}))
-const kk = tokenizeRoute("/api/v1/koko/", k)
+const k = tokenizeRoute("/api/:v1/users/", new Node("", {}))
+const kk = tokenizeRoute("/api/:v1/koko/", k)
 
 console.log(JSON.stringify(kk, null, 2))
 
