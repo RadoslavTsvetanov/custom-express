@@ -104,3 +104,10 @@ function createSubscribeable<T extends Record<string, (value: any) => any>>(
     
     return result as Subscribeable<T>;
 }
+
+
+
+function runHookHandler(route: string, definedRoutes: Node): void {
+    
+
+}

@@ -1,7 +1,5 @@
 import type { Optionable } from "@blazyts/better-standard-library";
-
-type ContainsAtTheEnd<T extends string, Y extends string> = T extends `${infer Rest}${Y}` ? true : false;
-type ContainsAtTheStart<T extends string, Y extends string> = T extends `${Y}${infer Rest}` ? true : false
+import type { Alphabet, ContainsAtTheEnd, ContainsAtTheStart, RemoveNonAlphabetic } from "./utils";
 
 type InferParamType<Param extends string> =
   ContainsAtTheEnd<Param, "$"> extends true
@@ -12,27 +10,7 @@ type InferParamType<Param extends string> =
         ? boolean
         : string;
 
-type k = ContainsAtTheEnd<"koko$", "$"> extends true ? number : string;
 
-
-
-
-type Alphabet =
-  | "a" | "b" | "c" | "d" | "e" | "f" | "g"
-  | "h" | "i" | "j" | "k" | "l" | "m" | "n"
-  | "o" | "p" | "q" | "r" | "s" | "t" | "u"
-  | "v" | "w" | "x" | "y" | "z"
-  | "A" | "B" | "C" | "D" | "E" | "F" | "G"
-  | "H" | "I" | "J" | "K" | "L" | "M" | "N"
-  | "O" | "P" | "Q" | "R" | "S" | "T" | "U"
-  | "V" | "W" | "X" | "Y" | "Z";
-
-type RemoveNonAlphabetic<S extends string> =
-  S extends `${infer First}${infer Rest}`
-  ? First extends Alphabet
-  ? `${First}${RemoveNonAlphabetic<Rest>}`
-  : RemoveNonAlphabetic<Rest>
-  : "";
 
 
 
