@@ -89,7 +89,9 @@ function overload<
 >(
     v: T,
     d: R,
-): <E extends number>(v: Parameters<R[E]>[0]) => ReturnType<R[E]> {}
+): /* <E extends number>(v: Parameters<R[E]>[0]) => ReturnType<R[E]>*/   <K extends z.infer<T[number]>>(v: K) => ReturnType<R[K]>    {
+    return 
+}
 
 {
     const exmaple = overload(
@@ -106,7 +108,8 @@ function overload<
             (v) => { return 3; },
         ],
     );
-    exmaple({ hi: "" });
+    const res = exmaple({ hi: "" });
+    exmaple()
 }
 }
 {

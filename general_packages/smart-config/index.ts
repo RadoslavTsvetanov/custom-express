@@ -33,17 +33,37 @@ class smartConfig<T extends ZodObject<ZodRawShape>, Values extends {[K in keyof 
         this.values[key] = value
         return new smartConfig<T, Values & { [K in Key]: H }>(this.schema, this.values)
     }
-    
+    setWhole(v: {
+        enabled?: (keyof getOnlyBooleans<T>)[],
+        disabled?: (keyof getOnlyBooleans<T>)[],
+        values?: {[K in keyof z.infer<T>]: z.infer<T>[K]}
+    }): Values {
+        
+    }
+
+    new(v: {
+        enabled?: (keyof getOnlyBooleans<T>)[],
+        disabled?: (keyof getOnlyBooleans<T>)[],
+        values?: {[K in keyof z.infer<T>]: z.infer<T>[K]}
+    }): Values {
+        
+    }
     
     enable<Key extends keyof getOnlyBooleans<T>>(key: Key){
         this.values[key] = true
         return new smartConfig<T, Values & { [K in Key]: true }>(this.schema, this.values)
     }
+
+    enableGroup(keys: (keyof getOnlyBooleans<T>)[]) {
+        
+    }
+
     disable<Key extends keyof getOnlyBooleans<T>>(key: Key){
         this.values[key] = false
         return new smartConfig<T, Values & { [K in Key]: false }>(this.schema, this.values)
     }
-    flip<Key extends keyof getOnlyBooleans<T>>(key: Key){
+
+    flip<Key extends keyof getOnlyBooleans<T>>(key: Key) : smartConfig<T, Values & { [K in Key]: Values[Key] extends true  ? true : false }>{
         this.values[key] = !this.values[key]
         return this.values[key] 
         ?  new smartConfig<T, Values & { [K in Key]: true }>(this.schema, this.values)
@@ -67,23 +87,77 @@ class smartConfig<T extends ZodObject<ZodRawShape>, Values extends {[K in keyof 
     raw(): readonly Values{
         return this.values as const
     }
+
+    incrementGroup(keys: (keyof getOnlyNumbers<T>)[]){
+        keys.forEach(key => {
+            this.values[key] = this.values[key] + 1
+        })
+        return new smartConfig<T, Values & { [K in Key]: typeof this.values[key] }>(this.schema, this.values)
+    }
 }
 
 
 const config = new smartConfig(z.object({
    name: z.string(),
    isAdult: z.boolean(),
+   isFF: z.boolean(),
    age: z.number()
 })) 
+config.new({
+    enabled: ["isAdult", "isFF"],
+})
 
+config.incrementGroup(["age"])
 const h = config.set("name", "jooj" as const).get("name")
+
 config.enable("isAdult").raw()
 config.increment("age")
 config.decrement("age")
 config.flip("isAdult")
-
+config.enableGroup(["isAdult", "isFF"])
 
 config.get("name")
 config.set("name", "jojooj")
 
 export default smartConfig
+
+
+
+
+const cacheSchema = z.object({
+  active: z.boolean().optional(),
+
+  disable: z.array(z.string()).optional(),
+
+  ttl: z.number().optional(),
+
+  key: z.function().args(z.any()).returns(z.any()).optional(),
+
+  tags: z.array(z.string()).optional(),
+
+  group: z.string().optional(),
+
+  resolver: z.function().args(z.any(), z.any()).returns(z.any()).optional(),
+
+  shouldReturn: z.function().args(z.any()).returns(z.boolean()).optional(),
+
+  bypassIf: z.function().args(z.any()).returns(z.boolean()).optional(),
+
+  dependsOn: z.array(z.string()).optional(),
+
+  errorFallback: z.boolean().optional(),
+
+  autoRefreshInterval: z.number().optional(),
+
+  plannedMiss: z.function().args(z.any()).returns(z.boolean()).optional(),
+
+  metadataResolver: z.function().args(z.any(), z.any()).returns(z.any()).optional(),
+})
+
+type h = z.infer<typeof cacheSchema>["errorFallback"]
+
+export const cacheConfig = new smartConfig(cacheSchema) 
+
+cacheConfig.setWhole({
+    
+})
