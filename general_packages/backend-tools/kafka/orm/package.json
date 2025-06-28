@@ -7,7 +7,6 @@
     },
     "dependencies": {
         "@blazyts/better-standard-library": "1.0.0",
-        "@blazyts/framework": "1.0.1",
         "kafkajs": "^2.2.4",
         "tsd": "^0.32.0"
     },

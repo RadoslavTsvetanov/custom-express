@@ -3,7 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "dependencies": {
-    "@blazyts/backend-lib": "1.0.0"
+    "@blazyts/backend-lib": "workspace:*",
+    "@blazyts/better-standard-library": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest"

@@ -11,7 +11,7 @@
         "prepare": "husky"
     },
     "workspaces": [
-        "packages/**/*",
+        "general_packages/**/*",
         "apps/**/*",
         "projects/**/**/*"
     ],

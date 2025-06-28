@@ -1,4 +1,4 @@
-import type { GetSet, keyofonlystringkeys, Port, WebsocketUrl } from "@blazyts/better-standard-library";
+import type { GetSet, keyofonlystringkeys, Last, Port, WebsocketUrl } from "@blazyts/better-standard-library";
 import type { ZodObject, ZodRawShape } from "zod";
 
 import { BetterArray, map, Optionable, panic } from "@blazyts/better-standard-library";
@@ -46,8 +46,13 @@ export class CustomWebSocketRouter<
         this.hooks = hooks;
     }
 
-    public hook<Hook>(h: Hook): CustomWebSocketRouter<Channels, Context, Hooks & Hook> {
+    public hook<Hook extends (v: Parameters<Last<>>) => unknown>(h: Hook): CustomWebSocketRouter<Channels, Context, Hooks & Hook> {
         return new CustomWebSocketRouter(this.channels, this.context, this.hooks.setV(h));
+    }
+
+    block(handler: (v: this) => void){
+        handler(this)
+        return this.hook(v => v)
     }
 
 
@@ -219,6 +224,9 @@ export class CustomWebSocketRouter<
 
     // it hahves like elysia plugins
     // usefull for adding big batches of context for example e,g, a big store which you have reused previously, for example all of services for interacting with a auth provider which you are reusing
+    get(){}
+    post(){}
+    options(){}
 
     addChannel<
     // Config extends { name:  string }, // try putting the  below generic here for a bit more cleannes

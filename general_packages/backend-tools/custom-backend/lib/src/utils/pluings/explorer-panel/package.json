@@ -60,7 +60,6 @@
         "tsconfig-paths": "^4.2.0",
         "typescript": "~5.7.2",
         "typescript-eslint": "^8.24.1",
-        "uWebSockets.js": "uNetworking/uWebSockets.js#v20.51.0",
         "uuid": "^11.0.5",
         "vite": "^6.2.0",
         "zod": "^3.24.2"

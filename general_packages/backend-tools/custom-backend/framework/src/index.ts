@@ -1,6 +1,6 @@
-import "@blazyts/better-standard-library"
-import { ifNotNone, map, objectEntries, Try } from "@blazyts/better-standard-library";
-
+import { Extended } from "../../lib/src/core/websocket/server/app/extended";
+import { Try, objectEntries, overload } from "@blazyts/better-standard-library";
+import { Cache } from "../builtinServices/cache";
 type Subscribeable<T extends Record<string, (value: unknown) => any>> = {
     [K in keyof T]: {
         invoke: (v: Parameters<T[K]>) => ReturnType<T[K]>;
@@ -111,3 +111,39 @@ function runHookHandler(route: string, definedRoutes: Node): void {
     
 
 }
+
+
+export class Blazy extends Extended<{},{}>{
+    constructor(
+
+    ){
+        const cache = new Cache()
+        super()
+        this.addService("name",cache)
+    }
+
+    addService(name: string,v: Record<string, (value: any) => any>) {
+       this.hook(v => {
+        return {
+            ...v,
+            [name]: createSubscribeable(v)
+        }
+       })
+    }
+
+    routify<T extends Record<string, unknown>>(v: T) {
+        if(v["isCrudified"]){
+            objectEntries(v).filter(([key, val]) => typeof val === "function").forEach(([key, value]) => {
+                this[key](key, value)
+            })
+        }else {
+            objectEntries(v).filter(([key, val]) => typeof val === "function").forEach(([key, value]) => {
+                this.post(key, value)
+            })
+        }
+
+
+    }
+
+}
+
