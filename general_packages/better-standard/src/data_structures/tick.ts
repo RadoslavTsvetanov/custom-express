@@ -1,9 +1,6 @@
 import type { VCallback } from "../../types/voidcallback";
 
 // the tick interface allows you to try something on a value and return the value but whatever you did on the value does not affect the original value , essentiually it allws toi make debug calls without bothering the main logic handler
-export type Tick<T> = {
-    tick: (callback: VCallback<T>) => T;
-};
 
 // // Example usage
 // const tick: Tick<number> = (value) => {

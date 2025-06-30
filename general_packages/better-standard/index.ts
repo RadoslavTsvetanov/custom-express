@@ -31,3 +31,4 @@ export type { WebSocketUrl } from "./src/types/networking";
 export * from "./src/data_structures/metaprogramming";
 
 export * from "./src/data_structures/overload/export"
+export * from "./src/type-level-functions/isBoolean"

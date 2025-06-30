@@ -1,0 +1,23 @@
+{
+  "name": "@blazyts/objects-redis",
+  "version": "1.0.0",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@blazyts/objects-docker": "workspace:*",
+    "@blazyts/smart-config": "workspace:*",
+    "@types/dockerode": "^3.3.41",
+    "dockerode": "^4.0.7",
+    "ioredis": "^5.2.1",
+    "redis": "^5.5.6",
+    "redis-om": "^0.4.7",
+    "unimport": "^5.1.0",
+    "vitest": "^3.2.4"
+  }
+}

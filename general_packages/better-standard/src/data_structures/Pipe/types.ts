@@ -1,4 +1,4 @@
-import type { VCallback } from "../../../../types/voidcallback";
+import { VCallback } from "@better-standard-internal/types/voidcallback";
 
 export type IPipeable<V> = {
     pipe: (handler: VCallback<V>) => void;

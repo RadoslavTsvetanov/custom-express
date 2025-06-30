@@ -1,3 +1,5 @@
+import { z, ZodObject, ZodRawShape } from "zod";
+import { ZodRawObject } from "./types";
 
 // Examples
 {
@@ -17,7 +19,6 @@
     );
     const res = exmaple({ hi: "" });
     exmaple()
-}
 }
 {
     type Overload<T extends ZodRawObject, R> = {

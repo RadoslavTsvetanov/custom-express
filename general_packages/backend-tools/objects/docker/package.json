@@ -1,7 +1,7 @@
 {
-  "name": "@blazyts/smart-config",
-  "module": "index.ts",
+  "name": "@blazyts/objects-docker",
   "version": "1.0.0",
+  "module": "index.ts",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest"
@@ -10,7 +10,6 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@blazyts/better-standard-library": "workspace:*",
-    "vitest": "^3.2.4"
+    "dockerode": "^4.0.7"
   }
 }

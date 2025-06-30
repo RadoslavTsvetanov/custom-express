@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { types } from "./zod-utils/export";
 
-class smartConfig<T extends ZodObject<ZodRawShape>, Values extends {[K in keyof z.infer<T>]: unknown}> {
+export class SmartConfig<T extends ZodObject<ZodRawShape>, Values extends {[K in keyof z.infer<T>]: unknown}> {
     constructor(private schema: T, private values: Values = {} as any)    {}
 
     set<Key extends keyof z.infer<T>, H extends z.infer<T>[Key]>(key: Key, value: H): smartConfig<T, Values & { [K in Key]: H }>{
@@ -67,7 +67,7 @@ class smartConfig<T extends ZodObject<ZodRawShape>, Values extends {[K in keyof 
         keys.forEach(key => {
             this.values[key] = this.values[key] + 1
         })
-        return new smartConfig<T, Values & { [K in Key]: typeof this.values[key] }>(this.schema, this.values)
+        return new SmartConfig<T, Values & { [K in Key]: typeof this.values[key] }>(this.schema, this.values)
     }
 }
 
