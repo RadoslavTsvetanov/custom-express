@@ -1,0 +1,3 @@
+[submodule "general_packages/packages/better-standard"]
+	path = general_packages/packages/better-standard
+	url = https://github.com/DockerByTheGo/better-standard-lib.git
