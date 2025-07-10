@@ -1,7 +1,6 @@
 import Docker, { Container, ContainerCreateOptions } from 'dockerode';
 import { Writable } from 'stream';
 import { ILogger } from './logger';
-import { pipefy } from './pipefy';
 import { servicefy } from './servicefy';
 
 export interface LifecycleHooks<TCtx = any> {

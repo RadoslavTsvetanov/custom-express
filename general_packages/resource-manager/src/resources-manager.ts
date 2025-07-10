@@ -58,7 +58,7 @@ function ObjectEntry<
 }
 
 
-class QlManager<Schema extends Record<string, Value>> {
+class QlManager<Schema extends Record<string, unknown>> {
     schema: Schema
     constructor(v: Schema) {
         this.schema = v
@@ -78,7 +78,7 @@ class QlManager<Schema extends Record<string, Value>> {
         return
     }
 
-    static new<T extends Record<string, Value>>(v: T) {
+    static new<T extends Record<string, unknown>>(v: T) {
         return new QlManager(v)
     }
 }
@@ -111,4 +111,16 @@ ql.add({
         zipCode: "12345"
     }
 })
+
+
+class Dummy {
+    constructor(public name: string, public age: number) { }
+    hi() {
+        console.log(`Hi, my name is ${this.name} and I am ${this.age} years old.`)
+    }
+}
+
+
+const g = QlManager.new<{object: Dummy[]}>({})
+
 

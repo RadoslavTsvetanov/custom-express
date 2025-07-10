@@ -1,7 +1,7 @@
 import type { Last } from "@blazyts/better-standard-library";
 import type { z, ZodObject, ZodRawShape } from "zod";
 
-import { OrderedRecord } from "@blazyts/better-standard-library";
+import { OrderedRecord, tap } from "@blazyts/better-standard-library";
 
 import type { GlobalHooks, HookDefaults, HookOrderedRecord, HookOrderedRecordEntry } from "../../../types/Hooks/main";
 import type { Handler } from "../../../types/Message/main";
@@ -68,3 +68,20 @@ export class HookBuilder<
 }
 
 // Note when making a hook builder for the inference and type retaining to work you must provide an arg in the cinstrcutor if you are gonna use it directly as in this example although a simple `([] as const)` will work as good
+
+
+HookBuilder.new("message")
+    .add({
+        key: "test",
+        execute: v => tap(v, v => console.log)
+        ,
+    })
+    .guard(z.object({ name: z.string() }), "test2")
+    .add({
+        key: "test3",
+        execute: (v) => {
+            console.log("test3", v);
+            return v;
+        },
+    })
+    .build();
